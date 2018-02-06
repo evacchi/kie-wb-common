@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2018 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.core.graph.content.definition;
+package org.kie.workbench.common.stunner.bpmn.definition.property.task;
 
-public interface Defihttps://github.com/kiegroup/kie-wb-common/pull/1390nition<T> {
+public interface ScriptableExecutionSet {
 
-    T getDefinition();
+    OnEntryAction getOnEntryAction();
 
-    void setDefinition(final T definition);
+    void setOnEntryAction(OnEntryAction onEntryAction);
+
+    OnExitAction getOnExitAction();
+
+    void setOnExitAction(OnExitAction onExitAction);
+
+    ScriptLanguage getScriptLanguage();
+
+    void setScriptLanguage(ScriptLanguage scriptLanguage);
 }
