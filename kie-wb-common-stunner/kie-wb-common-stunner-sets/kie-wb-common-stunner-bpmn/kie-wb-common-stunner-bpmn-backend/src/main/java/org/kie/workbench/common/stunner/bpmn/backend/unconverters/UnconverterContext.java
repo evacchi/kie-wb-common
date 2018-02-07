@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,22 +37,58 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 
-public class UnconverterContext {
+//
+// the implementation for this class is in the package-private
+// abstract class below. We are using type parameters to fake type aliases.
+// Scroll down for details
+//
+public class UnconverterContext
+        extends HelperUnconverterContext<
+        /*EdgeT = */
+        Edge<ViewConnector<BPMNViewDefinition>,
+                Node<? extends View<? extends BPMNViewDefinition>, ?>>,
 
-    public final Map<String,
-            Node<View<? extends BPMNViewDefinition>,
-                    Edge<ViewConnector<BPMNViewDefinition>,
-                            Node<? extends View<? extends BPMNViewDefinition>, ?>>>> nodes;
+        /*NodeT = */
+        Node<View<? extends BPMNViewDefinition>,
+                Edge<ViewConnector<BPMNViewDefinition>,
+                        Node<? extends View<? extends BPMNViewDefinition>, ?>>>
+        > {
 
-    public final Map<String, FlowNode> flowNodes;
-
-    private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
+    // constructor uses raw Graph for convenience
 
     public UnconverterContext(
             Graph<DefinitionSet,
                     Node<View<? extends BPMNViewDefinition>,
                             Edge<ViewConnector<BPMNViewDefinition>,
                                     Node<? extends View<? extends BPMNViewDefinition>, ?>>>> graph) {
+        super(graph);
+    }
+}
+
+//
+// this is sort-of a hack: we don't have type aliases in Java
+// so we use this abstract class to bind a type-parameter to this horribly long
+// Node, Edge declarations (because Node, Edge are... mutually recursive... erm)
+// so we declare EdgeT, NodeT to "extend" the type we want to alias
+// then in the concrete instance we actually **bind** them to the exact type
+//
+abstract class HelperUnconverterContext<
+        EdgeT extends
+                Edge<ViewConnector<BPMNViewDefinition>,
+                        Node<? extends View<? extends BPMNViewDefinition>, ?>>,
+        NodeT extends
+                Node<View<? extends BPMNViewDefinition>, EdgeT>
+        > {
+
+    private final Map<String, NodeT> nodes;
+
+    private final Map<String, FlowNode> flowNodes;
+
+    private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
+    private final Graph<DefinitionSet, NodeT> graph;
+
+    public HelperUnconverterContext(Graph<DefinitionSet, NodeT> graph) {
+        this.graph = graph;
         this.firstNode =
                 GraphUtils.getFirstNode((Graph) graph, BPMNDiagramImpl.class);
 
@@ -64,16 +101,11 @@ public class UnconverterContext {
         this.flowNodes = new HashMap<>();
     }
 
-    public Stream<
-            Node<View<? extends BPMNViewDefinition>,
-                    Edge<ViewConnector<BPMNViewDefinition>,
-                            Node<? extends View<? extends BPMNViewDefinition>, ?>>>> nodes() {
+    public Stream<NodeT> nodes() {
         return nodes.values().stream();
     }
 
-    public Node<View<? extends BPMNViewDefinition>,
-            Edge<ViewConnector<BPMNViewDefinition>,
-                    Node<? extends View<? extends BPMNViewDefinition>, ?>>> getNode(String id) {
+    public NodeT getNode(String id) {
         return nodes.get(id);
     }
 
@@ -89,7 +121,20 @@ public class UnconverterContext {
         return flowNodes.get(id);
     }
 
-    public Stream<Edge<ViewConnector<BPMNViewDefinition>, Node<? extends View<? extends BPMNViewDefinition>, ?>>> edges() {
-        return nodes().flatMap(e -> Stream.concat(e.getInEdges().stream(), e.getOutEdges().stream())).distinct().filter(e -> !(e.getContent() instanceof Child));
+    public Collection<FlowNode> getFlowNodes() {
+        return flowNodes.values();
+    }
+
+    public Stream<EdgeT> edges() {
+        return nodes()
+                .flatMap(e -> Stream.concat(
+                        e.getInEdges().stream(),
+                        e.getOutEdges().stream()))
+                .distinct()
+                .filter(e -> !(e.getContent() instanceof Child));
+    }
+
+    public Graph<DefinitionSet, NodeT> getGraph() {
+        return graph;
     }
 }
