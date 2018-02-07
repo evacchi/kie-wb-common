@@ -1501,6 +1501,17 @@ public class BPMNDirectDiagramMarshallerTest {
                      0.1d);
     }
 
+    @Test
+    public void testMarshallBasic() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_BASIC);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+    }
+
+
     private ViewConnector getInEdgeViewConnector(Node node) {
         List<Edge> edges = node.getInEdges();
         if (edges != null) {
