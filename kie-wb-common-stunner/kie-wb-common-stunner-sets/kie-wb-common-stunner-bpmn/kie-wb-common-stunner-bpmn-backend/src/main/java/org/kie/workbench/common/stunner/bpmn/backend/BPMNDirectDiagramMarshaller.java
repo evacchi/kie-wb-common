@@ -34,9 +34,7 @@ import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.DocumentRoot;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.di.BPMNDiagram;
-import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.bpmn2.util.Bpmn2Resource;
-import org.eclipse.dd.dc.DcFactory;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -55,22 +53,18 @@ import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2Re
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.unconverters.ProcessUnconverter;
 import org.kie.workbench.common.stunner.bpmn.backend.unconverters.UnconverterContext;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.api.FactoryManager;
 import org.kie.workbench.common.stunner.core.definition.service.DiagramMarshaller;
 import org.kie.workbench.common.stunner.core.definition.service.DiagramMetadataMarshaller;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
-import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.command.EmptyRulesCommandExecutionContext;
 import org.kie.workbench.common.stunner.core.graph.command.GraphCommandManager;
 import org.kie.workbench.common.stunner.core.graph.command.impl.GraphCommandFactory;
 import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
-import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 import org.kie.workbench.common.stunner.core.graph.processing.index.map.MapIndexBuilder;
 import org.kie.workbench.common.stunner.core.rule.RuleManager;
 import org.slf4j.Logger;
@@ -146,16 +140,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         rSet.getResources().add(resource);
 
         Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-        BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
-        DcFactory dc = DcFactory.eINSTANCE;
-
-        Graph<DefinitionSet,
-                Node<View<? extends BPMNViewDefinition>,
-                        Edge<ViewConnector<BPMNViewDefinition>,
-                                Node<? extends View<? extends BPMNViewDefinition>, ?>>>> graph = diagram.getGraph();
 
         UnconverterContext context =
-                new UnconverterContext(graph);
+                new UnconverterContext(diagram.getGraph());
 
         ProcessUnconverter processUnconverter =
                 new ProcessUnconverter(context);

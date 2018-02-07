@@ -17,8 +17,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
 
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.FlowElement;
@@ -29,15 +27,6 @@ import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.dd.dc.DcFactory;
 import org.eclipse.dd.di.DiagramElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.core.graph.Edge;
-import org.kie.workbench.common.stunner.core.graph.Graph;
-import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
-import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
-import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
 public class ProcessUnconverter {
 
@@ -58,7 +47,7 @@ public class ProcessUnconverter {
         FlowElementUnconverter flowElementUnconverter = new FlowElementUnconverter();
 
         Process rootLevelProcess = bpmn2.createProcess();
-//        rootLevelProcess.setId(graph.getUUID());
+        rootLevelProcess.setId(context.getGraph().getUUID());
 
         List<FlowElement> flowElements = rootLevelProcess.getFlowElements();
 
@@ -72,7 +61,7 @@ public class ProcessUnconverter {
                 .map(sequenceFlowUnconverter::toFlowElement)
                 .forEach(flowElements::add);
 
-        flowElements.addAll(context.flowNodes.values());
+        flowElements.addAll(context.getFlowNodes());
 
         return rootLevelProcess;
     }
@@ -96,15 +85,5 @@ public class ProcessUnconverter {
                 .forEach(planeElement::add);
 
         return bpmnDiagram;
-    }
-
-    private Stream<Node<View<? extends BPMNViewDefinition>, Edge<ViewConnector<BPMNViewDefinition>, ?>>> nodes(
-            Graph<DefinitionSet, Node<
-                    View<? extends BPMNViewDefinition>,
-                    Edge<ViewConnector<BPMNViewDefinition>, ?>>> graph,
-            Node<Definition<BPMNDiagramImpl>, ?> firstNode) {
-        return StreamSupport
-                .stream(graph.nodes().spliterator(), false)
-                .filter(n -> !n.getUUID().equals(firstNode.getUUID()));
     }
 }
