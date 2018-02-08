@@ -42,7 +42,7 @@ import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 // abstract class below. We are using type parameters to fake type aliases.
 // Scroll down for details
 //
-public class DefinitionsBuildingContextHelper
+public class DefinitionsBuildingContext
         extends DefinitionsContextHelper<
         /*EdgeT = */
         Edge<ViewConnector<BPMNViewDefinition>,
@@ -56,7 +56,7 @@ public class DefinitionsBuildingContextHelper
 
     // constructor uses raw Graph for convenience
 
-    public DefinitionsBuildingContextHelper(
+    public DefinitionsBuildingContext(
             Graph<DefinitionSet,
                     Node<View<? extends BPMNViewDefinition>,
                             Edge<ViewConnector<BPMNViewDefinition>,
@@ -86,6 +86,7 @@ abstract class DefinitionsContextHelper<
 
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
+    private Map<String, org.eclipse.bpmn2.SequenceFlow> sequenceFlows;
 
     public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
         this.graph = graph;
@@ -99,6 +100,7 @@ abstract class DefinitionsContextHelper<
                         .collect(Collectors.toMap(Node::getUUID, Function.identity()));
 
         this.flowNodes = new HashMap<>();
+        this.sequenceFlows = new HashMap<>();
     }
 
     public Stream<NodeT> nodes() {
@@ -123,6 +125,18 @@ abstract class DefinitionsContextHelper<
 
     public Collection<FlowNode> getFlowNodes() {
         return flowNodes.values();
+    }
+
+    public void addSequenceFlow(org.eclipse.bpmn2.SequenceFlow seq) {
+        sequenceFlows.put(seq.getId(), seq);
+    }
+
+    public org.eclipse.bpmn2.SequenceFlow getSequenceFlow(String id) {
+        return sequenceFlows.get(id);
+    }
+
+    public Collection<org.eclipse.bpmn2.SequenceFlow> getSequenceFlows() {
+        return sequenceFlows.values();
     }
 
     public Stream<EdgeT> edges() {

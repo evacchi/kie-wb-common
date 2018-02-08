@@ -16,19 +16,20 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+
 public class DefinitionsConverter {
-    private static final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    private final DefinitionsBuildingContextHelper context;
+
+    private final DefinitionsBuildingContext context;
     private final ProcessConverter processConverter;
 
-    public DefinitionsConverter(DefinitionsBuildingContextHelper context) {
+    public DefinitionsConverter(DefinitionsBuildingContext context) {
         this.context = context;
-
         this.processConverter = new ProcessConverter(context);
     }
 
@@ -40,6 +41,12 @@ public class DefinitionsConverter {
 
         BPMNDiagram bpmnDiagram = processConverter.toBPMNDiagram();
         definitions.getDiagrams().add(bpmnDiagram);
+
+        Relationship relationship = processConverter.toRelationship();
+        definitions.getRelationships().add(relationship);
+
+        relationship.getSources().add(process);
+        relationship.getTargets().add(process);
 
         return definitions;
     }

@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.di.BpmnDiFactory;
-import org.eclipse.dd.dc.DcFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.util.Utils;
 
-public class FlowElementPropertyWriter {
+public class PropertyWriter {
 
     private final FlowElement flowElement;
-    private final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
-    private final DcFactory dc = DcFactory.eINSTANCE;
 
-    public FlowElementPropertyWriter(FlowElement flowElement) {
+    public PropertyWriter(FlowElement flowElement) {
         this.flowElement = flowElement;
     }
 

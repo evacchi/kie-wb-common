@@ -16,26 +16,25 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.StartEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.FlowElementPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class StartEventConverter {
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-    private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
+public class StartEventConverter {
 
     public FlowNode toFlowElement(Node<View<BaseStartEvent>, ?> node) {
         return NodeMatch.fromNode(BaseStartEvent.class, FlowNode.class)
                 .when(StartNoneEvent.class, n -> {
                     StartEvent startEvent = bpmn2.createStartEvent();
-                    FlowElementPropertyWriter p = new FlowElementPropertyWriter(startEvent);
+                    PropertyWriter p = new PropertyWriter(startEvent);
                     startEvent.setId(n.getUUID());
                     startEvent.setIsInterrupting(false);
 

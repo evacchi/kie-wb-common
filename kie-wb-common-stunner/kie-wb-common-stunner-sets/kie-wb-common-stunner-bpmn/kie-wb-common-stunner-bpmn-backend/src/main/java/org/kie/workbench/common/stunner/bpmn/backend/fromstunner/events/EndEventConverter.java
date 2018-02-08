@@ -16,21 +16,20 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.EndEvent;
 import org.eclipse.bpmn2.FlowNode;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.FlowElementPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class EndEventConverter {
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-    private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
+public class EndEventConverter {
 
     public FlowNode toFlowElement(Node<View<BaseEndEvent>, ?> n) {
         EndEvent endEvent = bpmn2.createEndEvent();
-        FlowElementPropertyWriter p = new FlowElementPropertyWriter(endEvent);
+        PropertyWriter p = new PropertyWriter(endEvent);
         BaseEndEvent definition = n.getContent().getDefinition();
         endEvent.setId(n.getUUID());
         p.setName(definition.getGeneral().getName().getValue());

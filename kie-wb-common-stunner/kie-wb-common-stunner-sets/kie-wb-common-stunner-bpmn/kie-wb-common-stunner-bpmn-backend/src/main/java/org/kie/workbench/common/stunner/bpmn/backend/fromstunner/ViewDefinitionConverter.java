@@ -16,12 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
-import org.eclipse.bpmn2.di.BpmnDiFactory;
-import org.eclipse.dd.dc.DcFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEventConverter;
@@ -37,18 +34,17 @@ import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.dc;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
+
 public class ViewDefinitionConverter {
 
-    private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    private static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
-    private static final DcFactory dc = DcFactory.eINSTANCE;
-
-    private final DefinitionsBuildingContextHelper context;
+    private final DefinitionsBuildingContext context;
     private final StartEventConverter startEventConverter;
     private final TaskConverter taskConverter;
     private final EndEventConverter endEventConverter;
 
-    public ViewDefinitionConverter(DefinitionsBuildingContextHelper context) {
+    public ViewDefinitionConverter(DefinitionsBuildingContext context) {
         this.context = context;
         this.startEventConverter = new StartEventConverter();
         this.endEventConverter = new EndEventConverter();
@@ -63,21 +59,25 @@ public class ViewDefinitionConverter {
                 .apply(node);
     }
 
-    public BPMNShape shapeFrom(
-            Node<View<? extends BPMNViewDefinition>, ?> node) {
-
+    public BPMNShape shapeFrom(Node<View<? extends BPMNViewDefinition>, ?> node) {
         FlowNode element = context.getFlowNode(node.getUUID());
 
         BPMNShape shape = di.createBPMNShape();
-        shape.setBpmnElement(element);
-        Bounds.Bound upperLeft = node.getContent().getBounds().getUpperLeft();
-        Bounds.Bound lowerRight = node.getContent().getBounds().getLowerRight();
         org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
+
+        Bounds rect = node.getContent().getBounds();
+
+        Bounds.Bound upperLeft = rect.getUpperLeft();
+        Bounds.Bound lowerRight = rect.getLowerRight();
+
         bounds.setX(upperLeft.getX().floatValue());
         bounds.setY(upperLeft.getY().floatValue());
         bounds.setWidth(lowerRight.getX().floatValue() - upperLeft.getX().floatValue());
         bounds.setHeight(lowerRight.getY().floatValue() - upperLeft.getY().floatValue());
+
+        shape.setBpmnElement(element);
         shape.setBounds(bounds);
+
         return shape;
     }
 
@@ -85,7 +85,7 @@ public class ViewDefinitionConverter {
             Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
                     Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
 
-        FlowNode element = context.getFlowNode(edge.getUUID());
+        org.eclipse.bpmn2.SequenceFlow element = context.getSequenceFlow(edge.getUUID());
 
         BPMNEdge bpmnEdge = di.createBPMNEdge();
         bpmnEdge.setBpmnElement(element);

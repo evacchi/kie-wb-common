@@ -50,7 +50,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Prope
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContextHelper;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.api.FactoryManager;
 import org.kie.workbench.common.stunner.core.definition.service.DiagramMarshaller;
@@ -139,8 +139,8 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         rSet.getResources().add(resource);
 
-        DefinitionsBuildingContextHelper context =
-                new DefinitionsBuildingContextHelper(diagram.getGraph());
+        DefinitionsBuildingContext context =
+                new DefinitionsBuildingContext(diagram.getGraph());
 
         DefinitionsConverter definitionsConverter =
                 new DefinitionsConverter(context);

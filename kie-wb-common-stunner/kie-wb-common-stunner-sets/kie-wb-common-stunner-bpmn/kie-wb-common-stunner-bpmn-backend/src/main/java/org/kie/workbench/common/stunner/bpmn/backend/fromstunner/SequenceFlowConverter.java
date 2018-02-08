@@ -16,18 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
-public class SequenceFlowUnconverter {
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-    private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    private final DefinitionsBuildingContextHelper context;
+public class SequenceFlowConverter {
 
-    public SequenceFlowUnconverter(DefinitionsBuildingContextHelper context) {
+    private final DefinitionsBuildingContext context;
+
+    public SequenceFlowConverter(DefinitionsBuildingContext context) {
         this.context = context;
     }
 
@@ -39,6 +39,4 @@ public class SequenceFlowUnconverter {
         seq.setName(edge.getContent().getDefinition().getGeneral().getName().getValue());
         return seq;
     }
-
-
 }

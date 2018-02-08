@@ -16,6 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-public class FlowElementsAdapter {
+import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.di.BPMNShape;
 
+public class BpmnContainer {
+
+    FlowElement flowElement;
+    BPMNShape shape;
 }
