@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 
-public class DefinitionsUnconverter {
+public class DefinitionsConverter {
     private static final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    private final UnconverterContext context;
-    private final ProcessUnconverter processUnconverter;
+    private final DefinitionsBuildingContextHelper context;
+    private final ProcessConverter processConverter;
 
-    public DefinitionsUnconverter(UnconverterContext context) {
+    public DefinitionsConverter(DefinitionsBuildingContextHelper context) {
         this.context = context;
 
-        this.processUnconverter = new ProcessUnconverter(context);
+        this.processConverter = new ProcessConverter(context);
     }
 
-    public Definitions unconvert() {
+    public Definitions toDefinitions() {
         Definitions definitions = bpmn2.createDefinitions();
 
-        Process process = processUnconverter.toFlowElement();
+        Process process = processConverter.toFlowElement();
         definitions.getRootElements().add(process);
 
-        BPMNDiagram bpmnDiagram = processUnconverter.toBPMNDiagram();
+        BPMNDiagram bpmnDiagram = processConverter.toBPMNDiagram();
         definitions.getDiagrams().add(bpmnDiagram);
 
         return definitions;

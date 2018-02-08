@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import java.util.List;
 
@@ -28,31 +28,31 @@ import org.eclipse.dd.dc.DcFactory;
 import org.eclipse.dd.di.DiagramElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 
-public class ProcessUnconverter {
-
-    private final SequenceFlowUnconverter sequenceFlowUnconverter;
+public class ProcessConverter {
 
     private static final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
     private static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
     private static final DcFactory dc = DcFactory.eINSTANCE;
-    private final UnconverterContext context;
 
-    public ProcessUnconverter(UnconverterContext context) {
+    private final DefinitionsBuildingContextHelper context;
+
+    private final SequenceFlowUnconverter sequenceFlowUnconverter;
+    private final ViewDefinitionConverter viewDefinitionConverter;
+
+    public ProcessConverter(DefinitionsBuildingContextHelper context) {
         this.context = context;
         this.sequenceFlowUnconverter = new SequenceFlowUnconverter(context);
+        this.viewDefinitionConverter = new ViewDefinitionConverter(context);
     }
 
     public Process toFlowElement() {
-
-        FlowElementUnconverter flowElementUnconverter = new FlowElementUnconverter();
-
         Process rootLevelProcess = bpmn2.createProcess();
         rootLevelProcess.setId(context.getGraph().getUUID());
 
         List<FlowElement> flowElements = rootLevelProcess.getFlowElements();
 
         context.nodes()
-                .map(flowElementUnconverter::unconvert)
+                .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
                 .forEach(context::addFlowNode);
@@ -76,15 +76,12 @@ public class ProcessUnconverter {
         List<DiagramElement> planeElement =
                 bpmnPlane.getPlaneElement();
 
-        BPMNDiagramUnconverter bpmnDiagramUnconverter =
-                new BPMNDiagramUnconverter(context);
-
         context.nodes()
-                .map(bpmnDiagramUnconverter::shapeFrom)
+                .map(viewDefinitionConverter::shapeFrom)
                 .forEach(planeElement::add);
 
         context.edges()
-                .map(bpmnDiagramUnconverter::edgeFrom)
+                .map(viewDefinitionConverter::edgeFrom)
                 .forEach(planeElement::add);
 
         return bpmnDiagram;

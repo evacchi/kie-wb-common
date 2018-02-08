@@ -14,29 +14,53 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
+import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.dd.dc.DcFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
-public class BPMNDiagramUnconverter {
+public class ViewDefinitionConverter {
 
+    private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
     private static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
     private static final DcFactory dc = DcFactory.eINSTANCE;
 
-    private final UnconverterContext context;
+    private final DefinitionsBuildingContextHelper context;
+    private final StartEventConverter startEventConverter;
+    private final TaskConverter taskConverter;
+    private final EndEventConverter endEventConverter;
 
-    public BPMNDiagramUnconverter(UnconverterContext context) {
+    public ViewDefinitionConverter(DefinitionsBuildingContextHelper context) {
         this.context = context;
+        this.startEventConverter = new StartEventConverter();
+        this.endEventConverter = new EndEventConverter();
+        this.taskConverter = new TaskConverter();
+    }
+
+    public Result<FlowNode> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
+        return NodeMatch.fromNode(BPMNViewDefinition.class, FlowNode.class)
+                .when(BaseStartEvent.class, startEventConverter::toFlowElement)
+                .when(BaseTask.class, taskConverter::toFlowElement)
+                .when(BaseEndEvent.class, endEventConverter::toFlowElement)
+                .apply(node);
     }
 
     public BPMNShape shapeFrom(
@@ -58,7 +82,8 @@ public class BPMNDiagramUnconverter {
     }
 
     public BPMNEdge edgeFrom(
-            Edge<? extends ViewConnector<? extends BPMNViewDefinition>, Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
+            Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
+                    Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
 
         FlowNode element = context.getFlowNode(edge.getUUID());
 
@@ -81,3 +106,4 @@ public class BPMNDiagramUnconverter {
         return bpmnEdge;
     }
 }
+

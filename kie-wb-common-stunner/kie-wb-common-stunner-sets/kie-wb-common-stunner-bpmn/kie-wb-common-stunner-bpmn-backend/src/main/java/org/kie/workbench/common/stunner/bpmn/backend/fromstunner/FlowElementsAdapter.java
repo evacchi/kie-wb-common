@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 public class FlowElementsAdapter {
 

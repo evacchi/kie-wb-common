@@ -49,8 +49,8 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.Proces
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
-import org.kie.workbench.common.stunner.bpmn.backend.unconverters.DefinitionsUnconverter;
-import org.kie.workbench.common.stunner.bpmn.backend.unconverters.UnconverterContext;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContextHelper;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.api.FactoryManager;
 import org.kie.workbench.common.stunner.core.definition.service.DiagramMarshaller;
@@ -139,14 +139,14 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         rSet.getResources().add(resource);
 
-        UnconverterContext context =
-                new UnconverterContext(diagram.getGraph());
+        DefinitionsBuildingContextHelper context =
+                new DefinitionsBuildingContextHelper(diagram.getGraph());
 
-        DefinitionsUnconverter definitionsUnconverter =
-                new DefinitionsUnconverter(context);
+        DefinitionsConverter definitionsConverter =
+                new DefinitionsConverter(context);
 
         Definitions definitions =
-                definitionsUnconverter.unconvert();
+                definitionsConverter.toDefinitions();
 
         resource.getContents().add(definitions);
 

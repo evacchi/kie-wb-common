@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.SequenceFlow;
@@ -25,9 +25,9 @@ import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 public class SequenceFlowUnconverter {
 
     private final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    private final UnconverterContext context;
+    private final DefinitionsBuildingContextHelper context;
 
-    public SequenceFlowUnconverter(UnconverterContext context) {
+    public SequenceFlowUnconverter(DefinitionsBuildingContextHelper context) {
         this.context = context;
     }
 

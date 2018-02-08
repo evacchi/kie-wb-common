@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.unconverters;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,8 +42,8 @@ import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
 // abstract class below. We are using type parameters to fake type aliases.
 // Scroll down for details
 //
-public class UnconverterContext
-        extends HelperUnconverterContext<
+public class DefinitionsBuildingContextHelper
+        extends DefinitionsContextHelper<
         /*EdgeT = */
         Edge<ViewConnector<BPMNViewDefinition>,
                 Node<? extends View<? extends BPMNViewDefinition>, ?>>,
@@ -56,7 +56,7 @@ public class UnconverterContext
 
     // constructor uses raw Graph for convenience
 
-    public UnconverterContext(
+    public DefinitionsBuildingContextHelper(
             Graph<DefinitionSet,
                     Node<View<? extends BPMNViewDefinition>,
                             Edge<ViewConnector<BPMNViewDefinition>,
@@ -72,7 +72,7 @@ public class UnconverterContext
 // so we declare EdgeT, NodeT to "extend" the type we want to alias
 // then in the concrete instance we actually **bind** them to the exact type
 //
-abstract class HelperUnconverterContext<
+abstract class DefinitionsContextHelper<
         EdgeT extends
                 Edge<ViewConnector<BPMNViewDefinition>,
                         Node<? extends View<? extends BPMNViewDefinition>, ?>>,
@@ -87,7 +87,7 @@ abstract class HelperUnconverterContext<
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
 
-    public HelperUnconverterContext(Graph<DefinitionSet, NodeT> graph) {
+    public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
         this.graph = graph;
         this.firstNode =
                 GraphUtils.getFirstNode((Graph) graph, BPMNDiagramImpl.class);
