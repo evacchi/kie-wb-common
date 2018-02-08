@@ -28,12 +28,10 @@ import javax.inject.Inject;
 import bpsim.impl.BpsimFactoryImpl;
 import bpsim.impl.BpsimPackageImpl;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.DocumentRoot;
 import org.eclipse.bpmn2.Process;
-import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.util.Bpmn2Resource;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
@@ -51,7 +49,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.Proces
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
-import org.kie.workbench.common.stunner.bpmn.backend.unconverters.ProcessUnconverter;
+import org.kie.workbench.common.stunner.bpmn.backend.unconverters.DefinitionsUnconverter;
 import org.kie.workbench.common.stunner.bpmn.backend.unconverters.UnconverterContext;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.api.FactoryManager;
@@ -132,33 +130,30 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         rSet.getResourceFactoryRegistry()
                 .getExtensionToFactoryMap()
-                .put("bpmn2", new JBPMBpmn2ResourceFactoryImpl());
+                .put("bpmn2",
+                     new JBPMBpmn2ResourceFactoryImpl());
 
         Bpmn2Resource resource =
-                (Bpmn2Resource) rSet.createResource(URI.createURI("virtual.bpmn2"));
+                (Bpmn2Resource) rSet.createResource(
+                        URI.createURI("virtual.bpmn2"));
 
         rSet.getResources().add(resource);
-
-        Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
 
         UnconverterContext context =
                 new UnconverterContext(diagram.getGraph());
 
-        ProcessUnconverter processUnconverter =
-                new ProcessUnconverter(context);
+        DefinitionsUnconverter definitionsUnconverter =
+                new DefinitionsUnconverter(context);
 
-        Definitions definitions = bpmn2.createDefinitions();
+        Definitions definitions =
+                definitionsUnconverter.unconvert();
+
         resource.getContents().add(definitions);
-
-        Process process = processUnconverter.toFlowElement();
-        definitions.getRootElements().add(process);
-
-        BPMNDiagram bpmnDiagram = processUnconverter.toBPMNDiagram();
-        definitions.getDiagrams().add(bpmnDiagram);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         resource.save(outputStream, new HashMap<>());
-        String result = StringEscapeUtils.unescapeHtml4(outputStream.toString("UTF-8"));
+        String result = StringEscapeUtils.unescapeHtml4(
+                outputStream.toString("UTF-8"));
 
         System.out.println(result);
         return result;

@@ -72,9 +72,12 @@ public class ProcessUnconverter {
 
         BPMNPlane bpmnPlane = di.createBPMNPlane();
         bpmnDiagram.setPlane(bpmnPlane);
-        List<DiagramElement> planeElement = bpmnPlane.getPlaneElement();
 
-        BPMNDiagramUnconverter bpmnDiagramUnconverter = new BPMNDiagramUnconverter(context);
+        List<DiagramElement> planeElement =
+                bpmnPlane.getPlaneElement();
+
+        BPMNDiagramUnconverter bpmnDiagramUnconverter =
+                new BPMNDiagramUnconverter(context);
 
         context.nodes()
                 .map(bpmnDiagramUnconverter::shapeFrom)
