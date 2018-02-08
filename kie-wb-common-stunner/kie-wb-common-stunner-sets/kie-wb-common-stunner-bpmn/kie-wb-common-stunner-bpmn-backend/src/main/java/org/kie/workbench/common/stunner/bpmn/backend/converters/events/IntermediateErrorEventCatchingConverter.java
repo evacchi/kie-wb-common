@@ -58,7 +58,7 @@ public class IntermediateErrorEventCatchingConverter {
 
         definition.setDataIOSet(
                 new DataIOSet(
-                        new AssignmentsInfo(p.getAssignmentsInfo())));
+                        p.getAssignmentsInfo()));
 
         definition.setExecutionSet(new CancellingErrorEventExecutionSet(
                 new CancelActivity(p.isCancelActivity()),

@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -24,17 +25,21 @@ import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import bpsim.impl.BpsimFactoryImpl;
 import bpsim.impl.BpsimPackageImpl;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.bpmn2.Bpmn2Package;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.DocumentRoot;
 import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.util.Bpmn2Resource;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.jboss.drools.DroolsPackage;
+import org.jboss.drools.impl.DroolsFactoryImpl;
 import org.jboss.drools.impl.DroolsPackageImpl;
 import org.kie.workbench.common.stunner.backend.service.XMLEncoderDiagramMetadataMarshaller;
 import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
@@ -42,6 +47,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingCon
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
@@ -115,8 +121,38 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
     @Override
     @SuppressWarnings("unchecked")
-    public String marshall(final Diagram diagram) throws IOException {
-        return legacyMarshaller.marshall(diagram);
+    public String marshall(final Diagram<Graph, Metadata> diagram) throws IOException {
+        DroolsFactoryImpl.init();
+        BpsimFactoryImpl.init();
+
+        ResourceSet rSet = new ResourceSetImpl();
+
+        rSet.getResourceFactoryRegistry()
+                .getExtensionToFactoryMap()
+                .put("bpmn2",
+                     new JBPMBpmn2ResourceFactoryImpl());
+
+        Bpmn2Resource resource =
+                (Bpmn2Resource) rSet.createResource(
+                        URI.createURI("virtual.bpmn2"));
+
+        rSet.getResources().add(resource);
+
+        DefinitionsConverter definitionsConverter =
+                new DefinitionsConverter(diagram.getGraph());
+
+        Definitions definitions =
+                definitionsConverter.toDefinitions();
+
+        resource.getContents().add(definitions);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        resource.save(outputStream, new HashMap<>());
+        String result = StringEscapeUtils.unescapeHtml4(
+                outputStream.toString("UTF-8"));
+
+        System.out.println(result);
+        return result;
     }
 
     @Override
@@ -134,7 +170,7 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         Graph<DefinitionSet, Node> graph =
                 typedFactoryManager.newGraph(
-                        definitionsId, BPMNDefinitionSet.class);
+                        process.getId(), BPMNDefinitionSet.class);
 
         GraphBuildingContext context = emptyGraphContext(graph);
 
@@ -147,7 +183,7 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
                         propertyReaderFactory,
                         context);
 
-        processConverter.convert(definitionsId, process);
+        processConverter.convert(process);
 
         LOG.debug("Diagram unmarshalling finished successfully.");
         return graph;
@@ -213,5 +249,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         final DocumentRoot root = (DocumentRoot) resource.getContents().get(0);
 
         return root.getDefinitions();
+    }
+
+    public JBPMBpmn2ResourceImpl marshallToBpmn2Resource(Diagram<Graph, Metadata> diagram) {
+        return null;
     }
 }

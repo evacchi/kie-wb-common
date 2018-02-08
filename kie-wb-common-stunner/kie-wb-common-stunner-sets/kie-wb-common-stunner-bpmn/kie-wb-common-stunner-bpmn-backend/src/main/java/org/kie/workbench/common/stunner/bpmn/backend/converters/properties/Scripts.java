@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.Task;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.jboss.drools.DroolsFactory;
 import org.jboss.drools.DroolsPackage;
 import org.jboss.drools.OnEntryScriptType;
 import org.jboss.drools.OnExitScriptType;
@@ -55,6 +59,22 @@ public class Scripts {
 
         return new ScriptTypeListValue()
                 .addValue(new ScriptTypeValue("java", ""));
+    }
+
+    public static String scriptLanguageToUri(String language) {
+        if (language == null) {
+            return "http://www.java.com/java";
+        }
+        switch (language) {
+            case "java":
+                return "http://www.java.com/java";
+            case "mvel":
+                return "http://www.mvel.org/2.0";
+            case "javascript":
+                return "http://www.javascript.com/javascript";
+            default:
+                return "http://www.java.com/java";
+        }
     }
 
     public static String scriptLanguageFromUri(String format) {
@@ -92,5 +112,10 @@ public class Scripts {
 
         return new ScriptTypeListValue()
                 .addValue(new ScriptTypeValue("java", ""));
+    }
+
+    // eww
+    public static String asCData(String original) {
+        return "<![CDATA[" + original + "]]>";
     }
 }

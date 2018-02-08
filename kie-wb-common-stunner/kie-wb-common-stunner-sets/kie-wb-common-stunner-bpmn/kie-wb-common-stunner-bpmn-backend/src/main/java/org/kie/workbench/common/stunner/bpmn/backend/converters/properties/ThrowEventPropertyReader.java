@@ -24,6 +24,7 @@ import org.eclipse.bpmn2.ThrowEvent;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Colors;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 
 class ThrowEventPropertyReader extends EventPropertyReader {
 
@@ -35,14 +36,14 @@ class ThrowEventPropertyReader extends EventPropertyReader {
     }
 
     @Override
-    public String getAssignmentsInfo() {
-        return AssignmentsInfos.makeString(
+    public AssignmentsInfo getAssignmentsInfo() {
+        return AssignmentsInfos.of(
                 throwEvent.getDataInputs(),
-                Collections.singletonList(throwEvent.getInputSet()),
+//                Collections.singletonList(throwEvent.getInputSet()),
                 throwEvent.getDataInputAssociation(),
                 Collections.emptyList(),
-                Collections.emptyList(),
-                Collections.emptyList());
+//                Collections.emptyList(),
+                Collections.emptyList(), false);
     }
 
 //    @Override

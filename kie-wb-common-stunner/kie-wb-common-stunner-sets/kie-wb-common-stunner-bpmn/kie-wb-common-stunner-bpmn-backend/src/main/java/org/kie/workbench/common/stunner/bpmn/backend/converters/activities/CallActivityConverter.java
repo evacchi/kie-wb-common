@@ -19,11 +19,9 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.activities;
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ActivityPropertyReader;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Documentation;
@@ -67,7 +65,7 @@ public class CallActivityConverter {
         ));
 
         definition.setDataIOSet(new DataIOSet(
-                new AssignmentsInfo(p.getAssignmentsInfo()))
+                p.getAssignmentsInfo())
         );
 
         node.getContent().setBounds(p.getBounds());
@@ -77,7 +75,6 @@ public class CallActivityConverter {
         definition.setDimensionsSet(p.getRectangleDimensionsSet());
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
-
 
         return node;
     }

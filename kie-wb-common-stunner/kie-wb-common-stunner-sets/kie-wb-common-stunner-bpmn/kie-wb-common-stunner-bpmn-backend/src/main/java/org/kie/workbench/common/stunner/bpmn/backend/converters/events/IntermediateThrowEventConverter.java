@@ -80,7 +80,7 @@ public class IntermediateThrowEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                               new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new ScopedSignalEventExecutionSet(
@@ -109,7 +109,7 @@ public class IntermediateThrowEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new MessageEventExecutionSet(

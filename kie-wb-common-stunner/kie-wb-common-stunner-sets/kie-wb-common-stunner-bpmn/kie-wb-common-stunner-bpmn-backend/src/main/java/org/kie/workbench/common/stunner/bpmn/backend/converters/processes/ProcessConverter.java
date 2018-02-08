@@ -65,9 +65,9 @@ public class ProcessConverter {
         this.laneConverter = new LaneConverter(typedFactoryManager, propertyReaderFactory);
     }
 
-    public void convert(String definitionsId, Process process) {
+    public void convert(Process process) {
         Node<View<BPMNDiagramImpl>, ?> firstDiagramNode =
-                convertProcessNode(definitionsId, process);
+                convertProcessNode(process);
 
         context.addNode(firstDiagramNode);
 
@@ -103,8 +103,9 @@ public class ProcessConverter {
                 .forEach(flowElementConverter::convertDockedNodes);
     }
 
-    private Node<View<BPMNDiagramImpl>, ?> convertProcessNode(String definitionId, Process process) {
-        Node<View<BPMNDiagramImpl>, Edge> diagramNode = factoryManager.newNode(definitionId, BPMNDiagramImpl.class);
+    private Node<View<BPMNDiagramImpl>, ?> convertProcessNode(Process process) {
+        Node<View<BPMNDiagramImpl>, Edge> diagramNode =
+                factoryManager.newNode(process.getId(), BPMNDiagramImpl.class);
         BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
 
         ProcessPropertyReader e = propertyReaderFactory.of(process);

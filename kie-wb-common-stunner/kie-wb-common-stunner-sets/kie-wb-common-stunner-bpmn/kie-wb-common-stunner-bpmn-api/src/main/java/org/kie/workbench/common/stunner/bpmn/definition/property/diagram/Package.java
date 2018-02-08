@@ -46,6 +46,7 @@ public class Package implements BPMNProperty {
     private String value;
 
     public Package() {
+        this(DEFAULT_PACKAGE);
     }
 
     public Package(final String value) {

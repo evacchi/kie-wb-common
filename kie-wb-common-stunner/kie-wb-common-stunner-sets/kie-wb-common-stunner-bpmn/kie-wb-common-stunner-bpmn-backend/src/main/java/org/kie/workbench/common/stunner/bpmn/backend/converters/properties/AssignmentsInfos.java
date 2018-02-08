@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BaseElement;
@@ -27,150 +26,107 @@ import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
-import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.ItemAwareElement;
-import org.eclipse.bpmn2.OutputSet;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationList;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Utils.extractDtype;
 
 public class AssignmentsInfos {
 
-    // this is actually for compatibility with the previous generator
-    public static String makeWrongString(
+    public static AssignmentsInfo of(
             final List<DataInput> datainput,
-            //final List<InputSet> inputSets,
+//            final List<InputSet> inputSets,
             final List<DataInputAssociation> inputAssociations,
             final List<DataOutput> dataoutput,
-            //final List<OutputSet> dataoutputset,
-            final List<DataOutputAssociation> outputAssociations) {
+//            final List<OutputSet> dataoutputset,
+            final List<DataOutputAssociation> outputAssociations,
+            boolean alternativeEncoding) {
 
-        String dataInputString = dataInputsToString(datainput);
-        List<String> dataInputAssociationsToString = inAssociationsToString(inputAssociations);
+        DeclarationList inputs = dataInputDeclarations(datainput);
+        List<AssociationDeclaration.Input> inputAssociationDeclarations =
+                inAssociationDeclarations(inputAssociations);
 
-        String dataOutputString = dataOutputsToString(dataoutput);
-        List<String> dataOutputAssociationsToString = outAssociationsToString(outputAssociations);
+        DeclarationList outputs = dataOutputDeclarations(dataoutput);
+        List<AssociationDeclaration.Output> outputAssociationDeclarations =
+                outAssociationDeclarations(outputAssociations);
 
-        String associationString =
-                Stream.concat(dataInputAssociationsToString.stream(), dataOutputAssociationsToString.stream())
-                        .collect(Collectors.joining(","));
+        AssociationList associations = new AssociationList(
+                inputAssociationDeclarations,
+                outputAssociationDeclarations);
 
-        return Stream.of("",
-                         dataInputString,
-                         "",
-                         dataOutputString,
-                         associationString)
-                .collect(Collectors.joining("|"));
+        return new AssignmentsInfo(inputs, outputs, associations, alternativeEncoding);
     }
 
-    public static String makeString(
-            final List<DataInput> datainput,
-            final List<InputSet> inputSets,
-            final List<DataInputAssociation> inputAssociations,
-            final List<DataOutput> dataoutput,
-            final List<OutputSet> dataoutputset,
-            final List<DataOutputAssociation> outputAssociations) {
-
-        String dataInputString = dataInputsToString(datainput);
-        String inputSetsToString = inputSetsToString(inputSets);
-        List<String> dataInputAssociationsToString = inAssociationsToString(inputAssociations);
-
-        String dataOutputString = dataOutputsToString(dataoutput);
-        String outputSetsToString = outputSetsToString(dataoutputset);
-        List<String> dataOutputAssociationsToString = outAssociationsToString(outputAssociations);
-
-        String associationString =
-                Stream.concat(dataInputAssociationsToString.stream(), dataOutputAssociationsToString.stream())
-                        .collect(Collectors.joining(","));
-
-        return Stream.of(dataInputString,
-                         inputSetsToString,
-                         dataOutputString,
-                         outputSetsToString,
-                         associationString)
-                .collect(Collectors.joining("|"));
+    public static DeclarationList dataInputDeclarations(List<DataInput> dataInputs) {
+        return new DeclarationList(
+                dataInputs.stream()
+                        .filter(o -> !o.getName().equals("TaskName"))
+                        //.filter(o -> !extractDtype(o).isEmpty())
+                        .map(AssignmentsInfos::declarationFromInput)
+                        .collect(Collectors.toList()));
     }
 
-    private static String inputSetsToString(List<InputSet> inputSets) {
-        return inputSets.stream()
-                .map(AssignmentsInfos::toString)
-                .collect(Collectors.joining(","));
+    public static DeclarationList dataOutputDeclarations(List<DataOutput> dataInputs) {
+        return new DeclarationList(
+                dataInputs.stream()
+                        .filter(o -> !extractDtype(o).isEmpty())
+                        .map(AssignmentsInfos::declarationFromOutput)
+                        .collect(Collectors.toList()));
     }
 
-    private static String outputSetsToString(List<OutputSet> outputSets) {
-        return outputSets.stream()
-                .map(AssignmentsInfos::toString)
-                .collect(Collectors.joining(","));
+    public static AssignmentDeclaration declarationFromInput(DataInput in) {
+        return new AssignmentDeclaration(
+                in.getName(),
+                extractDtype(in));
     }
 
-    public static String dataInputsToString(List<DataInput> dataInputs) {
-        return dataInputs.stream()
-                .filter(o -> !o.getName().equals("TaskName"))
-                //.filter(o -> !extractDtype(o).isEmpty())
-                .map(AssignmentsInfos::toString)
-                .collect(Collectors.joining(","));
+    public static AssignmentDeclaration declarationFromOutput(DataOutput out) {
+        return new AssignmentDeclaration(
+                out.getName(),
+                extractDtype(out));
     }
 
-    public static String dataOutputsToString(List<DataOutput> dataInputs) {
-        return dataInputs.stream()
-                .filter(o -> !extractDtype(o).isEmpty())
-                .map(AssignmentsInfos::toString)
-                .collect(Collectors.joining(","));
-    }
-
-    private static String toString(OutputSet outputSet) {
-        return "";
-    }
-
-    public static String toString(InputSet dataInput) {
-        return "";
-    }
-
-    public static List<String> outAssociationsToString(List<DataOutputAssociation> outputAssociations) {
-        List<String> result = new ArrayList<>();
+    public static List<AssociationDeclaration.Output> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
+        List<AssociationDeclaration.Output> result = new ArrayList<>();
         for (DataOutputAssociation doa : outputAssociations) {
-            String doaName = ((DataOutput) doa.getSourceRef().get(0)).getName();
-            if (doaName != null && doaName.length() > 0) {
-
-                if (doaName != null && doaName.length() > 0) {
-                    result.add(
-                            String.format("[dout]%s->%s", doaName, doa.getTargetRef().getId()));
-                }
+            DataOutput dataOutput = (DataOutput) doa.getSourceRef().get(0);
+            String source = dataOutput.getName();
+            String target = doa.getTargetRef().getId();
+            if (source != null && source.length() > 0) {
+                result.add(new AssociationDeclaration.Output(new AssociationDeclaration.SourceTarget(source, target)));
             }
         }
         return result;
     }
 
-    public static List<String> inAssociationsToString(List<DataInputAssociation> inputAssociations) {
-        List<String> result = new ArrayList<>();
+    public static List<AssociationDeclaration.Input> inAssociationDeclarations(List<DataInputAssociation> inputAssociations) {
+        List<AssociationDeclaration.Input> result = new ArrayList<>();
 
         for (DataInputAssociation dia : inputAssociations) {
             List<ItemAwareElement> sourceRef = dia.getSourceRef();
             if (sourceRef.isEmpty()) {
                 continue;
             }
-            String doaName = sourceRef.get(0).getId();
-            if (doaName != null && doaName.length() > 0) {
-                result.add(
-                        String.format("[din]%s->%s", doaName, ((DataInput) dia.getTargetRef()).getName()));
+            String source = sourceRef.get(0).getId();
+            String target = ((DataInput) dia.getTargetRef()).getName();
+            if (source != null && source.length() > 0) {
+                result.add(new AssociationDeclaration.Input(new AssociationDeclaration.SourceTarget(source, target)));
             }
         }
 
         return result;
     }
+}
 
-    public static String toString(DataInput dataInput) {
-        String name = dataInput.getName();
-        String dtype = extractDtype(dataInput);
-        return dtype.isEmpty() ? name : name + ':' + dtype;
-    }
+class Utils {
 
-    public static String toString(DataOutput dataInput) {
-        String name = dataInput.getName();
-        String dtype = extractDtype(dataInput);
-        return dtype.isEmpty() ? name : name + ':' + dtype;
-    }
-
-    private static String extractDtype(BaseElement el) {
+    static String extractDtype(BaseElement el) {
         return getAnyAttributeValue(el, "dtype");
     }
 

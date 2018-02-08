@@ -57,7 +57,7 @@ public class IntermediateMessageEventCatchingConverter {
         ));
 
         definition.setDataIOSet(new DataIOSet(
-                new AssignmentsInfo(p.getAssignmentsInfo())
+                p.getAssignmentsInfo()
         ));
 
         definition.setExecutionSet(new CancellingMessageEventExecutionSet(

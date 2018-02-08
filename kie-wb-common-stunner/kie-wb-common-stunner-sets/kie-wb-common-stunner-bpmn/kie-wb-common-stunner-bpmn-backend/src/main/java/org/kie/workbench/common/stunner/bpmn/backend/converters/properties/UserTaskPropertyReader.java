@@ -32,8 +32,8 @@ import org.eclipse.bpmn2.ResourceRole;
 import org.eclipse.bpmn2.UserTask;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
 public class UserTaskPropertyReader extends TaskPropertyReader {
 
@@ -65,30 +65,26 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
         return input("GroupId");
     }
 
-    public String getAssignmentsInfo() {
+    public AssignmentsInfo getAssignmentsInfo() {
         InputOutputSpecification ioSpecification = task.getIoSpecification();
         if (ioSpecification == null) {
-            return (
-                    AssignmentsInfos.makeString(
-                            Collections.emptyList(),
-                            Collections.emptyList(),
-                            task.getDataInputAssociations(),
-                            Collections.emptyList(),
-                            Collections.emptyList(),
-                            task.getDataOutputAssociations()
-                    )
-            );
+            return AssignmentsInfos.of(
+                    Collections.emptyList(),
+//                            Collections.emptyList(),
+                    task.getDataInputAssociations(),
+                    Collections.emptyList(),
+//                            Collections.emptyList(),
+                    task.getDataOutputAssociations(),
+                    false);
         } else {
-            return (
-                    AssignmentsInfos.makeWrongString(
-                            ioSpecification.getDataInputs(),
-                            //ioSpecification.getInputSets(),
-                            task.getDataInputAssociations(),
-                            ioSpecification.getDataOutputs(),
-                            //ioSpecification.getOutputSets(),
-                            task.getDataOutputAssociations()
-                    )
-            );
+            return AssignmentsInfos.of(
+                    ioSpecification.getDataInputs(),
+                    //ioSpecification.getInputSets(),
+                    task.getDataInputAssociations(),
+                    ioSpecification.getDataOutputs(),
+                    //ioSpecification.getOutputSets(),
+                    task.getDataOutputAssociations(),
+                    true);
         }
     }
 
@@ -136,7 +132,7 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
     }
 
     private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getMixed().getValue(0);
+        return ((FormalExpression) assignment.getFrom()).getBody();
     }
 
     public SimulationSet getSimulationSet() {

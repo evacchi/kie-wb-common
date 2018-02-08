@@ -71,7 +71,7 @@ public class UserTaskConverter {
                 new TaskName(p.getTaskName()),
                 new Actors(p.getActors()),
                 new Groupid(p.getGroupid()),
-                new AssignmentsInfo(p.getAssignmentsInfo()),
+                p.getAssignmentsInfo(),
                 new IsAsync(p.isAsync()),
                 new Skippable(p.isSkippable()),
                 new Priority(p.getPriority()),

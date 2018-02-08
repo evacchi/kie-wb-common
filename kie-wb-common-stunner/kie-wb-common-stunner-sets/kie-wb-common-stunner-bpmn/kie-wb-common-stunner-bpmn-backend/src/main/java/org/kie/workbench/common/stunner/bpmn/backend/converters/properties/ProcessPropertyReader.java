@@ -16,8 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Package;
@@ -28,10 +31,14 @@ import org.kie.workbench.common.stunner.core.graph.content.view.BoundsImpl;
 public class ProcessPropertyReader extends BasePropertyReader {
 
     private final Process process;
+    private final Map<String, FlowElement> flowElements;
 
     public ProcessPropertyReader(Process element, BPMNPlane plane) {
         super(element, plane);
         this.process = element;
+        this.flowElements =
+                process.getFlowElements().stream()
+                        .collect(Collectors.toMap(FlowElement::getId, Function.identity()));
     }
 
     public String getPackageName() {
@@ -62,5 +69,9 @@ public class ProcessPropertyReader extends BasePropertyReader {
                 .stream()
                 .map(p -> p.getId() + ":" + p.getItemSubjectRef().getStructureRef())
                 .collect(Collectors.joining(","));
+    }
+
+    public FlowElement getFlowElement(String id) {
+        return flowElements.get(id);
     }
 }
