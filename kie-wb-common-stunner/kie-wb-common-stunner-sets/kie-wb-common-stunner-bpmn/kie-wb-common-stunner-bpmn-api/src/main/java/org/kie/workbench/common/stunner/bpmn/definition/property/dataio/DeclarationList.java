@@ -16,12 +16,19 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DeclarationList {
 
     private final List<AssignmentDeclaration> declarations;
+
+    public DeclarationList() {
+        this.declarations = Collections.emptyList();
+    }
+
 
     public DeclarationList(List<AssignmentDeclaration> declarations) {
         this.declarations = declarations;
@@ -33,4 +40,12 @@ public class DeclarationList {
                 .map(AssignmentDeclaration::toString)
                 .collect(Collectors.joining(","));
     }
+
+    public static DeclarationList fromString(String encoded) {
+        return new DeclarationList(
+                Arrays.asList(encoded.split(",")).stream()
+                        .map(AssignmentDeclaration::fromString)
+                        .collect(Collectors.toList()));
+    }
+
 }

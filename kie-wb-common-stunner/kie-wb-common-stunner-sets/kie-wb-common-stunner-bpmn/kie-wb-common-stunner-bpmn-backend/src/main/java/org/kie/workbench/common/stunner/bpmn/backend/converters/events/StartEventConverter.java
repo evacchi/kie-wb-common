@@ -136,7 +136,7 @@ public class StartEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new InterruptingMessageEventExecutionSet(
@@ -192,7 +192,7 @@ public class StartEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new InterruptingErrorEventExecutionSet(

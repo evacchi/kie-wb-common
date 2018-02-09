@@ -17,23 +17,41 @@
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class AssociationList {
 
-    private final List<AssociationDeclaration> declarations;
+    private final List<AssociationDeclaration> associations;
 
     public AssociationList(List<AssociationDeclaration> inputs, List<AssociationDeclaration> outputs) {
-        this.declarations = new ArrayList<>();
-        declarations.addAll(inputs);
-        declarations.addAll(outputs);
+        this.associations = new ArrayList<>();
+        associations.addAll(inputs);
+        associations.addAll(outputs);
+    }
+
+    public AssociationList(List<AssociationDeclaration> all) {
+        this.associations = new ArrayList<>();
+        associations.addAll(all);
+    }
+
+    public AssociationList() {
+        this.associations = Collections.emptyList();
     }
 
     @Override
     public String toString() {
-        return declarations.stream()
+        return associations.stream()
                 .map(AssociationDeclaration::toString)
                 .collect(Collectors.joining(","));
+    }
+
+    public static AssociationList fromString(String encoded) {
+        return new AssociationList(
+                Arrays.asList(encoded.split(",")).stream()
+                        .map(AssociationDeclaration::fromString)
+                        .collect(Collectors.toList()));
     }
 }

@@ -124,7 +124,7 @@ public class EndEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new ScopedSignalEventExecutionSet(
@@ -153,7 +153,7 @@ public class EndEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new MessageEventExecutionSet(
@@ -181,7 +181,7 @@ public class EndEventConverter {
                             ));
 
                             definition.setDataIOSet(new DataIOSet(
-                                    new AssignmentsInfo(p.getAssignmentsInfo())
+                                    p.getAssignmentsInfo()
                             ));
 
                             definition.setExecutionSet(new ErrorEventExecutionSet(

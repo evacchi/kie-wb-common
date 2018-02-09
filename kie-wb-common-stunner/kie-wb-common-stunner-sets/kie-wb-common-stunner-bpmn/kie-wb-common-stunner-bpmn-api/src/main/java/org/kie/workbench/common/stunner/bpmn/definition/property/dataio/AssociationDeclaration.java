@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.Scanner;
+import java.util.regex.Pattern;
+
 public abstract class AssociationDeclaration {
 
     private final String source;
@@ -34,12 +37,31 @@ public abstract class AssociationDeclaration {
     public static AssociationDeclaration ofInput(String source, String target) {
         return new InputAssociationDeclaration(source, target);
     }
+
     public static AssociationDeclaration ofOutput(String source, String target) {
         return new OutputAssociationDeclaration(source, target);
+    }
+
+    public static AssociationDeclaration fromString(String encoded) {
+        if (encoded.startsWith(InputAssociationDeclaration.BEGIN_MARK)) {
+            String rest = encoded.substring(InputAssociationDeclaration.BEGIN_MARK.length());
+            String[] association = rest.split("->");
+            return ofInput(association[0], association[1]);
+        }
+
+        if (encoded.startsWith(OutputAssociationDeclaration.BEGIN_MARK)) {
+            String rest = encoded.substring(OutputAssociationDeclaration.BEGIN_MARK.length());
+            String[] association = rest.split("->");
+            return ofOutput(association[0], association[1]);
+        }
+
+        throw new IllegalArgumentException("Cannot parse " + encoded);
     }
 }
 
 class InputAssociationDeclaration extends AssociationDeclaration {
+
+    protected static final String BEGIN_MARK = "[din]";
 
     public InputAssociationDeclaration(String source, String target) {
         super(source, target);
@@ -52,6 +74,8 @@ class InputAssociationDeclaration extends AssociationDeclaration {
 }
 
 class OutputAssociationDeclaration extends AssociationDeclaration {
+
+    protected static final String BEGIN_MARK = "[dout]";
 
     public OutputAssociationDeclaration(String source, String target) {
         super(source, target);

@@ -37,5 +37,12 @@ public class AssignmentDeclaration {
             return identifier + ":" + type;
         }
     }
+
+    public static AssignmentDeclaration fromString(String encoded) {
+        String[] split = encoded.split(":");
+        String identifier = split[0];
+        String type = (split.length == 2)? split[1] : null;
+        return new AssignmentDeclaration(identifier, type);
+    }
 }
 

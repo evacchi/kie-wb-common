@@ -24,8 +24,8 @@ import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.di.BPMNPlane;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Colors;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 public class ActivityPropertyReader extends FlowElementPropertyReader {
@@ -51,24 +51,28 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
         return Boolean.parseBoolean(metaData("customAsync"));
     }
 
-    public String getAssignmentsInfo() {
+    public AssignmentsInfo getAssignmentsInfo() {
         InputOutputSpecification ioSpecification = activity.getIoSpecification();
         if (ioSpecification == null) {
-            return AssignmentsInfos.makeString(
+            return AssignmentsInfos.of(
                     Collections.emptyList(),
 //                    Collections.emptyList(),
                     activity.getDataInputAssociations(),
                     Collections.emptyList(),
 //                    Collections.emptyList(),
-                    activity.getDataOutputAssociations());
+                    activity.getDataOutputAssociations(),
+                    false
+            );
         } else {
-            return AssignmentsInfos.makeWrongString(
+            return AssignmentsInfos.of(
                     ioSpecification.getDataInputs(),
                     //ioSpecification.getInputSets(),
                     activity.getDataInputAssociations(),
                     ioSpecification.getDataOutputs(),
                     //ioSpecification.getOutputSets(),
-                    activity.getDataOutputAssociations());
+                    activity.getDataOutputAssociations(),
+                    true
+            );
         }
     }
 

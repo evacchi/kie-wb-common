@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,12 +45,18 @@ public class AssignmentsInfo implements BPMNProperty {
     @FieldValue
     private String value;
 
+    private DeclarationList inputs;
+    private DeclarationList outputs;
+    private AssociationList associations;
+    private boolean alternativeEncoding;
+
     public AssignmentsInfo() {
         this("");
     }
 
     public AssignmentsInfo(final String value) {
         this.value = value;
+        readIntoStringRepresentation(value);
     }
 
     public AssignmentsInfo(
@@ -58,22 +65,16 @@ public class AssignmentsInfo implements BPMNProperty {
             AssociationList associations,
             boolean alternativeEncoding) {
 
-        this(
-                alternativeEncoding ?
-                        Stream.of(
-                                inputs.toString(),
-                                "",
-                                outputs.toString(),
-                                "",
-                                associations.toString())
-                                .collect(Collectors.joining("|"))
-                        : Stream.of("",
-                                    inputs.toString(),
-                                    "",
-                                    outputs.toString(),
-                                    associations.toString())
-                        .collect(Collectors.joining("|"))
-        );
+        this(encodeStringRepresentation(
+                inputs,
+                outputs,
+                associations,
+                alternativeEncoding));
+
+        this.inputs = inputs;
+        this.outputs = outputs;
+        this.associations = associations;
+        this.alternativeEncoding = alternativeEncoding;
     }
 
     public PropertyType getType() {
@@ -86,6 +87,7 @@ public class AssignmentsInfo implements BPMNProperty {
 
     public void setValue(final String value) {
         this.value = value;
+        readIntoStringRepresentation(value);
     }
 
     @Override
@@ -100,5 +102,68 @@ public class AssignmentsInfo implements BPMNProperty {
             return (null != value) ? value.equals(other.value) : null == other.value;
         }
         return false;
+    }
+
+    public static String encodeStringRepresentation(
+            DeclarationList inputs,
+            DeclarationList outputs,
+            AssociationList associations,
+            boolean alternativeEncoding) {
+        if (alternativeEncoding) {
+            return nonCanonicalEncoding(inputs, outputs, associations);
+        } else {
+            return canonicalEncoding(inputs, outputs, associations);
+        }
+    }
+
+    public static String canonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
+        return Stream.of(
+                inputs.toString(),
+                "",
+                outputs.toString(),
+                "",
+                associations.toString())
+                .collect(Collectors.joining("|"));
+    }
+
+    public static String nonCanonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
+        return Stream.of("",
+                         inputs.toString(),
+                         "",
+                         outputs.toString(),
+                         associations.toString())
+                .collect(Collectors.joining("|"));
+    }
+
+    private void readIntoStringRepresentation(String encoded) {
+        this.inputs = new DeclarationList();
+        this.outputs = new DeclarationList();
+        this.associations = new AssociationList();
+
+        if (encoded.isEmpty()) {
+            return;
+        }
+
+        String[] split = encoded.split("\\|");
+        if (split.length == 0) {
+            return;
+        }
+
+        if (!split[0].isEmpty()) {
+            // then it is certainly canonicalEncoding (see canonicalEncoding())
+            this.inputs = DeclarationList.fromString(split[0]);
+            if (split.length < 3) return;
+            this.outputs = DeclarationList.fromString(split[2]);
+            if (split.length < 5) return;
+            this.associations = AssociationList.fromString(split[4]);
+        } else {
+            // otherwise, let's try offsetting by one -- fixme: verify this assumption is good enough
+            this.alternativeEncoding = true;
+            this.inputs = DeclarationList.fromString(split[1]);
+            if (split.length < 4) return;
+            this.outputs = DeclarationList.fromString(split[3]);
+            if (split.length < 5) return;
+            this.associations = AssociationList.fromString(split[4]); // associations are always last
+        }
     }
 }

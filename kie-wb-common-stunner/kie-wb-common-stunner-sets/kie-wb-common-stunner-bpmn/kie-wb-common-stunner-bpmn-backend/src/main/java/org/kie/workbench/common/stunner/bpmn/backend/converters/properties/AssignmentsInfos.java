@@ -31,6 +31,7 @@ import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
@@ -38,6 +39,26 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.Declarat
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Utils.extractDtype;
 
 public class AssignmentsInfos {
+
+    public static AssignmentsInfo of(
+            final List<DataInput> datainput,
+//            final List<InputSet> inputSets,
+            final List<DataInputAssociation> inputAssociations,
+            final List<DataOutput> dataoutput,
+//            final List<OutputSet> dataoutputset,
+            final List<DataOutputAssociation> outputAssociations,
+            boolean alternativeEncoding) {
+
+        DeclarationList inputs = dataInputDeclarations(datainput);
+        List<AssociationDeclaration> inputAssociationDeclarations = inAssociationDeclarations(inputAssociations);
+
+        DeclarationList outputs = dataOutputDeclarations(dataoutput);
+        List<AssociationDeclaration> outputAssociationDeclarations = outAssociationDeclarations(outputAssociations);
+
+        AssociationList associations = new AssociationList(inputAssociationDeclarations, outputAssociationDeclarations);
+
+        return new AssignmentsInfo(inputs, outputs, associations, alternativeEncoding);
+    }
 
     // this is actually for compatibility with the previous generator
     public static String makeWrongString(
