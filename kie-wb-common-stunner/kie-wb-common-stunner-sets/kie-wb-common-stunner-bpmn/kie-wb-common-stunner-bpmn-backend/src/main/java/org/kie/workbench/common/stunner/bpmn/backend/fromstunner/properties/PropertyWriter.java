@@ -16,6 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
@@ -32,9 +37,14 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class PropertyWriter {
 
     private final FlowElement flowElement;
+    private final Map<String, BaseElement> baseElements = new HashMap<>();
 
     public PropertyWriter(FlowElement flowElement) {
         this.flowElement = flowElement;
+    }
+
+    public FlowElement getFlowElement() {
+        return flowElement;
     }
 
     public void setName(String value) {
@@ -42,7 +52,15 @@ public class PropertyWriter {
         setMeta("elementname", value);
     }
 
-    private void setMeta(
+    public void addBaseElement(BaseElement element) {
+        this.baseElements.put(element.getId(), element);
+    }
+
+    public Collection<BaseElement> getBaseElements() {
+        return this.baseElements.values();
+    }
+
+    protected void setMeta(
             String attributeId,
             String metaDataValue) {
 
@@ -64,7 +82,7 @@ public class PropertyWriter {
     }
 
     // eww
-    private String asCData(String original) {
+    protected String asCData(String original) {
         return "<![CDATA[" + original + "]]>";
     }
 

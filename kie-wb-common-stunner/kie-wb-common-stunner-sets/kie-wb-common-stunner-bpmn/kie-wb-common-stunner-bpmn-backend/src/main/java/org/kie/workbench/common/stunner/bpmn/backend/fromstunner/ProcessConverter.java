@@ -68,13 +68,15 @@ public class ProcessConverter {
                 .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
-                .forEach(context::addFlowNode);
+                .forEach(p -> {
+                    flowElements.add(p.getFlowElement());
+                    p.getBaseElements().forEach(context::addBaseElement);
+                });
 
         context.edges()
                 .map(sequenceFlowConverter::toFlowElement)
                 .forEach(context::addSequenceFlow);
 
-        flowElements.addAll(context.getFlowNodes());
         flowElements.addAll(context.getSequenceFlows());
 
         return rootLevelProcess;

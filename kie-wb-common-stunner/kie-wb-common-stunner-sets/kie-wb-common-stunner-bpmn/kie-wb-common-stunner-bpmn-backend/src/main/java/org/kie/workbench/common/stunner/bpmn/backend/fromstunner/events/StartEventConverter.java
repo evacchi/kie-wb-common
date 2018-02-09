@@ -16,15 +16,13 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import java.io.UnsupportedEncodingException;
-import java.util.UUID;
-
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.StartEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Ids;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
@@ -45,8 +43,8 @@ public class StartEventConverter {
         this.context = context;
     }
 
-    public FlowNode toFlowElement(Node<View<BaseStartEvent>, ?> node) {
-        return NodeMatch.fromNode(BaseStartEvent.class, StartEvent.class)
+    public PropertyWriter toFlowElement(Node<View<BaseStartEvent>, ?> node) {
+        return NodeMatch.fromNode(BaseStartEvent.class, PropertyWriter.class)
                 .when(StartNoneEvent.class, n -> {
                     StartEvent startEvent = bpmn2.createStartEvent();
                     PropertyWriter p = new PropertyWriter(startEvent);
@@ -57,7 +55,7 @@ public class StartEventConverter {
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
 
-                    return startEvent;
+                    return p;
                 })
                 .when(StartSignalEvent.class, n -> {
                     StartEvent startEvent = bpmn2.createStartEvent();
@@ -81,25 +79,16 @@ public class StartEventConverter {
                             definition.getExecutionSet();
                     Signal signal = bpmn2.createSignal();
                     String signalName = executionSet.getSignalRef().getValue();
-                    uuidFromString(signalName);
 
                     signal.setName(signalName);
-                    signal.setId(uuidFromString(signalName));
+                    signal.setId(Ids.fromString(signalName));
                     signalEventDefinition.setSignalRef(signal.getId());
 
                     startEvent.getEventDefinitions().add(signalEventDefinition);
 
-                    context.addRootElement(signal);
+                    p.addBaseElement(signal);
 
-                    return startEvent;
+                    return p;
                 }).apply(node).value();
-    }
-
-    public String uuidFromString(String myString) {
-        try {
-            return "_" + UUID.nameUUIDFromBytes(myString.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException ex) {
-            return "_" + UUID.nameUUIDFromBytes(myString.getBytes());
-        }
     }
 }

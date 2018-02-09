@@ -31,15 +31,15 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class TaskConverter {
 
-    public FlowNode toFlowElement(Node<View<BaseTask>, ?> node) {
-        return NodeMatch.fromNode(BaseTask.class, FlowNode.class)
+    public PropertyWriter toFlowElement(Node<View<BaseTask>, ?> node) {
+        return NodeMatch.fromNode(BaseTask.class, PropertyWriter.class)
                 .when(NoneTask.class, n -> {
                     Task task = bpmn2.createTask();
                     NoneTask definition = n.getContent().getDefinition();
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
-                    return task;
+                    return p;
                 })
                 .when(ScriptTask.class, n -> {
                     ScriptTask definition = n.getContent().getDefinition();
@@ -47,7 +47,7 @@ public class TaskConverter {
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
-                    return task;
+                    return p;
                 })
                 .when(UserTask.class, n -> {
                     UserTask definition = n.getContent().getDefinition();
@@ -55,7 +55,7 @@ public class TaskConverter {
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
-                    return task;
+                    return p;
                 }).apply(node).value();
     }
 }

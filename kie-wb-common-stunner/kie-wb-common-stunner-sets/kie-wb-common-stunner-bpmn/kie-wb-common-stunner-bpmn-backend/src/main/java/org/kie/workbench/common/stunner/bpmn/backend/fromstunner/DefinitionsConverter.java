@@ -16,9 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
+import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
+import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
@@ -48,7 +50,13 @@ public class DefinitionsConverter {
         relationship.getSources().add(process);
         relationship.getTargets().add(process);
 
-        definitions.getRootElements().addAll(context.getRootElements());
+//        definitions.getRootElements().addAll(context.getBaseElements());
+
+        for (BaseElement baseElement : context.getBaseElements()) {
+            if (baseElement instanceof RootElement) {
+                definitions.getRootElements().add((RootElement)baseElement);
+            }
+        }
 
         return definitions;
     }

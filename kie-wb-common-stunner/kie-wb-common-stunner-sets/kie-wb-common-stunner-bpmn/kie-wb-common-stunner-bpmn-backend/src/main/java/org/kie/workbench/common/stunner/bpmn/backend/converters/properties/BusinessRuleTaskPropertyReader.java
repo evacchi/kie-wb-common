@@ -22,6 +22,7 @@ import org.eclipse.bpmn2.BusinessRuleTask;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 public class BusinessRuleTaskPropertyReader extends TaskPropertyReader {
@@ -34,30 +35,26 @@ public class BusinessRuleTaskPropertyReader extends TaskPropertyReader {
         return attribute("ruleFlowGroup");
     }
 
-    public String getAssignmentsInfo() {
+    public AssignmentsInfo getAssignmentsInfo() {
         InputOutputSpecification ioSpecification = task.getIoSpecification();
         if (ioSpecification == null) {
-            return (
-                    AssignmentsInfos.makeString(
-                            Collections.emptyList(),
+            return AssignmentsInfos.of(
+                    Collections.emptyList(),
 //                            Collections.emptyList(),
-                            task.getDataInputAssociations(),
-                            Collections.emptyList(),
+                    task.getDataInputAssociations(),
+                    Collections.emptyList(),
 //                            Collections.emptyList(),
-                            task.getDataOutputAssociations()
-                    )
-            );
+                    task.getDataOutputAssociations(),
+                    false);
         } else {
-            return (
-                    AssignmentsInfos.makeWrongString(
-                            ioSpecification.getDataInputs(),
-                            //ioSpecification.getInputSets(),
-                            task.getDataInputAssociations(),
-                            ioSpecification.getDataOutputs(),
-                            //ioSpecification.getOutputSets(),
-                            task.getDataOutputAssociations()
-                    )
-            );
+            return AssignmentsInfos.of(
+                    ioSpecification.getDataInputs(),
+                    //ioSpecification.getInputSets(),
+                    task.getDataInputAssociations(),
+                    ioSpecification.getDataOutputs(),
+                    //ioSpecification.getOutputSets(),
+                    task.getDataOutputAssociations(),
+                    true);
         }
     }
 

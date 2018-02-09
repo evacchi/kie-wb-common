@@ -29,6 +29,14 @@ public abstract class AssociationDeclaration {
         this.target = target;
     }
 
+    public String getSource() {
+        return source;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
     @Override
     public String toString() {
         return String.format("%s->%s", source, target);

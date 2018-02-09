@@ -16,13 +16,14 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AssociationList {
+public class AssociationList extends AbstractList<AssociationDeclaration> {
 
     private final List<AssociationDeclaration> associations;
 
@@ -39,6 +40,16 @@ public class AssociationList {
 
     public AssociationList() {
         this.associations = Collections.emptyList();
+    }
+
+    @Override
+    public int size() {
+        return associations.size();
+    }
+
+    @Override
+    public AssociationDeclaration get(int i) {
+        return associations.get(i);
     }
 
     @Override

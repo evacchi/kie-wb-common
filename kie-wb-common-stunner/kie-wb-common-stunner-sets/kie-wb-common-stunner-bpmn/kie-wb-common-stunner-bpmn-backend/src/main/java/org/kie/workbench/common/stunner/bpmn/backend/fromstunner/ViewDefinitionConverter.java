@@ -23,6 +23,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
@@ -51,8 +52,8 @@ public class ViewDefinitionConverter {
         this.taskConverter = new TaskConverter();
     }
 
-    public Result<FlowNode> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
-        return NodeMatch.fromNode(BPMNViewDefinition.class, FlowNode.class)
+    public Result<PropertyWriter> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
+        return NodeMatch.fromNode(BPMNViewDefinition.class, PropertyWriter.class)
                 .when(BaseStartEvent.class, startEventConverter::toFlowElement)
                 .when(BaseTask.class, taskConverter::toFlowElement)
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)

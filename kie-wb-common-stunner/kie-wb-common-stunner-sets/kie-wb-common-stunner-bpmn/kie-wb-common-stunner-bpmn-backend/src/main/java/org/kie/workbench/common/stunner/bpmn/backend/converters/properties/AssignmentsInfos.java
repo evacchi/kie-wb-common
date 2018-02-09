@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BaseElement;
@@ -50,78 +49,35 @@ public class AssignmentsInfos {
             boolean alternativeEncoding) {
 
         DeclarationList inputs = dataInputDeclarations(datainput);
-        List<AssociationDeclaration> inputAssociationDeclarations = inAssociationDeclarations(inputAssociations);
+        List<AssociationDeclaration> inputAssociationDeclarations =
+                inAssociationDeclarations(inputAssociations);
 
         DeclarationList outputs = dataOutputDeclarations(dataoutput);
-        List<AssociationDeclaration> outputAssociationDeclarations = outAssociationDeclarations(outputAssociations);
+        List<AssociationDeclaration> outputAssociationDeclarations =
+                outAssociationDeclarations(outputAssociations);
 
-        AssociationList associations = new AssociationList(inputAssociationDeclarations, outputAssociationDeclarations);
+        AssociationList associations = new AssociationList(
+                inputAssociationDeclarations,
+                outputAssociationDeclarations);
 
         return new AssignmentsInfo(inputs, outputs, associations, alternativeEncoding);
     }
 
-    // this is actually for compatibility with the previous generator
-    public static String makeWrongString(
-            final List<DataInput> datainput,
-            //final List<InputSet> inputSets,
-            final List<DataInputAssociation> inputAssociations,
-            final List<DataOutput> dataoutput,
-            //final List<OutputSet> dataoutputset,
-            final List<DataOutputAssociation> outputAssociations) {
-
-        DeclarationList dataInputDeclarations = dataInputDeclarations(datainput);
-        List<AssociationDeclaration> inputAssociationDeclarations = inAssociationDeclarations(inputAssociations);
-
-        DeclarationList dataOutputDeclarations = dataOutputDeclarations(dataoutput);
-        List<AssociationDeclaration> outputAssociationDeclarations = outAssociationDeclarations(outputAssociations);
-
-        AssociationList associationList = new AssociationList(inputAssociationDeclarations, outputAssociationDeclarations);
-
-        return Stream.of("",
-                         dataInputDeclarations.toString(),
-                         "",
-                         dataOutputDeclarations.toString(),
-                         associationList.toString())
-                .collect(Collectors.joining("|"));
-    }
-
-    public static String makeString(
-            final List<DataInput> datainput,
-//            final List<InputSet> inputSets,
-            final List<DataInputAssociation> inputAssociations,
-            final List<DataOutput> dataoutput,
-//            final List<OutputSet> dataoutputset,
-            final List<DataOutputAssociation> outputAssociations) {
-
-        DeclarationList dataInputDeclarations = dataInputDeclarations(datainput);
-        List<AssociationDeclaration> inputAssociationDeclarations = inAssociationDeclarations(inputAssociations);
-
-        DeclarationList dataOutputDeclarations = dataOutputDeclarations(dataoutput);
-        List<AssociationDeclaration> outputAssociationDeclarations = outAssociationDeclarations(outputAssociations);
-
-        AssociationList associationList = new AssociationList(inputAssociationDeclarations, outputAssociationDeclarations);
-
-        return Stream.of(dataInputDeclarations.toString(),
-                         "",
-                         dataOutputDeclarations.toString(),
-                         "",
-                         associationList.toString())
-                .collect(Collectors.joining("|"));
-    }
-
     public static DeclarationList dataInputDeclarations(List<DataInput> dataInputs) {
-        return new DeclarationList(dataInputs.stream()
-                                           .filter(o -> !o.getName().equals("TaskName"))
-                                           //.filter(o -> !extractDtype(o).isEmpty())
-                                           .map(AssignmentsInfos::declarationFromInput)
-                                           .collect(Collectors.toList()));
+        return new DeclarationList(
+                dataInputs.stream()
+                        .filter(o -> !o.getName().equals("TaskName"))
+                        //.filter(o -> !extractDtype(o).isEmpty())
+                        .map(AssignmentsInfos::declarationFromInput)
+                        .collect(Collectors.toList()));
     }
 
     public static DeclarationList dataOutputDeclarations(List<DataOutput> dataInputs) {
-        return new DeclarationList(dataInputs.stream()
-                                           .filter(o -> !extractDtype(o).isEmpty())
-                                           .map(AssignmentsInfos::declarationFromOutput)
-                                           .collect(Collectors.toList()));
+        return new DeclarationList(
+                dataInputs.stream()
+                        .filter(o -> !extractDtype(o).isEmpty())
+                        .map(AssignmentsInfos::declarationFromOutput)
+                        .collect(Collectors.toList()));
     }
 
     public static AssignmentDeclaration declarationFromInput(DataInput in) {

@@ -68,27 +68,23 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
     public AssignmentsInfo getAssignmentsInfo() {
         InputOutputSpecification ioSpecification = task.getIoSpecification();
         if (ioSpecification == null) {
-            return (
-                    AssignmentsInfos.of(
-                            Collections.emptyList(),
+            return AssignmentsInfos.of(
+                    Collections.emptyList(),
 //                            Collections.emptyList(),
-                            task.getDataInputAssociations(),
-                            Collections.emptyList(),
+                    task.getDataInputAssociations(),
+                    Collections.emptyList(),
 //                            Collections.emptyList(),
-                            task.getDataOutputAssociations(), false
-                    )
-            );
+                    task.getDataOutputAssociations(),
+                    false);
         } else {
-            return (
-                    AssignmentsInfos.of(
-                            ioSpecification.getDataInputs(),
-                            //ioSpecification.getInputSets(),
-                            task.getDataInputAssociations(),
-                            ioSpecification.getDataOutputs(),
-                            //ioSpecification.getOutputSets(),
-                            task.getDataOutputAssociations(), true
-                    )
-            );
+            return AssignmentsInfos.of(
+                    ioSpecification.getDataInputs(),
+                    //ioSpecification.getInputSets(),
+                    task.getDataInputAssociations(),
+                    ioSpecification.getDataOutputs(),
+                    //ioSpecification.getOutputSets(),
+                    task.getDataOutputAssociations(),
+                    true);
         }
     }
 

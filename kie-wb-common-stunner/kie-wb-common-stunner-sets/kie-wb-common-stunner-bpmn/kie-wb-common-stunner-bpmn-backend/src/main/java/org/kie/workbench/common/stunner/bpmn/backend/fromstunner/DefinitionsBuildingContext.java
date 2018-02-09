@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.eclipse.bpmn2.BaseElement;
+import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.FlowNode;
-import org.eclipse.bpmn2.RootElement;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -88,7 +90,7 @@ abstract class DefinitionsContextHelper<
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
     private Map<String, org.eclipse.bpmn2.SequenceFlow> sequenceFlows;
-    private Map<String, RootElement> rootElements;
+    private Map<String, BaseElement> baseElements;
 
     public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
         this.graph = graph;
@@ -103,7 +105,7 @@ abstract class DefinitionsContextHelper<
 
         this.flowNodes = new HashMap<>();
         this.sequenceFlows = new HashMap<>();
-        this.rootElements = new HashMap<>();
+        this.baseElements = new HashMap<>();
     }
 
     public Stream<NodeT> nodes() {
@@ -142,16 +144,16 @@ abstract class DefinitionsContextHelper<
         return sequenceFlows.values();
     }
 
-    public void addRootElement(RootElement message) {
-        rootElements.put(message.getId(), message);
+    public void addBaseElement(BaseElement element) {
+        baseElements.put(element.getId(), element);
     }
 
-    public RootElement getRootElement(String id) {
-        return rootElements.get(id);
+    public BaseElement getBaseElements(String id) {
+        return baseElements.get(id);
     }
 
-    public Collection<RootElement> getRootElements() {
-        return rootElements.values();
+    public Collection<BaseElement> getBaseElements() {
+        return baseElements.values();
     }
 
     public Stream<EdgeT> edges() {
