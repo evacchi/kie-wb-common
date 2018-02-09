@@ -38,10 +38,10 @@ class ThrowEventPropertyReader extends EventPropertyReader {
     public String getAssignmentsInfo() {
         return AssignmentsInfos.makeString(
                 throwEvent.getDataInputs(),
-                Collections.singletonList(throwEvent.getInputSet()),
+//                Collections.singletonList(throwEvent.getInputSet()),
                 throwEvent.getDataInputAssociation(),
                 Collections.emptyList(),
-                Collections.emptyList(),
+//                Collections.emptyList(),
                 Collections.emptyList());
     }
 

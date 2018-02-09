@@ -37,10 +37,10 @@ class CatchEventPropertyReader extends EventPropertyReader {
     public String getAssignmentsInfo() {
         return AssignmentsInfos.makeString(
                 Collections.emptyList(),
-                Collections.emptyList(),
+//                Collections.emptyList(),
                 Collections.emptyList(),
                 catchEvent.getDataOutputs(),
-                Collections.singletonList(catchEvent.getOutputSet()),
+//                Collections.singletonList(catchEvent.getOutputSet()),
                 catchEvent.getDataOutputAssociation());
     }
 

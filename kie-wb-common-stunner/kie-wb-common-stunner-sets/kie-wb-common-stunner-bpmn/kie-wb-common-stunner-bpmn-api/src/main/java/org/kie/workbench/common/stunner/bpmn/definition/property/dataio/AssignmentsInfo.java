@@ -16,6 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.kie.workbench.common.forms.adf.definitions.annotations.metaModel.FieldDefinition;
@@ -47,6 +50,30 @@ public class AssignmentsInfo implements BPMNProperty {
 
     public AssignmentsInfo(final String value) {
         this.value = value;
+    }
+
+    public AssignmentsInfo(
+            DeclarationList inputs,
+            DeclarationList outputs,
+            AssociationList associations,
+            boolean alternativeEncoding) {
+
+        this(
+                alternativeEncoding ?
+                        Stream.of(
+                                inputs.toString(),
+                                "",
+                                outputs.toString(),
+                                "",
+                                associations.toString())
+                                .collect(Collectors.joining("|"))
+                        : Stream.of("",
+                                    inputs.toString(),
+                                    "",
+                                    outputs.toString(),
+                                    associations.toString())
+                        .collect(Collectors.joining("|"))
+        );
     }
 
     public PropertyType getType() {

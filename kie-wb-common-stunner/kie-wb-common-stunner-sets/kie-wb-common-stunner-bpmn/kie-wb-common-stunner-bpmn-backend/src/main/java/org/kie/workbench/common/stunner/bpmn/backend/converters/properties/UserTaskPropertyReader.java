@@ -71,10 +71,10 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
             return (
                     AssignmentsInfos.makeString(
                             Collections.emptyList(),
-                            Collections.emptyList(),
+//                            Collections.emptyList(),
                             task.getDataInputAssociations(),
                             Collections.emptyList(),
-                            Collections.emptyList(),
+//                            Collections.emptyList(),
                             task.getDataOutputAssociations()
                     )
             );

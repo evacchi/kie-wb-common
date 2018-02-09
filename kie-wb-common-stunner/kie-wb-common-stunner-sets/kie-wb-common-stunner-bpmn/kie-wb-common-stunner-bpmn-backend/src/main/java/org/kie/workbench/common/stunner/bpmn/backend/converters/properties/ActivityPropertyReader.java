@@ -56,10 +56,10 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
         if (ioSpecification == null) {
             return AssignmentsInfos.makeString(
                     Collections.emptyList(),
-                    Collections.emptyList(),
+//                    Collections.emptyList(),
                     activity.getDataInputAssociations(),
                     Collections.emptyList(),
-                    Collections.emptyList(),
+//                    Collections.emptyList(),
                     activity.getDataOutputAssociations());
         } else {
             return AssignmentsInfos.makeWrongString(
