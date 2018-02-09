@@ -22,6 +22,8 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
+import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
+import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -34,6 +36,22 @@ public class TaskConverter {
                 .when(NoneTask.class, n -> {
                     Task task = bpmn2.createTask();
                     NoneTask definition = n.getContent().getDefinition();
+                    PropertyWriter p = new PropertyWriter(task);
+                    task.setId(n.getUUID());
+                    p.setName(definition.getGeneral().getName().getValue());
+                    return task;
+                })
+                .when(ScriptTask.class, n -> {
+                    ScriptTask definition = n.getContent().getDefinition();
+                    Task task = bpmn2.createTask();
+                    PropertyWriter p = new PropertyWriter(task);
+                    task.setId(n.getUUID());
+                    p.setName(definition.getGeneral().getName().getValue());
+                    return task;
+                })
+                .when(UserTask.class, n -> {
+                    UserTask definition = n.getContent().getDefinition();
+                    Task task = bpmn2.createTask();
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());

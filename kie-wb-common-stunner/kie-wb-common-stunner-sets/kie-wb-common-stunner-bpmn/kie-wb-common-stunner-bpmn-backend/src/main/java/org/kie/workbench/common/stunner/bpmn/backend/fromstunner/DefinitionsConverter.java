@@ -48,6 +48,8 @@ public class DefinitionsConverter {
         relationship.getSources().add(process);
         relationship.getTargets().add(process);
 
+        definitions.getRootElements().addAll(context.getRootElements());
+
         return definitions;
     }
 }

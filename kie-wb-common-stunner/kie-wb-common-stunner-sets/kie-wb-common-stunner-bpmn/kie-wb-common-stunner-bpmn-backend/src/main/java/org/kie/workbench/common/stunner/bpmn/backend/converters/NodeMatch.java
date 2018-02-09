@@ -21,7 +21,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -94,7 +93,7 @@ public class NodeMatch<In, Out> {
 
     private Result<Out> applyFallback(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
         if (orElse == null) {
-            return Result.failure(value == null ? "Null" : value.getClass().getName());
+            return Result.failure(value == null ? "Null" : value.getContent().getDefinition().getClass().getName());
         } else {
             return Result.of(orElse.apply(value));
         }

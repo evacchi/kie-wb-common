@@ -17,9 +17,30 @@
 package org.kie.workbench.common.stunner.bpmn.backend.service.diagram;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
+import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.DataInput;
+import org.eclipse.bpmn2.DataInputAssociation;
+import org.eclipse.bpmn2.DataOutput;
+import org.eclipse.bpmn2.DataOutputAssociation;
+import org.eclipse.bpmn2.Definitions;
+import org.eclipse.bpmn2.ExtensionAttributeValue;
+import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.InputOutputSpecification;
+import org.eclipse.bpmn2.ItemAwareElement;
+import org.eclipse.bpmn2.ItemDefinition;
+import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.Property;
+import org.eclipse.bpmn2.RootElement;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.jboss.drools.MetaDataType;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -111,6 +132,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.kie.workbench.common.stunner.bpmn.backend.service.diagram.Assertions.assertDiagram;
+import static org.kie.workbench.common.stunner.bpmn.backend.service.diagram.Assertions.assertDocumentation;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -146,6 +168,7 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_BUSINESSRULETASKRULEFLOWGROUP = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/businessRuleTask.bpmn";
     private static final String BPMN_REUSABLE_SUBPROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/reusableSubprocessCalledElement.bpmn";
     private static final String BPMN_EMBEDDED_SUBPROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/embeddedSubprocess.bpmn";
+    private static final String BPMN_EVENT_SUBPROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/eventSubprocess.bpmn";
     private static final String BPMN_ADHOC_SUBPROCESS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/adHocSubProcess.bpmn";
     private static final String BPMN_SCRIPTTASK = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/scriptTask.bpmn";
     private static final String BPMN_USERTASKASSIGNEES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/userTaskAssignees.bpmn";
@@ -158,7 +181,7 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_MAGNETSINLANE = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/magnetsInLane.bpmn";
     private static final String BPMN_ENDERROR_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endErrorEvent.bpmn";
 
-
+    private static final String NEW_LINE = System.lineSeparator();
 
     @Mock
     DefinitionManager definitionManager;
@@ -234,7 +257,6 @@ public class BPMNDirectDiagramMarshallerTest {
         when(adapterManager.forPropertySet()).thenReturn(propertySetAdapter);
         when(adapterManager.forProperty()).thenReturn(propertyAdapter);
     }
-
 
     // 4 nodes expected: BPMNDiagram, StartNode, Task and EndNode
     @Test
@@ -1511,6 +1533,778 @@ public class BPMNDirectDiagramMarshallerTest {
                       2);
     }
 
+    @Test
+    public void testMarshallEvaluation() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_EVALUATION);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      7,
+                      7);
+    }
+
+    @Test
+    public void testMarshallNotBoundaryEvents() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_NOT_BOUNDARY_EVENTS);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      5,
+                      4);
+    }
+
+    @Test
+    public void testMarshallBoundaryEvents() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_BOUNDARY_EVENTS);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      5,
+                      3);
+        // Assert that the boundary event location and size are the expected ones.
+        assertTrue(result.contains("Bounds height=\"30.0\" width=\"30.0\" x=\"312.0\" y=\"195.0\""));
+    }
+
+//    @Test
+//    public void testMarshallProcessVariables() throws Exception {
+//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSVARIABLES);
+//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
+//
+//        String result = tested.marshall(diagram);
+//        assertDiagram(result,
+//                      1,
+//                      7,
+//                      7);
+//
+//        Definitions definitions = (Definitions) resource.getContents().get(0);
+//        assertNotNull(definitions);
+//        List<RootElement> rootElements = definitions.getRootElements();
+//        assertNotNull(rootElements);
+//
+//        assertNotNull(getItemDefinition(rootElements,
+//                                        "_employeeItem",
+//                                        "java.lang.String"));
+//        assertNotNull(getItemDefinition(rootElements,
+//                                        "_reasonItem",
+//                                        "java.lang.String"));
+//        assertNotNull(getItemDefinition(rootElements,
+//                                        "_performanceItem",
+//                                        "java.lang.String"));
+//
+//        Process process = getProcess(definitions);
+//        assertNotNull(process);
+//        List<Property> properties = process.getProperties();
+//        assertNotNull(properties);
+//        assertNotNull(getProcessProperty(properties,
+//                                         "employee",
+//                                         "_employeeItem"));
+//        assertNotNull(getProcessProperty(properties,
+//                                         "reason",
+//                                         "_reasonItem"));
+//        assertNotNull(getProcessProperty(properties,
+//                                         "performance",
+//                                         "_performanceItem"));
+//    }
+//
+//    @Test
+//    public void testMarshallProcessProperties() throws Exception {
+//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSPROPERTIES);
+//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
+//
+//        String result = tested.marshall(diagram);
+//        assertDiagram(result,
+//                      1,
+//                      3,
+//                      2);
+//
+//        Definitions definitions = (Definitions) resource.getContents().get(0);
+//        assertNotNull(definitions);
+//        Process process = getProcess(definitions);
+//        assertNotNull(process);
+//
+//        assertEquals("JDLProj.BPSimple",
+//                     process.getId());
+//        assertEquals("BPSimple",
+//                     process.getName());
+//        assertTrue(process.isIsExecutable());
+//        assertEquals("true",
+//                     getProcessPropertyValue(process,
+//                                             "adHoc"));
+//        assertEquals("org.jbpm",
+//                     getProcessPropertyValue(process,
+//                                             "packageName"));
+//        assertEquals("1.0",
+//                     getProcessPropertyValue(process,
+//                                             "version"));
+//        assertNotNull(process.getDocumentation());
+//        assertFalse(process.getDocumentation().isEmpty());
+//        assertEquals("<![CDATA[This is a\nsimple\nprocess]]>",
+//                     process.getDocumentation().get(0).getText());
+//        assertEquals("<![CDATA[This is the\nProcess\nInstance\nDescription]]>",
+//                     getProcessExtensionValue(process,
+//                                              "customDescription"));
+//    }
+
+//    @Test
+//    public void testMarshallUserTaskAssignments() throws Exception {
+//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_USERTASKASSIGNMENTS);
+//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
+//
+//        String result = tested.marshall(diagram);
+//        assertDiagram(result,
+//                      1,
+//                      7,
+//                      7);
+//
+//        Definitions definitions = (Definitions) resource.getContents().get(0);
+//        assertNotNull(definitions);
+//        Process process = getProcess(definitions);
+//        assertNotNull(process);
+//        org.eclipse.bpmn2.UserTask userTask = (org.eclipse.bpmn2.UserTask) getNamedFlowElement(process,
+//                                                                                               org.eclipse.bpmn2.UserTask.class,
+//                                                                                               "Self Evaluation");
+//        assertNotNull(userTask);
+//        DataInput dataInput = (DataInput) getDataInput(userTask,
+//                                                       "reason");
+//        validateDataInputOrOutput(dataInput,
+//                                  "_reasonInputX",
+//                                  "com.test.Reason",
+//                                  "_reasonInputXItem");
+//        DataOutput dataOutput = (DataOutput) getDataOutput(userTask,
+//                                                           "performance");
+//        validateDataInputOrOutput(dataOutput,
+//                                  "_performanceOutputX",
+//                                  "Object",
+//                                  "_performanceOutputXItem");
+//
+//        ItemAwareElement sourceRef = getDataInputAssociationSourceRef(userTask,
+//                                                                      "reason");
+//        assertNotNull(sourceRef);
+//
+//        ItemAwareElement targetRef = getDataInputAssociationTargetRef(userTask,
+//                                                                      "_reasonInputX");
+//        assertNotNull(targetRef);
+//
+//        sourceRef = getDataOutputAssociationSourceRef(userTask,
+//                                                      "_performanceOutputX");
+//        assertNotNull(sourceRef);
+//
+//        targetRef = getDataOutputAssociationTargetRef(userTask,
+//                                                      "performance");
+//        assertNotNull(targetRef);
+//    }
+
+    @Test
+    public void testMarshallBusinessRuleTaskAssignments() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_BUSINESSRULETASKASSIGNMENTS);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+        assertTrue(result.contains("<bpmn2:dataInput id=\"_45C2C340-D1D0-4D63-8419-EF38F9E73507_input1InputX\" drools:dtype=\"String\" itemSubjectRef=\"__45C2C340-D1D0-4D63-8419-EF38F9E73507_input1InputXItem\" name=\"input1\"/>"));
+        assertTrue(result.contains("<bpmn2:dataInput id=\"_45C2C340-D1D0-4D63-8419-EF38F9E73507_input2InputX\" drools:dtype=\"String\" itemSubjectRef=\"__45C2C340-D1D0-4D63-8419-EF38F9E73507_input2InputXItem\" name=\"input2\"/>"));
+        assertTrue(result.contains("<bpmn2:dataOutput id=\"_45C2C340-D1D0-4D63-8419-EF38F9E73507_output1OutputX\" drools:dtype=\"String\" itemSubjectRef=\"__45C2C340-D1D0-4D63-8419-EF38F9E73507_output1OutputXItem\" name=\"output1\"/>"));
+        assertTrue(result.contains("<bpmn2:dataOutput id=\"_45C2C340-D1D0-4D63-8419-EF38F9E73507_output2OutputX\" drools:dtype=\"String\" itemSubjectRef=\"__45C2C340-D1D0-4D63-8419-EF38F9E73507_output2OutputXItem\" name=\"output2\"/>"));
+        assertTrue(result.contains("<bpmn2:dataInputRefs>_45C2C340-D1D0-4D63-8419-EF38F9E73507_input1InputX</bpmn2:dataInputRefs>"));
+        assertTrue(result.contains("<bpmn2:dataInputRefs>_45C2C340-D1D0-4D63-8419-EF38F9E73507_input2InputX</bpmn2:dataInputRefs>"));
+        assertTrue(result.contains("<bpmn2:dataOutputRefs>_45C2C340-D1D0-4D63-8419-EF38F9E73507_output1OutputX</bpmn2:dataOutputRefs>"));
+        assertTrue(result.contains("<bpmn2:dataOutputRefs>_45C2C340-D1D0-4D63-8419-EF38F9E73507_output2OutputX</bpmn2:dataOutputRefs>"));
+    }
+
+    @Test
+    public void testMarshallStartNoneEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTNONEEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+
+        assertTrue(result.contains("<bpmn2:startEvent"));
+        assertTrue(result.contains("name=\"MyStartNoneEvent\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[MyStartNoneEvent]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[MyStartNoneEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("</bpmn2:startEvent>"));
+    }
+
+    @Test
+    public void testMarshallStartTimerEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTTIMEREVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+        assertTrue(result.contains("name=\"StartTimer\" isInterrupting=\"false\">"));
+        assertTrue(result.contains("name=\"StartTimer\" isInterrupting=\"false\">"));
+        assertTrue(result.contains("P4H</bpmn2:timeDuration>"));
+        assertTrue(result.contains("language=\"cron\">*/2 * * * *</bpmn2:timeCycle>"));
+    }
+
+    @Test
+    public void testMarshallStartSignalEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTSIGNALEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+
+        assertTrue(result.contains("<bpmn2:startEvent"));
+        assertTrue(result.contains(" name=\"StartSignalEvent1\""));
+        assertTrue(result.contains("<bpmn2:signal id=\"_47718ea6-a6a4-3ceb-9e93-2111bdad0b8c\" name=\"sig1\"/>"));
+        assertTrue(result.contains("<bpmn2:signalEventDefinition"));
+        assertTrue(result.contains("signalRef=\"_47718ea6-a6a4-3ceb-9e93-2111bdad0b8c\"/>"));
+    }
+
+    @Test
+    public void testMarshallStartErrorEventEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTERROREVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      1);
+
+        assertTrue(result.contains("<bpmn2:startEvent"));
+        assertTrue(result.contains(" name=\"MyStartErrorEvent\""));
+        assertTrue(result.contains("<bpmn2:errorEventDefinition"));
+        assertTrue(result.contains("errorRef=\"MyError\""));
+        assertTrue(result.contains("drools:erefname=\"MyError\""));
+        assertTrue(result.contains("<bpmn2:error"));
+        assertTrue(result.contains("id=\"MyError\""));
+        assertTrue(result.contains("errorCode=\"MyError\""));
+    }
+
+    @Test
+    public void testMarshallEndSignalEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDSIGNALEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+        assertTrue(result.contains("<bpmn2:endEvent id=\"_C9151E0C-2E3E-4558-AFC2-34038E3A8552\""));
+        assertTrue(result.contains(" name=\"EndSignalEvent\""));
+        assertTrue(result.contains("<bpmn2:signalEventDefinition"));
+        assertTrue(result.contains("<bpmn2:signal id=\"_fa547353-0e4d-3a5a-9e1e-b53d2fedb10c\" name=\"employee\"/>"));
+        assertTrue(result.contains("<bpmndi:BPMNDiagram"));
+        assertTrue(result.contains("<bpmn2:relationship"));
+        assertTrue(result.contains("<bpmn2:extensionElements"));
+    }
+
+    @Test
+    public void testMarshallStartMessageEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_STARTMESSAGEEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+        assertTrue(result.contains("<bpmn2:startEvent id=\"_34C4BBFC-544F-4E23-B17B-547BB48EEB63\""));
+        assertTrue(result.contains(" name=\"StartMessageEvent\""));
+        assertTrue(result.contains("<bpmn2:message "));
+        assertTrue(result.contains(" name=\"msgref\""));
+        assertTrue(result.contains("<bpmn2:messageEventDefinition"));
+    }
+
+    @Test
+    public void testMarshallEndMessageEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDMESSAGEEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+        assertTrue(result.contains("<bpmn2:endEvent id=\"_4A8A0A9E-D4A5-4B6E-94A6-20817A57B3C6\""));
+        assertTrue(result.contains(" name=\"EndMessageEvent\""));
+        assertTrue(result.contains("<bpmn2:message "));
+        assertTrue(result.contains(" name=\"msgref\""));
+        assertTrue(result.contains("<bpmn2:messageEventDefinition"));
+    }
+
+    @Test
+    public void testMarshallTimerIntermediateEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_TIMER_EVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateCatchEvent"));
+        assertTrue(result.contains(" name=\"MyTimer\""));
+        assertTrue(result.contains("<bpmn2:timerEventDefinition"));
+        assertTrue(result.contains("<bpmn2:timeDate"));
+        assertTrue(result.contains("<bpmn2:timeDuration"));
+        assertTrue(result.contains("<bpmn2:timeCycle"));
+    }
+
+    @Test
+    public void testMarshallIntermediateSignalEventCatching() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_SIGNAL_EVENTCATCHING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateCatchEvent"));
+        assertTrue(result.contains(" name=\"MySignalCatchingEvent\""));
+        assertTrue(result.contains("<bpmn2:signalEventDefinition"));
+        assertTrue(result.contains(" signalRef=\"_3b677877-9be0-3fe7-bfc4-94a862fdc919\""));
+        assertTrue(result.contains("<bpmn2:signal"));
+        assertTrue(result.contains("name=\"MySignal\""));
+    }
+
+    @Test
+    public void testMarshallIntermediatErrorEventCatching() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_ERROR_EVENTCATCHING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateCatchEvent"));
+        assertTrue(result.contains(" name=\"MyErrorCatchingEvent\""));
+        assertTrue(result.contains("<bpmn2:errorEventDefinition"));
+        assertTrue(result.contains("errorRef=\"MyError\""));
+        assertTrue(result.contains("<bpmn2:error"));
+        assertTrue(result.contains("id=\"MyError\""));
+        assertTrue(result.contains("errorCode=\"MyError\""));
+    }
+
+    @Test
+    public void testMarshallIntermediateMessageEventThrowing() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_MESSAGE_EVENTTHROWING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateThrowEvent"));
+        assertTrue(result.contains(" name=\"IntermediateMessageEventThrowing\""));
+        assertTrue(result.contains("<bpmn2:message "));
+        assertTrue(result.contains(" name=\"msgref\""));
+        assertTrue(result.contains("<bpmn2:messageEventDefinition"));
+    }
+
+    @Test
+    public void testMarshallIntermediateSignalEventThrowing() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_SIGNAL_EVENTTHROWING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateThrowEvent"));
+        assertTrue(result.contains(" name=\"MySignalThrowingEvent\""));
+        assertTrue(result.contains("<bpmn2:signalEventDefinition"));
+        assertTrue(result.contains(" signalRef=\"_3b677877-9be0-3fe7-bfc4-94a862fdc919\""));
+        assertTrue(result.contains("<bpmn2:signal"));
+        assertTrue(result.contains("name=\"MySignal\""));
+        assertTrue(result.contains("<drools:metaData name=\"customScope\">"));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[processInstance]]></drools:metaValue>"));
+    }
+
+    @Test
+    public void testMarshallIntermediateMessageEventCatching() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INTERMEDIATE_MESSAGE_EVENTCATCHING);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:intermediateCatchEvent"));
+        assertTrue(result.contains(" name=\"IntermediateMessageEventCatching\""));
+        assertTrue(result.contains("<bpmn2:message "));
+        assertTrue(result.contains(" name=\"msgref1\""));
+        assertTrue(result.contains("<bpmn2:messageEventDefinition"));
+    }
+
+    @Test
+    public void testMarshallEndNoneEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDNONEEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      1);
+
+        assertTrue(result.contains("<bpmn2:endEvent"));
+        assertTrue(result.contains(" id=\"_9DF2C9D3-15DF-4436-B6C6-85B58B8696B6\""));
+        assertTrue(result.contains("name=\"MyEndNoneEvent\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[MyEndNoneEvent]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[MyEndNoneEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("</bpmn2:endEvent>"));
+    }
+
+    @Test
+    public void testMarshallEndTerminateEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDTERMINATEEVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      2,
+                      1);
+
+        assertTrue(result.contains("<bpmn2:endEvent"));
+        assertTrue(result.contains(" id=\"_1B379E3E-E4ED-4BD2-AEE8-CD85374CEC78\""));
+        assertTrue(result.contains("name=\"MyEndTerminateEvent\""));
+        assertTrue(result.contains("<drools:metaValue><![CDATA[MyEndTerminateEvent]]></drools:metaValue>"));
+        assertTrue(result.contains("<![CDATA[MyEndTerminateEventDocumentation]]></bpmn2:documentation>"));
+        assertTrue(result.contains("<bpmn2:terminateEventDefinition"));
+        assertTrue(result.contains("</bpmn2:endEvent>"));
+    }
+
+    public void testMarshallEndErrorEnd() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDERROR_EVENT);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+        assertTrue(result.contains("<bpmn2:error id=\"MyError\" errorCode=\"MyError\"/>"));
+        assertTrue(result.contains("<bpmn2:endEvent"));
+        assertTrue(result.contains(" name=\"MyErrorEventName\""));
+        assertTrue(result.contains("<bpmn2:errorEventDefinition"));
+        assertTrue(result.contains(" errorRef=\"MyError\""));
+        assertTrue(result.contains(" drools:erefname=\"MyError\""));
+    }
+
+    @Test
+    public void testMarshallReusableSubprocess() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_REUSABLE_SUBPROCESS);
+        assertDiagram(diagram,
+                      4);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+
+        assertTrue(result.contains("<bpmn2:callActivity id=\"_FC6D8570-8C67-40C2-8B7B-953DE15765FB\" drools:independent=\"false\" drools:waitForCompletion=\"false\" name=\"my subprocess\" calledElement=\"my-called-element\">"));
+
+        assertTrue(result.contains("<bpmn2:dataInput id=\"_FC6D8570-8C67-40C2-8B7B-953DE15765FB_input1InputX\" drools:dtype=\"String\" itemSubjectRef=\"__FC6D8570-8C67-40C2-8B7B-953DE15765FB_input1InputXItem\" name=\"input1\"/>"));
+        assertTrue(result.contains("<bpmn2:dataOutput id=\"_FC6D8570-8C67-40C2-8B7B-953DE15765FB_output2OutputX\" drools:dtype=\"Float\" itemSubjectRef=\"__FC6D8570-8C67-40C2-8B7B-953DE15765FB_output2OutputXItem\" name=\"output2\"/>"));
+        assertTrue(result.contains("<bpmn2:sourceRef>pv1</bpmn2:sourceRef>"));
+        assertTrue(result.contains("<bpmn2:targetRef>_FC6D8570-8C67-40C2-8B7B-953DE15765FB_input1InputX</bpmn2:targetRef>"));
+        assertTrue(result.contains("<bpmn2:sourceRef>_FC6D8570-8C67-40C2-8B7B-953DE15765FB_output2OutputX</bpmn2:sourceRef>"));
+        assertTrue(result.contains("<bpmn2:targetRef>pv2</bpmn2:targetRef>"));
+
+        String flatResult = result.replace(NEW_LINE,
+                                           " ").replaceAll("( )+",
+                                                           " ");
+        assertTrue(flatResult.contains("<drools:metaData name=\"elementname\"> <drools:metaValue><![CDATA[my subprocess]]></drools:metaValue> </drools:metaData>"));
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAsync\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+    }
+
+    @Test
+    public void testMarshallEmbeddedSubprocess() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_EMBEDDED_SUBPROCESS);
+        assertDiagram(diagram,
+                      10);
+        assertDocumentation(diagram,
+                            "_C3EBE7F1-8E57-4BB1-B380-40BB02E9464E",
+                            "Subprocess  Documentation Value");
+
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      9,
+                      7);
+
+        assertTrue(result.contains("<bpmn2:subProcess id=\"_C3EBE7F1-8E57-4BB1-B380-40BB02E9464E\" "));
+    }
+
+    @Test
+    public void testMarshallEventSubprocess() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_EVENT_SUBPROCESS);
+        assertDiagram(diagram,
+                      2);
+
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      1,
+                      0);
+
+        assertTrue(result.contains("<bpmn2:subProcess id=\"_DF031493-5F1C-4D2B-9916-2FEABB1FADFF\""));
+    }
+
+    public void testMarshallAdHocSubprocess() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ADHOC_SUBPROCESS);
+        assertDiagram(diagram,
+                      9);
+        String result = tested.marshall(diagram);
+
+        assertDiagram(result,
+                      1,
+                      8,
+                      5);
+
+        assertTrue(result.contains("<bpmn2:adHocSubProcess id=\"_B65DDF51-9822-4B12-8669-2018A845A01B\""));
+        assertTrue(result.contains("name=\"AdHocSubprocess1\""));
+
+        assertTrue(result.contains("<drools:onEntry-script scriptFormat=\"http://www.mvel.org/2.0\">"));
+        assertTrue(result.contains("<drools:script><![CDATA[System.out.println(\"onEntryAction\");]]></drools:script>"));
+        assertTrue(result.contains("</drools:onEntry-script>"));
+
+        assertTrue(result.contains("<drools:onExit-script scriptFormat=\"http://www.java.com/java\">"));
+        assertTrue(result.contains("<drools:script><![CDATA[System.out.println(\"onExitAction\");]]></drools:script>"));
+        assertTrue(result.contains("</drools:onExit-script>"));
+
+        assertTrue(result.contains("<bpmn2:completionCondition xsi:type=\"bpmn2:tFormalExpression\""));
+        assertTrue(result.contains("language=\"http://www.jboss.org/drools/rule\"><![CDATA[autocomplete]]></bpmn2:completionCondition>"));
+    }
+
+    @Test
+    public void testMarshallUserTaskAssignees() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_USERTASKASSIGNEES);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      5,
+                      4);
+        assertTrue(result.contains("<![CDATA[admin,kiemgmt]]>"));
+        result = result.replace(NEW_LINE,
+                                " ");
+        assertTrue(result.matches("(.*)<bpmn2:resourceAssignmentExpression(.*)>user</bpmn2:formalExpression>(.*)"));
+        assertTrue(result.matches("(.*)<bpmn2:resourceAssignmentExpression(.*)>user1</bpmn2:formalExpression>(.*)"));
+    }
+
+    @Test
+    public void testMarshallUserTaskProperties() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_USERTASKPROPERTIES);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+        assertTrue(result.contains("MyUserTask</bpmn2:from>"));
+        String flatResult = result.replace(NEW_LINE,
+                                           " ").replaceAll("( )+",
+                                                           " ");
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAsync\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAutoStart\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+
+        assertTrue(flatResult.contains("<drools:onEntry-script scriptFormat=\"http://www.java.com/java\">"));
+        assertTrue(flatResult.contains("<drools:script><![CDATA[System.out.println(\"Hello\");]]></drools:script>"));
+        assertTrue(flatResult.contains("<drools:script><![CDATA[System.out.println(\"Bye\");]]></drools:script>"));
+    }
+
+    @Test
+    public void testMarshallSimulationProperties() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_SIMULATIONPROPERTIES);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+
+        result = result.replaceAll("\\s+",
+                                   " ");
+        result = result.replaceAll("> <",
+                                   "><");
+        assertTrue(result.contains("<bpsim:TimeParameters xsi:type=\"bpsim:TimeParameters\"><bpsim:ProcessingTime xsi:type=\"bpsim:Parameter\"><bpsim:PoissonDistribution mean=\"321.0\"/>"));
+        assertTrue(result.contains("<bpsim:ResourceParameters xsi:type=\"bpsim:ResourceParameters\"><bpsim:Availability xsi:type=\"bpsim:Parameter\"><bpsim:FloatingParameter value=\"999.0\"/>"));
+        assertTrue(result.contains("<bpsim:Quantity xsi:type=\"bpsim:Parameter\"><bpsim:FloatingParameter value=\"111.0\"/></bpsim:Quantity>"));
+        assertTrue(result.contains("<bpsim:CostParameters xsi:type=\"bpsim:CostParameters\"><bpsim:UnitCost xsi:type=\"bpsim:Parameter\"><bpsim:FloatingParameter value=\"123.0\"/>"));
+        assertTrue(result.contains("<bpsim:TimeParameters xsi:type=\"bpsim:TimeParameters\"><bpsim:ProcessingTime xsi:type=\"bpsim:Parameter\"><bpsim:UniformDistribution max=\"10.0\" min=\"5.0\"/>"));
+    }
+
+    @Test
+    public void testMarshallEvaluationTwice() throws Exception {
+        Diagram diagram = unmarshall(BPMN_EVALUATION);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      7,
+                      7);
+        Diagram diagram2 = unmarshall(BPMN_EVALUATION);
+        String result2 = tested.marshall(diagram2);
+        assertDiagram(result2,
+                      1,
+                      7,
+                      7);
+    }
+
+    @Test
+    public void testMarshallScriptTask() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_SCRIPTTASK);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      4,
+                      3);
+        assertTrue(result.contains("name=\"Javascript Script Task\" scriptFormat=\"http://www.javascript.com/javascript\""));
+        assertTrue(result.contains("name=\"Java Script Task\" scriptFormat=\"http://www.java.com/java\""));
+
+        assertTrue(result.contains("<bpmn2:script><![CDATA[var str = FirstName + LastName;]]></bpmn2:script>"));
+        assertTrue(result.contains("<bpmn2:script><![CDATA[if (name.toString().equals(\"Jay\")) {" + NEW_LINE +
+                                           NEW_LINE +
+                                           "      System.out.println(\"Hello\\n\" + name.toString() + \"\\n\");" + NEW_LINE +
+                                           NEW_LINE +
+                                           "} else {" + NEW_LINE +
+                                           NEW_LINE +
+                                           NEW_LINE +
+                                           "  System.out.println(\"Hi\\n\" + name.toString() + \"\\n\");" + NEW_LINE +
+                                           NEW_LINE +
+                                           NEW_LINE +
+                                           "}" + NEW_LINE +
+                                           "]]></bpmn2:script>"));
+
+        String flatResult = result.replace(NEW_LINE,
+                                           " ").replaceAll("( )+",
+                                                           " ");
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAsync\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+    }
+
+    @Test
+    public void testMarshallSequenceFlow() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_SEQUENCEFLOW);
+        assertConditionLanguage(diagram,
+                                "_C9F8F30D-E772-4504-A480-6EC894B289DC",
+                                "javascript");
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      6,
+                      5);
+        assertTrue(result.contains("language=\"http://www.javascript.com/javascript\"><![CDATA[age >= 10;]]></bpmn2:conditionExpression>"));
+        assertTrue(result.contains("language=\"http://www.java.com/java\"><![CDATA[age" + NEW_LINE +
+                                           "<" + NEW_LINE +
+                                           "10;]]></bpmn2:conditionExpression>"));
+    }
+
+    private void assertConditionLanguage(Diagram<Graph, Metadata> diagram,
+                                         String id,
+                                         String value) {
+        List<Node> nodes = getNodes(diagram);
+        Optional<SequenceFlow> sequenceFlow =
+                Stream.concat(nodes.stream().flatMap(node -> {
+                                  List<Edge> d = node.getInEdges();
+                                  return d.stream();
+                              }),
+                              nodes.stream().flatMap(node -> {
+                                  List<Edge> d = node.getOutEdges();
+                                  return d.stream();
+                              }))
+                        .filter(edge -> edge.getUUID().equals(id))
+                        .map(node -> (View) node.getContent())
+                        .filter(view -> view.getDefinition() instanceof SequenceFlow)
+                        .map(view -> ((SequenceFlow) view.getDefinition()))
+                        .findFirst();
+
+        String conditionLanguage = (sequenceFlow.isPresent() ? sequenceFlow.get().getExecutionSet().getConditionExpression().getValue().getLanguage() : null);
+        assertEquals(value,
+                     conditionLanguage);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testMarshallBusinessRuleTask() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_BUSINESSRULETASKRULEFLOWGROUP);
+        String result = tested.marshall(diagram);
+        assertDiagram(diagram,
+                      2);
+
+        assertTrue(result.contains("<bpmn2:businessRuleTask "));
+        String flatResult = result.replace(NEW_LINE,
+                                           " ").replaceAll("( )+",
+                                                           " ");
+        assertTrue(flatResult.contains("<drools:metaData name=\"customAsync\"> <drools:metaValue><![CDATA[true]]></drools:metaValue>"));
+
+        assertTrue(flatResult.contains("<drools:onEntry-script scriptFormat=\"http://www.java.com/java\">"));
+
+        assertTrue(flatResult.contains("<drools:script><![CDATA[System.out.println(\"Hello\");]]></drools:script>"));
+
+        assertTrue(flatResult.contains("<drools:script><![CDATA[System.out.println(\"Bye\");]]></drools:script>"));
+    }
+
+    @Test
+    public void testMarshallXorGateway() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_XORGATEWAY);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      6,
+                      5);
+        assertTrue(result.contains("<bpmn2:exclusiveGateway id=\"_877EA035-1A14-42E9-8CAA-43E9BF908C70\" drools:dg=\"under 10 : _5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\" name=\"AgeSplit\" gatewayDirection=\"Diverging\" default=\"_5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\">"));
+    }
+
+    @Test
+    public void testMarshallIntermediateTimerEvent() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_TIMER_EVENT);
+        IntermediateTimerEvent timerEvent = null;
+        Iterator<Element> it = nodesIterator(diagram);
+        while (it.hasNext()) {
+            Element element = it.next();
+            if (element.getContent() instanceof View) {
+                Object oDefinition = ((View) element.getContent()).getDefinition();
+                if (oDefinition instanceof IntermediateTimerEvent) {
+                    timerEvent = (IntermediateTimerEvent) oDefinition;
+                    break;
+                }
+            }
+        }
+        assertNotNull(timerEvent);
+        assertNotNull(timerEvent.getGeneral());
+        assertNotNull(timerEvent.getExecutionSet());
+
+        assertEquals("myTimeDateValue",
+                     timerEvent.getExecutionSet().getTimerSettings().getValue().getTimeDate());
+        assertEquals("MyTimeDurationValue",
+                     timerEvent.getExecutionSet().getTimerSettings().getValue().getTimeDuration());
+        assertEquals("myTimeCycleValue",
+                     timerEvent.getExecutionSet().getTimerSettings().getValue().getTimeCycle());
+        assertEquals("cron",
+                     timerEvent.getExecutionSet().getTimerSettings().getValue().getTimeCycleLanguage());
+    }
+
+    @Test
+    public void testMarshallMagnetDockers() throws Exception {
+        Diagram<Graph, Metadata> diagram1 = unmarshall(BPMN_MAGNETDOCKERS);
+        String result = tested.marshall(diagram1);
+        assertDiagram(result,
+                      1,
+                      8,
+                      7);
+        Diagram<Graph, Metadata> diagram2 = unmarshall(new ByteArrayInputStream(result.getBytes()));
+        testMagnetDockers(diagram2);
+    }
+
+    @Test
+    public void testMarshallMagnetsInlane() throws Exception {
+        Diagram<Graph, Metadata> diagram1 = unmarshall(BPMN_MAGNETSINLANE);
+        String result = tested.marshall(diagram1);
+        assertDiagram(result,
+                      1,
+                      6,
+                      4);
+
+        // Check the waypoints are as in the original process
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"371.0\" y=\"86.0\"/>"));
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"406.0\" y=\"324.0\"/>"));
+
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"692.0\" y=\"276.0\"/>"));
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"805.0\" y=\"76.0\"/>"));
+
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"81.0\" y=\"86.0\"/>"));
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"235.0\" y=\"86.0\"/>"));
+
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"474.0\" y=\"372.0\"/>"));
+        assertTrue(result.contains("<di:waypoint xsi:type=\"dc:Point\" x=\"556.0\" y=\"276.0\"/>"));
+
+        // Test unmarshall
+        Diagram<Graph, Metadata> diagram2 = unmarshall(new ByteArrayInputStream(result.getBytes()));
+        testMagnetsInLane(diagram2);
+    }
 
     private ViewConnector getInEdgeViewConnector(Node node) {
         List<Edge> edges = node.getInEdges();
@@ -1583,8 +2377,208 @@ public class BPMNDirectDiagramMarshallerTest {
                      diagram.getMetadata().getTitle());
     }
 
+    private List<Node> getNodes(Diagram<Graph, Metadata> diagram) {
+        Graph graph = diagram.getGraph();
+        assertNotNull(graph);
+        Iterator<Node> nodesIterable = graph.nodes().iterator();
+        List<Node> nodes = new ArrayList<>();
+        nodesIterable.forEachRemaining(nodes::add);
+        return nodes;
+    }
+
     @SuppressWarnings("unchecked")
     private Iterator<Element> nodesIterator(Diagram<Graph, Metadata> diagram) {
         return (Iterator<Element>) diagram.getGraph().nodes().iterator();
+    }
+
+    private Process getProcess(Definitions definitions) {
+        Object o = Arrays.stream(definitions.getRootElements().toArray())
+                .filter(x -> Process.class.isInstance(x))
+                .findFirst()
+                .orElse(null);
+        return (Process) o;
+    }
+
+    private ItemDefinition getItemDefinition(List<RootElement> rootElements,
+                                             String id,
+                                             String structureRef) {
+        for (RootElement rootElement : rootElements) {
+            if (id.equals(rootElement.getId()) && rootElement instanceof ItemDefinition) {
+                ItemDefinition itemDefinition = (ItemDefinition) rootElement;
+                if (structureRef.equals(itemDefinition.getStructureRef())) {
+                    return itemDefinition;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private Property getProcessProperty(List<Property> properties,
+                                        String id,
+                                        String itemSubjectRef) {
+        for (Property property : properties) {
+            if (id.equals(property.getId())) {
+                if (itemSubjectRef.equals(property.getItemSubjectRef().getId())) {
+                    return property;
+                } else {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getProcessPropertyValue(Process process,
+                                           String propertyName) {
+        Iterator<FeatureMap.Entry> iter = process.getAnyAttribute().iterator();
+        while (iter.hasNext()) {
+            FeatureMap.Entry entry = iter.next();
+            if (propertyName.equals(entry.getEStructuralFeature().getName())) {
+                return entry.getValue().toString();
+            }
+        }
+        return null;
+    }
+
+    private String getProcessExtensionValue(Process process,
+                                            String propertyName) {
+        List<ExtensionAttributeValue> extensionValues = process.getExtensionValues();
+        for (ExtensionAttributeValue extensionValue : extensionValues) {
+            FeatureMap featureMap = extensionValue.getValue();
+            for (int i = 0; i < featureMap.size(); i++) {
+                EStructuralFeatureImpl.SimpleFeatureMapEntry featureMapEntry = (EStructuralFeatureImpl.SimpleFeatureMapEntry) featureMap.get(i);
+                MetaDataType featureMapValue = (MetaDataType) featureMapEntry.getValue();
+                if (propertyName.equals(featureMapValue.getName())) {
+                    return featureMapValue.getMetaValue();
+                }
+            }
+        }
+        return "";
+    }
+
+    private Object getNamedFlowElement(Process process,
+                                       Class cls,
+                                       String name) {
+        List<FlowElement> flowElements = process.getFlowElements();
+        for (FlowElement flowElement : flowElements) {
+            if (cls.isInstance(flowElement) && name.equals(flowElement.getName())) {
+                return flowElement;
+            }
+        }
+        return null;
+    }
+
+    private DataInput getDataInput(Activity activity,
+                                   String name) {
+        InputOutputSpecification ioSpecification = activity.getIoSpecification();
+        if (ioSpecification != null) {
+            List<DataInput> dataInputs = ioSpecification.getDataInputs();
+            if (dataInputs != null) {
+                return Arrays.stream(dataInputs.toArray(new DataInput[dataInputs.size()]))
+                        .filter(dataInput -> name.equals(dataInput.getName()))
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+
+        return null;
+    }
+
+    private DataOutput getDataOutput(Activity activity,
+                                     String name) {
+        InputOutputSpecification ioSpecification = activity.getIoSpecification();
+        if (ioSpecification != null) {
+            List<DataOutput> dataOutputs = ioSpecification.getDataOutputs();
+            if (dataOutputs != null) {
+                return Arrays.stream(dataOutputs.toArray(new DataOutput[dataOutputs.size()]))
+                        .filter(dataOutput -> name.equals(dataOutput.getName()))
+                        .findFirst()
+                        .orElse(null);
+            }
+        }
+        return null;
+    }
+
+    private void validateDataInputOrOutput(ItemAwareElement itemAwareElement,
+                                           String idSuffix,
+                                           String dataType,
+                                           String itemSubjectRefSuffix) {
+        assertNotNull(itemAwareElement);
+
+        assertTrue(itemAwareElement.getId().endsWith(idSuffix));
+        ItemDefinition itemDefinition = itemAwareElement.getItemSubjectRef();
+        assertNotNull(itemDefinition);
+        assertTrue(itemDefinition.getStructureRef().equals(dataType));
+        assertTrue(itemDefinition.getId().endsWith(itemSubjectRefSuffix));
+    }
+
+    private ItemAwareElement getDataInputAssociationSourceRef(Activity activity,
+                                                              String id) {
+        List<DataInputAssociation> dataInputAssociations = activity.getDataInputAssociations();
+        if (dataInputAssociations != null) {
+            for (DataInputAssociation dataInputAssociation : dataInputAssociations) {
+                List<ItemAwareElement> sourceRef = dataInputAssociation.getSourceRef();
+                if (sourceRef != null && !sourceRef.isEmpty()) {
+                    ItemAwareElement result = Arrays.stream(sourceRef.toArray(new ItemAwareElement[sourceRef.size()]))
+                            .filter(itemAwareElement -> id.equals(itemAwareElement.getId()))
+                            .findFirst()
+                            .orElse(null);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private ItemAwareElement getDataInputAssociationTargetRef(Activity activity,
+                                                              String idSuffix) {
+        List<DataInputAssociation> dataInputAssociations = activity.getDataInputAssociations();
+        if (dataInputAssociations != null) {
+            for (DataInputAssociation dataInputAssociation : dataInputAssociations) {
+                ItemAwareElement targetRef = dataInputAssociation.getTargetRef();
+                if (targetRef != null && targetRef.getId().endsWith(idSuffix)) {
+                    return targetRef;
+                }
+            }
+        }
+        return null;
+    }
+
+    private ItemAwareElement getDataOutputAssociationSourceRef(Activity activity,
+                                                               String idSuffix) {
+        List<DataOutputAssociation> dataOutputAssociations = activity.getDataOutputAssociations();
+        if (dataOutputAssociations != null) {
+            for (DataOutputAssociation dataOutputAssociation : dataOutputAssociations) {
+                List<ItemAwareElement> sourceRef = dataOutputAssociation.getSourceRef();
+                if (sourceRef != null && !sourceRef.isEmpty()) {
+                    ItemAwareElement result = Arrays.stream(sourceRef.toArray(new ItemAwareElement[sourceRef.size()]))
+                            .filter(itemAwareElement -> itemAwareElement.getId().endsWith(idSuffix))
+                            .findFirst()
+                            .orElse(null);
+                    if (result != null) {
+                        return result;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private ItemAwareElement getDataOutputAssociationTargetRef(Activity activity,
+                                                               String id) {
+        List<DataOutputAssociation> dataOutputAssociations = activity.getDataOutputAssociations();
+        if (dataOutputAssociations != null) {
+            for (DataOutputAssociation dataOutputAssociation : dataOutputAssociations) {
+                ItemAwareElement targetRef = dataOutputAssociation.getTargetRef();
+                if (targetRef != null && id.equals(targetRef.getId())) {
+                    return targetRef;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.eclipse.bpmn2.FlowNode;
+import org.eclipse.bpmn2.RootElement;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -87,6 +88,7 @@ abstract class DefinitionsContextHelper<
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
     private Map<String, org.eclipse.bpmn2.SequenceFlow> sequenceFlows;
+    private Map<String, RootElement> rootElements;
 
     public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
         this.graph = graph;
@@ -101,6 +103,7 @@ abstract class DefinitionsContextHelper<
 
         this.flowNodes = new HashMap<>();
         this.sequenceFlows = new HashMap<>();
+        this.rootElements = new HashMap<>();
     }
 
     public Stream<NodeT> nodes() {
@@ -137,6 +140,18 @@ abstract class DefinitionsContextHelper<
 
     public Collection<org.eclipse.bpmn2.SequenceFlow> getSequenceFlows() {
         return sequenceFlows.values();
+    }
+
+    public void addRootElement(RootElement message) {
+        rootElements.put(message.getId(), message);
+    }
+
+    public RootElement getRootElement(String id) {
+        return rootElements.get(id);
+    }
+
+    public Collection<RootElement> getRootElements() {
+        return rootElements.values();
     }
 
     public Stream<EdgeT> edges() {

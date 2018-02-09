@@ -18,8 +18,17 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
 import org.eclipse.bpmn2.EndEvent;
 import org.eclipse.bpmn2.FlowNode;
+import org.eclipse.bpmn2.Message;
+import org.eclipse.bpmn2.MessageEventDefinition;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageEventExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -27,12 +36,56 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class EndEventConverter {
 
-    public FlowNode toFlowElement(Node<View<BaseEndEvent>, ?> n) {
-        EndEvent endEvent = bpmn2.createEndEvent();
-        PropertyWriter p = new PropertyWriter(endEvent);
-        BaseEndEvent definition = n.getContent().getDefinition();
-        endEvent.setId(n.getUUID());
-        p.setName(definition.getGeneral().getName().getValue());
-        return endEvent;
+    private final DefinitionsBuildingContext context;
+
+    public EndEventConverter(DefinitionsBuildingContext context) {
+        this.context = context;
+    }
+
+    public FlowNode toFlowElement(Node<View<BaseEndEvent>, ?> node) {
+        return NodeMatch.fromNode(BaseEndEvent.class, FlowNode.class)
+                .when(EndNoneEvent.class, n -> {
+                    EndEvent endEvent = bpmn2.createEndEvent();
+
+                    BaseEndEvent definition = n.getContent().getDefinition();
+                    PropertyWriter p = new PropertyWriter(endEvent);
+
+                    endEvent.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    return endEvent;
+                })
+                .when(EndMessageEvent.class, n -> {
+                    EndEvent endEvent = bpmn2.createEndEvent();
+                    MessageEventDefinition messageEventDefinition =
+                            bpmn2.createMessageEventDefinition();
+
+                    EndMessageEvent definition = n.getContent().getDefinition();
+                    PropertyWriter p = new PropertyWriter(endEvent);
+
+                    endEvent.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getName().getValue());
+
+                    // fixme we must now parse this
+                    AssignmentsInfo assignmentsinfo =
+                            definition.getDataIOSet().getAssignmentsinfo();
+
+                    MessageEventExecutionSet executionSet = definition.getExecutionSet();
+                    Message message = bpmn2.createMessage();
+                    message.setName(executionSet.getMessageRef().getValue());
+                    messageEventDefinition.setMessageRef(message);
+
+                    endEvent.getEventDefinitions().add(messageEventDefinition);
+
+                    context.addRootElement(message);
+
+                    return endEvent;
+                }).apply(node).value();
     }
 }

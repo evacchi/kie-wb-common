@@ -16,8 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import org.eclipse.bpmn2.Bpmn2Factory;
+import org.eclipse.bpmn2.Documentation;
+import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
-import org.kie.workbench.common.stunner.bpmn.backend.legacy.util.Utils;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.jboss.drools.DroolsFactory;
+import org.jboss.drools.DroolsPackage;
+import org.jboss.drools.MetaDataType;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class PropertyWriter {
 
@@ -28,14 +38,39 @@ public class PropertyWriter {
     }
 
     public void setName(String value) {
-        flowElement.setName(value);
+        flowElement.setName(value.trim());
         setMeta("elementname", value);
     }
 
-    private void setMeta(String attributeId, String value) {
-        Utils.setMetaDataExtensionValue(
-                flowElement,
-                attributeId,
-                value);
+    private void setMeta(
+            String attributeId,
+            String metaDataValue) {
+
+        if (flowElement != null) {
+            MetaDataType eleMetadata = DroolsFactory.eINSTANCE.createMetaDataType();
+            eleMetadata.setName(attributeId);
+            eleMetadata.setMetaValue(asCData(metaDataValue));
+
+            if (flowElement.getExtensionValues() == null || flowElement.getExtensionValues().isEmpty()) {
+                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                flowElement.getExtensionValues().add(extensionElement);
+            }
+
+            FeatureMap.Entry eleExtensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
+                    (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__META_DATA,
+                    eleMetadata);
+            flowElement.getExtensionValues().get(0).getValue().add(eleExtensionElementEntry);
+        }
+    }
+
+    // eww
+    private String asCData(String original) {
+        return "<![CDATA[" + original + "]]>";
+    }
+
+    public void setDocumentation(String value) {
+        Documentation documentation = bpmn2.createDocumentation();
+        documentation.setText(asCData(value));
+        flowElement.getDocumentation().add(documentation);
     }
 }

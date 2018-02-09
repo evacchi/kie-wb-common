@@ -71,7 +71,8 @@ public class EndEventConverter {
 
         switch (eventDefinitions.size()) {
             case 0: {
-                Node<View<EndNoneEvent>, Edge> node = factoryManager.newNode(nodeId, EndNoneEvent.class);
+                Node<View<EndNoneEvent>, Edge> node =
+                        factoryManager.newNode(nodeId, EndNoneEvent.class);
                 EndNoneEvent definition = node.getContent().getDefinition();
                 EventPropertyReader p = propertyReaderFactory.of(event);
 
@@ -91,7 +92,8 @@ public class EndEventConverter {
             case 1:
                 return Match.ofNode(EventDefinition.class, BaseEndEvent.class)
                         .when(TerminateEventDefinition.class, e -> {
-                            Node<View<EndTerminateEvent>, Edge> node = factoryManager.newNode(nodeId, EndTerminateEvent.class);
+                            Node<View<EndTerminateEvent>, Edge> node =
+                                    factoryManager.newNode(nodeId, EndTerminateEvent.class);
 
                             EndTerminateEvent definition = node.getContent().getDefinition();
                             EventPropertyReader p = propertyReaderFactory.of(event);
@@ -110,7 +112,8 @@ public class EndEventConverter {
                             return node;
                         })
                         .when(SignalEventDefinition.class, e -> {
-                            Node<View<EndSignalEvent>, Edge> node = factoryManager.newNode(nodeId, EndSignalEvent.class);
+                            Node<View<EndSignalEvent>, Edge> node =
+                                    factoryManager.newNode(nodeId, EndSignalEvent.class);
 
                             EndSignalEvent definition = node.getContent().getDefinition();
                             EventPropertyReader p = propertyReaderFactory.of(event);
@@ -138,7 +141,8 @@ public class EndEventConverter {
                             return node;
                         })
                         .when(MessageEventDefinition.class, e -> {
-                            Node<View<EndMessageEvent>, Edge> node = factoryManager.newNode(nodeId, EndMessageEvent.class);
+                            Node<View<EndMessageEvent>, Edge> node =
+                                    factoryManager.newNode(nodeId, EndMessageEvent.class);
 
                             EndMessageEvent definition = node.getContent().getDefinition();
                             EventPropertyReader p = propertyReaderFactory.of(event);
@@ -155,6 +159,7 @@ public class EndEventConverter {
                             definition.setExecutionSet(new MessageEventExecutionSet(
                                     new MessageRef(e.getMessageRef().getName())
                             ));
+
                             node.getContent().setBounds(p.getBounds());
 
                             definition.setDimensionsSet(p.getCircleDimensionSet());
@@ -164,7 +169,8 @@ public class EndEventConverter {
                             return node;
                         })
                         .when(ErrorEventDefinition.class, e -> {
-                            Node<View<EndErrorEvent>, Edge> node = factoryManager.newNode(nodeId, EndErrorEvent.class);
+                            Node<View<EndErrorEvent>, Edge> node =
+                                    factoryManager.newNode(nodeId, EndErrorEvent.class);
 
                             EndErrorEvent definition = node.getContent().getDefinition();
                             EventPropertyReader p = propertyReaderFactory.of(event);
