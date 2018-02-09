@@ -54,6 +54,7 @@ public class AssignmentsInfo implements BPMNProperty {
         this("");
     }
 
+    @Deprecated
     public AssignmentsInfo(final String value) {
         this.value = value;
         readIntoStringRepresentation(value);
@@ -90,6 +91,30 @@ public class AssignmentsInfo implements BPMNProperty {
         readIntoStringRepresentation(value);
     }
 
+    public DeclarationList getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(DeclarationList inputs) {
+        this.inputs = inputs;
+    }
+
+    public DeclarationList getOutputs() {
+        return outputs;
+    }
+
+    public void setOutputs(DeclarationList outputs) {
+        this.outputs = outputs;
+    }
+
+    public AssociationList getAssociations() {
+        return associations;
+    }
+
+    public void setAssociations(AssociationList associations) {
+        this.associations = associations;
+    }
+
     @Override
     public int hashCode() {
         return (null != value) ? value.hashCode() : 0;
@@ -104,7 +129,7 @@ public class AssignmentsInfo implements BPMNProperty {
         return false;
     }
 
-    public static String encodeStringRepresentation(
+    private static String encodeStringRepresentation(
             DeclarationList inputs,
             DeclarationList outputs,
             AssociationList associations,
@@ -116,7 +141,7 @@ public class AssignmentsInfo implements BPMNProperty {
         }
     }
 
-    public static String canonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
+    private static String canonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
         return Stream.of(
                 inputs.toString(),
                 "",
@@ -126,7 +151,7 @@ public class AssignmentsInfo implements BPMNProperty {
                 .collect(Collectors.joining("|"));
     }
 
-    public static String nonCanonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
+    private static String nonCanonicalEncoding(DeclarationList inputs, DeclarationList outputs, AssociationList associations) {
         return Stream.of("",
                          inputs.toString(),
                          "",
