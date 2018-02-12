@@ -60,26 +60,11 @@ public class ViewDefinitionConverter {
                 .apply(node);
     }
 
+    @Deprecated
     public BPMNShape shapeFrom(Node<View<? extends BPMNViewDefinition>, ?> node) {
         FlowNode element = context.getFlowNode(node.getUUID());
-
-        BPMNShape shape = di.createBPMNShape();
-        org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
-
-        Bounds rect = node.getContent().getBounds();
-
-        Bounds.Bound upperLeft = rect.getUpperLeft();
-        Bounds.Bound lowerRight = rect.getLowerRight();
-
-        bounds.setX(upperLeft.getX().floatValue());
-        bounds.setY(upperLeft.getY().floatValue());
-        bounds.setWidth(lowerRight.getX().floatValue() - upperLeft.getX().floatValue());
-        bounds.setHeight(lowerRight.getY().floatValue() - upperLeft.getY().floatValue());
-
-        shape.setBpmnElement(element);
-        shape.setBounds(bounds);
-
-        return shape;
+        PropertyWriter p = new PropertyWriter(element);
+        return p.getShape();
     }
 
     public BPMNEdge edgeFrom(

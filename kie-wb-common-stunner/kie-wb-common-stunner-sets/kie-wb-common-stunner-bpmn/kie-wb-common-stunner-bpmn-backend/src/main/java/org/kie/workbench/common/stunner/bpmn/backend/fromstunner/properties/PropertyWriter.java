@@ -25,22 +25,42 @@ import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.DroolsFactory;
 import org.jboss.drools.DroolsPackage;
 import org.jboss.drools.MetaDataType;
+import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.dc;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
 public class PropertyWriter {
 
     private final FlowElement flowElement;
     private final Map<String, BaseElement> baseElements = new HashMap<>();
+    private final BPMNShape shape;
 
     public PropertyWriter(FlowElement flowElement) {
         this.flowElement = flowElement;
+        this.shape = di.createBPMNShape();
+        shape.setBpmnElement(flowElement);
+        shape.setBounds(dc.createBounds());
+    }
+
+    public void setBounds(Bounds rect) {
+        org.eclipse.dd.dc.Bounds bounds = shape.getBounds();
+
+        Bounds.Bound upperLeft = rect.getUpperLeft();
+        Bounds.Bound lowerRight = rect.getLowerRight();
+
+        bounds.setX(upperLeft.getX().floatValue());
+        bounds.setY(upperLeft.getY().floatValue());
+        bounds.setWidth(lowerRight.getX().floatValue() - upperLeft.getX().floatValue());
+        bounds.setHeight(lowerRight.getY().floatValue() - upperLeft.getY().floatValue());
     }
 
     public FlowElement getFlowElement() {
@@ -90,5 +110,9 @@ public class PropertyWriter {
         Documentation documentation = bpmn2.createDocumentation();
         documentation.setText(asCData(value));
         flowElement.getDocumentation().add(documentation);
+    }
+
+    public BPMNShape getShape() {
+        return shape;
     }
 }
