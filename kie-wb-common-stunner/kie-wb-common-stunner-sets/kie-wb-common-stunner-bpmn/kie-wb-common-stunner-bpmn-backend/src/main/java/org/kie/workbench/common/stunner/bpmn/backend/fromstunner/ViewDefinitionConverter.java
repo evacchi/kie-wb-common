@@ -23,6 +23,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateCatchEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
@@ -31,6 +32,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediate
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
@@ -47,12 +49,14 @@ public class ViewDefinitionConverter {
     private final TaskConverter taskConverter;
     private final EndEventConverter endEventConverter;
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
+    private final IntermediateThrowEventConverter intermediateThrowEventConverter;
 
     public ViewDefinitionConverter(DefinitionsBuildingContext context) {
         this.context = context;
         this.startEventConverter = new StartEventConverter();
         this.endEventConverter = new EndEventConverter();
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
+        this.intermediateThrowEventConverter = new IntermediateThrowEventConverter();
         this.taskConverter = new TaskConverter();
     }
 
@@ -60,6 +64,7 @@ public class ViewDefinitionConverter {
         return NodeMatch.fromNode(BPMNViewDefinition.class, PropertyWriter.class)
                 .when(BaseStartEvent.class, startEventConverter::toFlowElement)
                 .when(BaseCatchingIntermediateEvent.class, intermediateCatchEventConverter::toFlowElement)
+                .when(BaseThrowingIntermediateEvent.class, intermediateThrowEventConverter::toFlowElement)
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)
                 .when(BaseTask.class, taskConverter::toFlowElement)
                 .apply(node);
