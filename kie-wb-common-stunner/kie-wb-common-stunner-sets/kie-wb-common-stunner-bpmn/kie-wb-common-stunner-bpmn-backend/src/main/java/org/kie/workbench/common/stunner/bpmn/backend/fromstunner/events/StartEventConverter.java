@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.StartEvent;
@@ -54,6 +53,7 @@ public class StartEventConverter {
                     StartNoneEvent definition = n.getContent().getDefinition();
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
 
                     return p;
                 })
