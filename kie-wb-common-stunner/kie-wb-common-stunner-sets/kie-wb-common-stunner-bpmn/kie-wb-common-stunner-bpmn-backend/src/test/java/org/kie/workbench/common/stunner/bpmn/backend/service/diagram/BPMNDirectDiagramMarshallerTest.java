@@ -1962,6 +1962,7 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("</bpmn2:endEvent>"));
     }
 
+    @Test
     public void testMarshallEndErrorEnd() throws Exception {
         Diagram<Graph, Metadata> diagram = unmarshall(BPMN_ENDERROR_EVENT);
         String result = tested.marshall(diagram);

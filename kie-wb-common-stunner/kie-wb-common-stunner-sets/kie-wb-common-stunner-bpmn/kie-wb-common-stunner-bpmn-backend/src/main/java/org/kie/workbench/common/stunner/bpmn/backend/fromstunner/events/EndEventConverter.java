@@ -17,19 +17,27 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
 import org.eclipse.bpmn2.EndEvent;
+import org.eclipse.bpmn2.Error;
+import org.eclipse.bpmn2.ErrorEventDefinition;
 import org.eclipse.bpmn2.Message;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
+import org.eclipse.bpmn2.TerminateEventDefinition;
+import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Ids;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Attributes;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.EndEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndSignalEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.ScopedSignalEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
@@ -74,7 +82,7 @@ public class EndEventConverter {
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
 
                     p.setAssignmentsInfo(
                             definition.getDataIOSet().getAssignmentsinfo());
@@ -120,6 +128,56 @@ public class EndEventConverter {
                     p.addBaseElement(signal);
 
                     return p;
-                }).apply(node).value();
+                })
+                .when(EndTerminateEvent.class, n -> {
+                    EndEvent endEvent = bpmn2.createEndEvent();
+                    TerminateEventDefinition terminateEventDefinition =
+                            bpmn2.createTerminateEventDefinition();
+
+                    EndTerminateEvent definition = n.getContent().getDefinition();
+                    EndEventPropertyWriter p = new EndEventPropertyWriter(endEvent);
+
+                    endEvent.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    endEvent.getEventDefinitions().add(terminateEventDefinition);
+
+                    return p;
+                })
+                .when(EndErrorEvent.class, n -> {
+                    EndEvent endEvent = bpmn2.createEndEvent();
+                    ErrorEventDefinition errorEventDefinition =
+                            bpmn2.createErrorEventDefinition();
+
+                    EndErrorEvent definition = n.getContent().getDefinition();
+                    EndEventPropertyWriter p = new EndEventPropertyWriter(endEvent);
+
+                    endEvent.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+
+                    ErrorEventExecutionSet executionSet = definition.getExecutionSet();
+                    Error error = bpmn2.createError();
+                    String errorCode = executionSet.getErrorRef().getValue();
+                    error.setId(errorCode);
+                    error.setErrorCode(errorCode);
+                    errorEventDefinition.setErrorRef(error);
+
+                    FeatureMap.Entry erefname =
+                            Attributes.drools("erefname", errorCode);
+                    errorEventDefinition.getAnyAttribute().add(erefname);
+
+                    endEvent.getEventDefinitions().add(errorEventDefinition);
+
+                    p.addBaseElement(error);
+
+                    return p;
+                })
+
+                .apply(node).value();
     }
 }

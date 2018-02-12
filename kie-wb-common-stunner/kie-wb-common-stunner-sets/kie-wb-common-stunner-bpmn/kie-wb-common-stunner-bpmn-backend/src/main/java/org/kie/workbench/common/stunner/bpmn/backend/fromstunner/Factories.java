@@ -20,6 +20,7 @@ import bpsim.BpsimFactory;
 import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.dd.dc.DcFactory;
+import org.eclipse.emf.ecore.util.ExtendedMetaData;
 
 public class Factories {
 
@@ -27,4 +28,5 @@ public class Factories {
     public static final BpsimFactory bpsim = BpsimFactory.eINSTANCE;
     public static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
     public static final DcFactory dc = DcFactory.eINSTANCE;
+    public static final ExtendedMetaData metaData = ExtendedMetaData.INSTANCE;
 }
