@@ -43,6 +43,7 @@ public class TaskConverter {
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(ScriptTask.class, n -> {
@@ -61,6 +62,7 @@ public class TaskConverter {
                     p.setScript(executionSet.getScript().getValue());
                     p.setAsync(executionSet.getIsAsync().getValue());
 
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(UserTask.class, n -> {
@@ -69,6 +71,7 @@ public class TaskConverter {
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 }).apply(node).value();
     }

@@ -39,23 +39,29 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class EndEventConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
-        EndEvent event = bpmn2.createEndEvent();
-        event.setId(node.getUUID());
 
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
         return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
                 .when(EndNoneEvent.class, n -> {
+                    EndEvent event = bpmn2.createEndEvent();
+                    event.setId(node.getUUID());
+
                     BaseEndEvent definition = n.getContent().getDefinition();
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(EndMessageEvent.class, n -> {
+                    EndEvent event = bpmn2.createEndEvent();
+                    event.setId(node.getUUID());
+
                     EndMessageEvent definition = n.getContent().getDefinition();
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -68,10 +74,16 @@ public class EndEventConverter {
                             definition.getExecutionSet();
 
                     p.addMessage(executionSet.getMessageRef());
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(EndSignalEvent.class, n -> {
+                    EndEvent event = bpmn2.createEndEvent();
+                    event.setId(node.getUUID());
+
                     EndSignalEvent definition = n.getContent().getDefinition();
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -82,21 +94,32 @@ public class EndEventConverter {
 
                     p.addSignal(definition.getExecutionSet().getSignalRef());
 
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(EndTerminateEvent.class, n -> {
+                    EndEvent event = bpmn2.createEndEvent();
+                    event.setId(node.getUUID());
+
                     EndTerminateEvent definition = n.getContent().getDefinition();
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
                     p.addTerminate();
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(EndErrorEvent.class, n -> {
+                    EndEvent event = bpmn2.createEndEvent();
+                    event.setId(node.getUUID());
+
                     EndErrorEvent definition = n.getContent().getDefinition();
-                    
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
@@ -106,6 +129,8 @@ public class EndEventConverter {
 
                     ErrorEventExecutionSet executionSet = definition.getExecutionSet();
                     p.addError(executionSet.getErrorRef());
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .apply(node).value();

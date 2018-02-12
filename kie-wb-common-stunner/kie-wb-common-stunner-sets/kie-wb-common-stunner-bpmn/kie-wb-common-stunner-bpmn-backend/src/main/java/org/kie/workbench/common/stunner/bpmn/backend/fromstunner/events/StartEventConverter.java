@@ -39,13 +39,13 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class StartEventConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseStartEvent>, ?> node) {
-        StartEvent event = bpmn2.createStartEvent();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
-        event.setId(node.getUUID());
-
         return NodeMatch.fromNode(BaseStartEvent.class, PropertyWriter.class)
                 .when(StartNoneEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    event.setId(node.getUUID());
+
                     StartNoneEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     event.setIsInterrupting(false);
 
@@ -53,10 +53,15 @@ public class StartEventConverter {
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(StartSignalEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    event.setId(node.getUUID());
+
                     StartSignalEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -69,10 +74,16 @@ public class StartEventConverter {
                             definition.getExecutionSet();
 
                     p.addSignal(executionSet.getSignalRef());
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(StartTimerEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    event.setId(node.getUUID());
+
                     StartTimerEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -86,10 +97,15 @@ public class StartEventConverter {
                     //p(e).setTimerSettings FIXME
                     //p.setSimulationSet
 
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(StartErrorEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    event.setId(node.getUUID());
+
                     StartErrorEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -102,11 +118,17 @@ public class StartEventConverter {
                             definition.getExecutionSet();
 
                     p.addError(executionSet.getErrorRef());
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
 
                 .when(StartMessageEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    event.setId(node.getUUID());
+
                     StartMessageEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -119,6 +141,8 @@ public class StartEventConverter {
                             definition.getExecutionSet();
 
                     p.addMessage(executionSet.getMessageRef());
+
+                    p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .apply(node).value();
