@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.EndEvent;
+import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Property;
@@ -27,11 +28,11 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.Associat
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-public class EndEventPropertyWriter extends PropertyWriter {
+public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
     private final EndEvent endEvent;
 
-    public EndEventPropertyWriter(EndEvent flowElement) {
+    public ThrowEventPropertyWriter(EndEvent flowElement) {
         super(flowElement);
         this.endEvent = flowElement;
     }
@@ -110,5 +111,10 @@ public class EndEventPropertyWriter extends PropertyWriter {
         typeDef.setId("_" + sourceName + "Item");
         typeDef.setStructureRef(type);
         return typeDef;
+    }
+
+    @Override
+    protected void addEventDefinition(EventDefinition eventDefinition) {
+        this.endEvent.getEventDefinitions().add(eventDefinition);
     }
 }

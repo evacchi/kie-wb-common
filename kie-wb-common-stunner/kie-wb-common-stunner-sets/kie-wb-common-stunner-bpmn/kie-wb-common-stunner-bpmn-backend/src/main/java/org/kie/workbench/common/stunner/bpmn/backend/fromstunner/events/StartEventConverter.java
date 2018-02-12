@@ -16,18 +16,23 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.StartEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Ids;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartSignalEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.StartTimerEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.InterruptingErrorEventExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.InterruptingMessageEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.InterruptingSignalEventExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.InterruptingTimerEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -45,10 +50,10 @@ public class StartEventConverter {
     public PropertyWriter toFlowElement(Node<View<BaseStartEvent>, ?> node) {
         return NodeMatch.fromNode(BaseStartEvent.class, PropertyWriter.class)
                 .when(StartNoneEvent.class, n -> {
-                    StartEvent startEvent = bpmn2.createStartEvent();
-                    PropertyWriter p = new PropertyWriter(startEvent);
-                    startEvent.setId(n.getUUID());
-                    startEvent.setIsInterrupting(false);
+                    StartEvent event = bpmn2.createStartEvent();
+                    PropertyWriter p = new PropertyWriter(event);
+                    event.setId(n.getUUID());
+                    event.setIsInterrupting(false);
 
                     StartNoneEvent definition = n.getContent().getDefinition();
                     BPMNGeneralSet general = definition.getGeneral();
@@ -58,14 +63,16 @@ public class StartEventConverter {
                     return p;
                 })
                 .when(StartSignalEvent.class, n -> {
-                    StartEvent startEvent = bpmn2.createStartEvent();
+                    StartEvent event = bpmn2.createStartEvent();
                     SignalEventDefinition signalEventDefinition =
                             bpmn2.createSignalEventDefinition();
 
-                    StartSignalEvent definition = n.getContent().getDefinition();
-                    PropertyWriter p = new PropertyWriter(startEvent);
+                    StartSignalEvent definition =
+                            n.getContent().getDefinition();
+                    CatchEventPropertyWriter p =
+                            new CatchEventPropertyWriter(event);
 
-                    startEvent.setId(n.getUUID());
+                    event.setId(n.getUUID());
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -77,18 +84,74 @@ public class StartEventConverter {
 
                     InterruptingSignalEventExecutionSet executionSet =
                             definition.getExecutionSet();
-                    Signal signal = bpmn2.createSignal();
-                    String signalName = executionSet.getSignalRef().getValue();
 
-                    signal.setName(signalName);
-                    signal.setId(Ids.fromString(signalName));
-                    signalEventDefinition.setSignalRef(signal.getId());
-
-                    startEvent.getEventDefinitions().add(signalEventDefinition);
-
-                    p.addBaseElement(signal);
+                    p.addSignal(executionSet.getSignalRef());
 
                     return p;
-                }).apply(node).value();
+                })
+                .when(StartTimerEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+
+                    StartTimerEvent definition = n.getContent().getDefinition();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+
+                    event.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getName().getValue());
+
+                    InterruptingTimerEventExecutionSet executionSet = definition.getExecutionSet();
+                    event.setIsInterrupting(executionSet.getIsInterrupting().getValue());
+
+                    p.addTimer(executionSet.getTimerSettings());
+
+                    //p(e).setTimerSettings FIXME
+                    //p.setSimulationSet
+
+                    return p;
+                })
+                .when(StartErrorEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+
+                    StartErrorEvent definition = n.getContent().getDefinition();
+
+                    event.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    InterruptingErrorEventExecutionSet executionSet =
+                            definition.getExecutionSet();
+
+                    p.addError(executionSet.getErrorRef());
+                    return p;
+                })
+
+                .when(StartMessageEvent.class, n -> {
+                    StartEvent event = bpmn2.createStartEvent();
+                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+
+                    StartMessageEvent definition = n.getContent().getDefinition();
+
+                    event.setId(n.getUUID());
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    //                     p.setAssignmentsInfo(
+                    //                            definition.getDataIOSet().getAssignmentsinfo());
+
+                    InterruptingMessageEventExecutionSet executionSet =
+                            definition.getExecutionSet();
+
+                    p.addMessage(executionSet.getMessageRef());
+
+                    return p;
+                })
+                .apply(node).value();
     }
 }
