@@ -21,6 +21,7 @@ import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.di.BpmnDiFactory;
 import org.eclipse.dd.dc.DcFactory;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
+import org.jboss.drools.DroolsFactory;
 
 public class Factories {
 
@@ -29,4 +30,5 @@ public class Factories {
     public static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
     public static final DcFactory dc = DcFactory.eINSTANCE;
     public static final ExtendedMetaData metaData = ExtendedMetaData.INSTANCE;
+    public static final DroolsFactory droolsFactory = DroolsFactory.eINSTANCE;
 }

@@ -16,14 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks;
 
-import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.TaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
+import org.kie.workbench.common.stunner.bpmn.definition.property.general.TaskGeneralSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTaskExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -42,20 +46,38 @@ public class TaskConverter {
                     return p;
                 })
                 .when(ScriptTask.class, n -> {
+                    org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
                     ScriptTask definition = n.getContent().getDefinition();
-                    Task task = bpmn2.createTask();
-                    PropertyWriter p = new PropertyWriter(task);
+                    TaskPropertyWriter p = new TaskPropertyWriter(task);
+
                     task.setId(n.getUUID());
-                    p.setName(definition.getGeneral().getName().getValue());
+
+                    TaskGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    ScriptTaskExecutionSet executionSet = definition.getExecutionSet();
+                    ScriptTypeValue script = executionSet.getScript().getValue();
+
+                    task.setScriptFormat(
+                            Scripts.scriptLanguageToUri(script.getLanguage()));
+                    task.setScript(asCData(script.getScript()));
+
+                    p.setAsync(executionSet.getIsAsync().getValue());
+
                     return p;
                 })
                 .when(UserTask.class, n -> {
-                    UserTask definition = n.getContent().getDefinition();
                     Task task = bpmn2.createTask();
+                    UserTask definition = n.getContent().getDefinition();
                     PropertyWriter p = new PropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
                     return p;
                 }).apply(node).value();
+    }
+
+    protected String asCData(String value) {
+        return "<![CDATA[" + value + "]]>";
     }
 }
