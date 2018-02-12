@@ -28,6 +28,7 @@ import org.eclipse.bpmn2.TerminateEventDefinition;
 import org.eclipse.bpmn2.TimerEventDefinition;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Ids;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalRef;
@@ -40,6 +41,8 @@ public abstract class EventPropertyWriter extends PropertyWriter {
     public EventPropertyWriter(Event event) {
         super(event);
     }
+
+    public abstract void setAssignmentsInfo(AssignmentsInfo assignmentsInfo);
 
     public void addMessage(MessageRef messageRef) {
         Message message = bpmn2.createMessage();

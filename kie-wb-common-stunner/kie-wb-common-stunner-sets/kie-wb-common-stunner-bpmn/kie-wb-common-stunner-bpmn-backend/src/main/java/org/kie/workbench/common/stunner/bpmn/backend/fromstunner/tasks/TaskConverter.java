@@ -20,7 +20,7 @@ import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.TaskPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
@@ -48,7 +48,7 @@ public class TaskConverter {
                 .when(ScriptTask.class, n -> {
                     org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
                     ScriptTask definition = n.getContent().getDefinition();
-                    TaskPropertyWriter p = new TaskPropertyWriter(task);
+                    ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
 
                     task.setId(n.getUUID());
 
@@ -57,12 +57,8 @@ public class TaskConverter {
                     p.setDocumentation(general.getDocumentation().getValue());
 
                     ScriptTaskExecutionSet executionSet = definition.getExecutionSet();
-                    ScriptTypeValue script = executionSet.getScript().getValue();
 
-                    task.setScriptFormat(
-                            Scripts.scriptLanguageToUri(script.getLanguage()));
-                    task.setScript(asCData(script.getScript()));
-
+                    p.setScript(executionSet.getScript().getValue());
                     p.setAsync(executionSet.getIsAsync().getValue());
 
                     return p;

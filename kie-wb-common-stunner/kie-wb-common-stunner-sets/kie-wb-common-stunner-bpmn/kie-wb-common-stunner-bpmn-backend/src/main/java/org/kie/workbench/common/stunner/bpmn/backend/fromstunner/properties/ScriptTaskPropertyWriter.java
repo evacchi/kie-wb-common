@@ -28,13 +28,19 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptType
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.droolsFactory;
 
-public class TaskPropertyWriter extends PropertyWriter {
+public class ScriptTaskPropertyWriter extends PropertyWriter {
 
     private final ScriptTask scriptTask;
 
-    public TaskPropertyWriter(ScriptTask scriptTask) {
+    public ScriptTaskPropertyWriter(ScriptTask scriptTask) {
         super(scriptTask);
         this.scriptTask = scriptTask;
+    }
+
+    public void setScript(ScriptTypeValue script) {
+        scriptTask.setScriptFormat(
+                Scripts.scriptLanguageToUri(script.getLanguage()));
+        scriptTask.setScript(asCData(script.getScript()));
     }
 
     public void setAsync(Boolean async) {

@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.EventDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 
 public class CatchEventPropertyWriter extends EventPropertyWriter {
 
@@ -26,6 +27,10 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
     public CatchEventPropertyWriter(CatchEvent event) {
         super(event);
         this.event = event;
+    }
+
+    public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
+        // todo
     }
 
     @Override

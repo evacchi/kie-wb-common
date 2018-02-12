@@ -47,8 +47,8 @@ public class ViewDefinitionConverter {
 
     public ViewDefinitionConverter(DefinitionsBuildingContext context) {
         this.context = context;
-        this.startEventConverter = new StartEventConverter(context);
-        this.endEventConverter = new EndEventConverter(context);
+        this.startEventConverter = new StartEventConverter();
+        this.endEventConverter = new EndEventConverter();
         this.taskConverter = new TaskConverter();
     }
 

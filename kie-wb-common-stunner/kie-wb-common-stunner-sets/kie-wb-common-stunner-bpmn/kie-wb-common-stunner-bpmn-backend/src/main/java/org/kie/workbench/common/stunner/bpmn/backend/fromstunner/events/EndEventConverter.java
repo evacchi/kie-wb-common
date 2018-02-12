@@ -38,21 +38,15 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class EndEventConverter {
 
-    private final DefinitionsBuildingContext context;
-
-    public EndEventConverter(DefinitionsBuildingContext context) {
-        this.context = context;
-    }
-
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(node.getUUID());
+
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
         return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
                 .when(EndNoneEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-
                     BaseEndEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    event.setId(n.getUUID());
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -61,12 +55,7 @@ public class EndEventConverter {
                     return p;
                 })
                 .when(EndMessageEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-
                     EndMessageEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    event.setId(n.getUUID());
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -79,16 +68,10 @@ public class EndEventConverter {
                             definition.getExecutionSet();
 
                     p.addMessage(executionSet.getMessageRef());
-
                     return p;
                 })
                 .when(EndSignalEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-
                     EndSignalEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    event.setId(n.getUUID());
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -102,42 +85,29 @@ public class EndEventConverter {
                     return p;
                 })
                 .when(EndTerminateEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    TerminateEventDefinition terminateEventDefinition =
-                            bpmn2.createTerminateEventDefinition();
-
                     EndTerminateEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    event.setId(n.getUUID());
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
                     p.addTerminate();
-
                     return p;
                 })
                 .when(EndErrorEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-
                     EndErrorEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    event.setId(n.getUUID());
-
+                    
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
+                    p.setAssignmentsInfo(
+                            definition.getDataIOSet().getAssignmentsinfo());
+
                     ErrorEventExecutionSet executionSet = definition.getExecutionSet();
-
                     p.addError(executionSet.getErrorRef());
-
                     return p;
                 })
-
                 .apply(node).value();
     }
 }
