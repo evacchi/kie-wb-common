@@ -39,8 +39,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class EndEventConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
-
-
         return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
                 .when(EndNoneEvent.class, n -> {
                     EndEvent event = bpmn2.createEndEvent();

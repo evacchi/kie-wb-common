@@ -22,10 +22,12 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateCatchEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
@@ -44,19 +46,22 @@ public class ViewDefinitionConverter {
     private final StartEventConverter startEventConverter;
     private final TaskConverter taskConverter;
     private final EndEventConverter endEventConverter;
+    private final IntermediateCatchEventConverter intermediateCatchEventConverter;
 
     public ViewDefinitionConverter(DefinitionsBuildingContext context) {
         this.context = context;
         this.startEventConverter = new StartEventConverter();
         this.endEventConverter = new EndEventConverter();
+        this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
         this.taskConverter = new TaskConverter();
     }
 
     public Result<PropertyWriter> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
         return NodeMatch.fromNode(BPMNViewDefinition.class, PropertyWriter.class)
                 .when(BaseStartEvent.class, startEventConverter::toFlowElement)
-                .when(BaseTask.class, taskConverter::toFlowElement)
+                .when(BaseCatchingIntermediateEvent.class, intermediateCatchEventConverter::toFlowElement)
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)
+                .when(BaseTask.class, taskConverter::toFlowElement)
                 .apply(node);
     }
 
