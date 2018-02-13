@@ -23,10 +23,6 @@ public class IOPropertyWriter extends PropertyWriter {
         return addInputSourceTarget((AssociationDeclaration.SourceTarget) pair);
     }
 
-    protected DataOutputAssociation addOutputSourceTarget(AssociationDeclaration.SourceTarget a) {
-        return null;
-    }
-
     protected DataInputAssociation addInputSourceTarget(AssociationDeclaration.SourceTarget a) {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
@@ -51,7 +47,7 @@ public class IOPropertyWriter extends PropertyWriter {
         return dataInputAssociation;
     }
 
-    private DataInputAssociation addInputFromTo(String attributeId, String value) {
+    protected DataInputAssociation input(String attributeId, Object value) {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedef(attributeId,
@@ -59,15 +55,17 @@ public class IOPropertyWriter extends PropertyWriter {
 
         Property decl = varDecl(attributeId, typeDef);
 
-        // then we declare the input that will provide
-        // the value that we assign to `source`
-        // e.g. myInput
+//        // then we declare the input that will provide
+//        // the value that we assign to `source`
+//        // e.g. myInput
         DataInput target = readInputFrom(attributeId);
+
+        Assignment assignment = assignment(target.getId(), "<![CDATA["+value.toString()+"]]>");
 
         // then we create the actual association between the two
         // e.g. foo := myInput (or, to put it differently, myInput -> foo)
         DataInputAssociation dataInputAssociation =
-                associate(decl, target);
+                associate(assignment, target);
 
         this.addBaseElement(typeDef);
 

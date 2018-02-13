@@ -46,19 +46,23 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
                 });
     }
 
-    public void setInput(String name, String value) {
-        DataInputAssociation association = bpmn2.createDataInputAssociation();
-
-        DataInput input = bpmn2.createDataInput();
-        input.setName(name);
-
-        Assignment assignment = bpmn2.createAssignment();
-        FormalExpression fromExpression = bpmn2.createFormalExpression();
-//        fromExpression.setBody();
-//        assignment.setFrom();
-
-        activity.getDataInputAssociations().add(association);
+    protected void setInput(String name, Object value) {
+        activity.getDataInputAssociations().add(input(name, value));
     }
+
+//    public void setInput(String name, Object value) {
+//        DataInputAssociation association = bpmn2.createDataInputAssociation();
+//
+//        DataInput input = bpmn2.createDataInput();
+//        input.setName(name);
+//
+//        Assignment assignment = bpmn2.createAssignment();
+//        FormalExpression fromExpression = bpmn2.createFormalExpression();
+////        fromExpression.setBody();
+////        assignment.setFrom();
+//
+//        activity.getDataInputAssociations().add(association);
+//    }
 
 //    public Optional<String> optionalInput(String name) {
 //        for (DataInputAssociation din : task.getDataInputAssociations()) {

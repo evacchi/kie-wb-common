@@ -18,10 +18,9 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks;
 
 import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.UserTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
@@ -30,7 +29,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.TaskGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.BusinessRuleTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTaskExecutionSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.UserTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -91,15 +89,35 @@ public class TaskConverter {
                     return p;
                 })
                 .when(UserTask.class, n -> {
-                    Task task = bpmn2.createTask();
+                    org.eclipse.bpmn2.UserTask task = bpmn2.createUserTask();
                     UserTask definition = n.getContent().getDefinition();
-                    ActivityPropertyWriter p = new ActivityPropertyWriter(task);
+                    UserTaskPropertyWriter p = new UserTaskPropertyWriter(task);
+
                     task.setId(n.getUUID());
-                    p.setName(definition.getGeneral().getName().getValue());
-                    p.setBounds(n.getContent().getBounds());
+
+                    TaskGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    p.setSimulationSet(definition.getSimulationSet());
 
                     UserTaskExecutionSet executionSet = definition.getExecutionSet();
+
+                    p.setTaskName(executionSet.getTaskName().getValue());
+                    p.setActors(executionSet.getActors());
+                    p.setGroupId(executionSet.getGroupid().getValue());
                     p.setAssignmentsInfo(executionSet.getAssignmentsinfo());
+                    p.setAsync(executionSet.getIsAsync().getValue());
+                    p.setSkippable(executionSet.getSkippable().getValue());
+                    p.setPriority(executionSet.getPriority().getValue());
+                    p.setSubject(executionSet.getSubject().getValue());
+                    p.setDescription(executionSet.getDescription().getValue());
+                    p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+                    p.setCreatedBy(executionSet.getCreatedBy().getValue());
+                    p.setOnEntryAction(executionSet.getOnEntryAction());
+                    p.setOnExitAction(executionSet.getOnExitAction());
+
+                    p.setBounds(n.getContent().getBounds());
 
                     return p;
                 }).apply(node).value();
