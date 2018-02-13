@@ -20,6 +20,7 @@ import org.eclipse.bpmn2.Error;
 import org.eclipse.bpmn2.ErrorEventDefinition;
 import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.EventDefinition;
+import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.Message;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.Signal;
@@ -32,7 +33,9 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.Assignme
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalRef;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalScope;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettings;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -70,6 +73,10 @@ public abstract class EventPropertyWriter extends PropertyWriter {
         addBaseElement(signal);
     }
 
+    public void addSignalScope(SignalScope signalScope) {
+        setMeta("customScope", signalScope.getValue());
+    }
+
     public void addError(ErrorRef errorRef) {
         Error error = bpmn2.createError();
         ErrorEventDefinition errorEventDefinition =
@@ -95,9 +102,25 @@ public abstract class EventPropertyWriter extends PropertyWriter {
     }
 
     public void addTimer(TimerSettings timerSettings) {
-        TimerEventDefinition timerEventDefinition =
+        TimerEventDefinition eventDefinition =
                 bpmn2.createTimerEventDefinition();
-        addEventDefinition(timerEventDefinition);
+
+        TimerSettingsValue timerSettingsValue = timerSettings.getValue();
+
+        FormalExpression timeDate = bpmn2.createFormalExpression();
+        timeDate.setBody(timerSettingsValue.getTimeDate());
+        eventDefinition.setTimeDate(timeDate);
+
+        FormalExpression timeDuration = bpmn2.createFormalExpression();
+        timeDuration.setBody(timerSettingsValue.getTimeDuration());
+        eventDefinition.setTimeDuration(timeDuration);
+
+        FormalExpression timeCycleExpression = bpmn2.createFormalExpression();
+        timeCycleExpression.setBody(timerSettingsValue.getTimeCycle());
+        timeCycleExpression.setLanguage(timerSettingsValue.getTimeCycleLanguage());
+        eventDefinition.setTimeCycle(timeCycleExpression);
+
+        addEventDefinition(eventDefinition);
     }
 
     protected abstract void addEventDefinition(EventDefinition eventDefinition);

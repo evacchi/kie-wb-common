@@ -18,11 +18,11 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
-import org.eclipse.bpmn2.EndEvent;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Property;
+import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 
@@ -30,11 +30,11 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
-    private final EndEvent endEvent;
+    private final ThrowEvent throwEvent;
 
-    public ThrowEventPropertyWriter(EndEvent flowElement) {
+    public ThrowEventPropertyWriter(ThrowEvent flowElement) {
         super(flowElement);
-        this.endEvent = flowElement;
+        this.throwEvent = flowElement;
     }
 
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
@@ -62,15 +62,15 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
         DataInputAssociation dataInputAssociation =
                 associate(source, target);
 
-        endEvent.getDataInputs().add(target);
+        throwEvent.getDataInputs().add(target);
 
         InputSet inputSet = bpmn2.createInputSet();
         inputSet.getDataInputRefs().add(target);
-        endEvent.setInputSet(inputSet);
+        throwEvent.setInputSet(inputSet);
 
         this.addBaseElement(typeDef);
 
-        endEvent.getDataInputAssociation()
+        throwEvent.getDataInputAssociation()
                 .add(dataInputAssociation);
     }
 
@@ -96,7 +96,7 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
     }
 
     private String makeDataInputId(String targetName) {
-        return endEvent.getId() + "_" + targetName + "InputX";
+        return throwEvent.getId() + "_" + targetName + "InputX";
     }
 
     private Property varDecl(String varName, ItemDefinition typeDef) {
@@ -115,6 +115,6 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
     @Override
     protected void addEventDefinition(EventDefinition eventDefinition) {
-        this.endEvent.getEventDefinitions().add(eventDefinition);
+        this.throwEvent.getEventDefinitions().add(eventDefinition);
     }
 }

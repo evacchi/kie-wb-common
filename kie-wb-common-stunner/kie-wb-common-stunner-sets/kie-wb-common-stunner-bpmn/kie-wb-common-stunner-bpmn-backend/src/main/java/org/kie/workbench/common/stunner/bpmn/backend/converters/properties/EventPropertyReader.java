@@ -23,13 +23,14 @@ import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.EventDefinition;
+import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.eclipse.bpmn2.TimerEventDefinition;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.events.TimerEventDefinitionConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettings;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 
@@ -76,7 +77,23 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     }
 
     public TimerSettingsValue getTimerSettings(TimerEventDefinition eventDefinition) {
-        return TimerEventDefinitionConverter.convertTimerEventDefinition(eventDefinition);
+        TimerSettingsValue timerSettingsValue = new TimerSettings().getValue();
+        FormalExpression timeCycle = (FormalExpression) eventDefinition.getTimeCycle();
+        if (timeCycle != null) {
+            timerSettingsValue.setTimeCycle(timeCycle.getMixed().getValue(0).toString());
+            timerSettingsValue.setTimeCycleLanguage(timeCycle.getLanguage());
+        }
+
+        FormalExpression timeDate = (FormalExpression) eventDefinition.getTimeDate();
+        if (timeDate != null) {
+            timerSettingsValue.setTimeDate(timeDate.getMixed().getValue(0).toString());
+        }
+
+        FormalExpression timeDateDuration = (FormalExpression) eventDefinition.getTimeDuration();
+        if (timeDateDuration != null) {
+            timerSettingsValue.setTimeDuration(timeDateDuration.getMixed().getValue(0).toString());
+        }
+        return (timerSettingsValue);
     }
 
     public String getSignalRef() {

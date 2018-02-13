@@ -17,9 +17,11 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
 import org.eclipse.bpmn2.IntermediateCatchEvent;
+import org.eclipse.bpmn2.IntermediateThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ThrowEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateSignalEventThrowing;
@@ -35,11 +37,11 @@ public class IntermediateThrowEventConverter {
     public PropertyWriter toFlowElement(Node<View<BaseThrowingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseThrowingIntermediateEvent.class, PropertyWriter.class)
                 .when(IntermediateMessageEventThrowing.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
                     event.setId(node.getUUID());
 
                     IntermediateMessageEventThrowing definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -56,11 +58,11 @@ public class IntermediateThrowEventConverter {
                     return p;
                 })
                 .when(IntermediateSignalEventThrowing.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
                     event.setId(node.getUUID());
 
                     IntermediateSignalEventThrowing definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -70,6 +72,7 @@ public class IntermediateThrowEventConverter {
                             definition.getDataIOSet().getAssignmentsinfo());
 
                     p.addSignal(definition.getExecutionSet().getSignalRef());
+                    p.addSignalScope(definition.getExecutionSet().getSignalScope());
 
                     p.setBounds(n.getContent().getBounds());
                     return p;
