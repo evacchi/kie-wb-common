@@ -29,6 +29,7 @@ import bpsim.ScenarioParameters;
 import bpsim.TimeParameters;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.PotentialOwner;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.di.BPMNDiagram;

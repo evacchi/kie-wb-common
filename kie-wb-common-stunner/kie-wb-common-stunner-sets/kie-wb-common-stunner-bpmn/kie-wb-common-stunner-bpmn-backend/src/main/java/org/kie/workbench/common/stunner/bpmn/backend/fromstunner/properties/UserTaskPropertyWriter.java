@@ -1,8 +1,13 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.UUID;
+
 import org.eclipse.bpmn2.DataInput;
+import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
+import org.eclipse.bpmn2.PotentialOwner;
+import org.eclipse.bpmn2.ResourceAssignmentExpression;
 import org.eclipse.bpmn2.UserTask;
 import org.kie.workbench.common.stunner.bpmn.definition.property.assignee.Actors;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
@@ -69,7 +74,20 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setActors(Actors actors) {
+        for (String actor : actors.getValue().split(",")) {
+            PotentialOwner potentialOwner = bpmn2.createPotentialOwner();
+            potentialOwner.setId(UUID.randomUUID().toString());
 
+            FormalExpression formalExpression = bpmn2.createFormalExpression();
+            formalExpression.setBody(actor);
+
+            ResourceAssignmentExpression resourceAssignmentExpression = bpmn2.createResourceAssignmentExpression();
+            resourceAssignmentExpression.setExpression(formalExpression);
+
+            potentialOwner.setResourceAssignmentExpression(resourceAssignmentExpression);
+
+            task.getResources().add(potentialOwner);
+        }
     }
 
     public void setGroupId(String value) {
