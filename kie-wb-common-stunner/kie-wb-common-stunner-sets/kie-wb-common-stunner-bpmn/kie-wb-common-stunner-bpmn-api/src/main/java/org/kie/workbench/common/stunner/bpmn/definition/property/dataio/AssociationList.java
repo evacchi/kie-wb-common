@@ -22,39 +22,46 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class AssociationList extends AbstractList<AssociationDeclaration> {
+public class AssociationList {
 
-    private final List<AssociationDeclaration> associations;
+    private final List<AssociationDeclaration.Input> inputs;
+    private final List<AssociationDeclaration.Output> outputs;
 
-    public AssociationList(List<AssociationDeclaration> inputs, List<AssociationDeclaration> outputs) {
-        this.associations = new ArrayList<>();
-        associations.addAll(inputs);
-        associations.addAll(outputs);
+    public AssociationList(List<AssociationDeclaration.Input> inputs, List<AssociationDeclaration.Output> outputs) {
+        this.inputs = inputs;
+        this.outputs = outputs;
     }
 
     public AssociationList(List<AssociationDeclaration> all) {
-        this.associations = new ArrayList<>();
-        associations.addAll(all);
+        this.inputs = new ArrayList<>();
+        this.outputs = new ArrayList<>();
+        for (AssociationDeclaration associationDeclaration : all) {
+            if (associationDeclaration.isInput()) {
+                inputs.add((AssociationDeclaration.Input) associationDeclaration);
+            } else {
+                outputs.add((AssociationDeclaration.Output) associationDeclaration);
+            }
+        }
     }
 
     public AssociationList() {
-        this.associations = Collections.emptyList();
+        this.inputs = new ArrayList<>();
+        this.outputs = new ArrayList<>();
     }
 
-    @Override
-    public int size() {
-        return associations.size();
+    public List<AssociationDeclaration.Input> getInputs() {
+        return inputs;
     }
 
-    @Override
-    public AssociationDeclaration get(int i) {
-        return associations.get(i);
+    public List<AssociationDeclaration.Output> getOutputs() {
+        return outputs;
     }
 
     @Override
     public String toString() {
-        return associations.stream()
+        return Stream.concat(inputs.stream(), outputs.stream())
                 .map(AssociationDeclaration::toString)
                 .collect(Collectors.joining(","));
     }

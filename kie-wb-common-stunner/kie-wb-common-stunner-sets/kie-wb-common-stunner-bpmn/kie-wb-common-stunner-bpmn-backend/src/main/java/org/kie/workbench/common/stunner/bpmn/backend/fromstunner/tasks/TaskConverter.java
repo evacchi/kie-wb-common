@@ -19,15 +19,19 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks;
 import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
+import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
 import org.kie.workbench.common.stunner.bpmn.definition.UserTask;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.TaskGeneralSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.BusinessRuleTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.UserTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -65,13 +69,38 @@ public class TaskConverter {
                     p.setBounds(n.getContent().getBounds());
                     return p;
                 })
+                .when(BusinessRuleTask.class, n -> {
+                    org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
+                    BusinessRuleTask definition = n.getContent().getDefinition();
+                    ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
+
+                    task.setId(n.getUUID());
+
+                    TaskGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    BusinessRuleTaskExecutionSet executionSet = definition.getExecutionSet();
+
+                    // p.setOnEntryScript(executionSet.getOnEntryAction());
+                    // p.setOnExitScript(executionSet.getOnExitAction());
+
+                    p.setAsync(executionSet.getIsAsync().getValue());
+
+                    p.setBounds(n.getContent().getBounds());
+                    return p;
+                })
                 .when(UserTask.class, n -> {
                     Task task = bpmn2.createTask();
                     UserTask definition = n.getContent().getDefinition();
-                    PropertyWriter p = new PropertyWriter(task);
+                    ActivityPropertyWriter p = new ActivityPropertyWriter(task);
                     task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
                     p.setBounds(n.getContent().getBounds());
+
+                    UserTaskExecutionSet executionSet = definition.getExecutionSet();
+                    p.setAssignmentsInfo(executionSet.getAssignmentsinfo());
+
                     return p;
                 }).apply(node).value();
     }

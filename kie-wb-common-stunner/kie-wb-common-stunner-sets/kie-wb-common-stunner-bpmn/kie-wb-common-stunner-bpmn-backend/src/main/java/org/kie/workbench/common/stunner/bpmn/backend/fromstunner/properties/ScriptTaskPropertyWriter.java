@@ -28,7 +28,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptType
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.droolsFactory;
 
-public class ScriptTaskPropertyWriter extends PropertyWriter {
+public class ScriptTaskPropertyWriter extends ActivityPropertyWriter {
 
     private final ScriptTask scriptTask;
 

@@ -17,14 +17,10 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.DataInput;
-import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.InputSet;
-import org.eclipse.bpmn2.ItemDefinition;
-import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -37,80 +33,18 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
         this.throwEvent = flowElement;
     }
 
+    @Override
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        assignmentsInfo.getAssociations()
-                .forEach(this::addDataInputAssociation);
-    }
-
-    private void addDataInputAssociation(AssociationDeclaration a) {
-        // first we declare the type of this assignment
-        ItemDefinition typeDef =
-                typedef(a.getSource(),
-                        "java.lang.String");
-
-        // then we declare a name (a variable) with that type,
-        // e.g. foo:java.lang.String
-        Property source = varDecl(a.getSource(), typeDef);
-
-        // then we declare the input that will provide
-        // the value that we assign to `source`
-        // e.g. myInput
-        DataInput target = readInputFrom(a.getTarget());
-
-        // then we create the actual association between the two
-        // e.g. foo := myInput (or, to put it differently, myInput -> foo)
-        DataInputAssociation dataInputAssociation =
-                associate(source, target);
-
-        throwEvent.getDataInputs().add(target);
-
-        InputSet inputSet = bpmn2.createInputSet();
-        inputSet.getDataInputRefs().add(target);
-        throwEvent.setInputSet(inputSet);
-
-        this.addBaseElement(typeDef);
-
-        throwEvent.getDataInputAssociation()
-                .add(dataInputAssociation);
-    }
-
-    private DataInputAssociation associate(Property source, DataInput dataInput) {
-        DataInputAssociation dataInputAssociation =
-                bpmn2.createDataInputAssociation();
-
-        dataInputAssociation
-                .getSourceRef()
-                .add(source);
-
-        dataInputAssociation
-                .setTargetRef(dataInput);
-        return dataInputAssociation;
-    }
-
-    private DataInput readInputFrom(String targetName) {
-        DataInput dataInput = bpmn2.createDataInput();
-        dataInput.setName(targetName);
-        // the id is an encoding of the node id + the name of the input
-        dataInput.setId(makeDataInputId(targetName));
-        return dataInput;
-    }
-
-    private String makeDataInputId(String targetName) {
-        return throwEvent.getId() + "_" + targetName + "InputX";
-    }
-
-    private Property varDecl(String varName, ItemDefinition typeDef) {
-        Property source = bpmn2.createProperty();
-        source.setId(varName);
-        source.setItemSubjectRef(typeDef);
-        return source;
-    }
-
-    private ItemDefinition typedef(String sourceName, String type) {
-        ItemDefinition typeDef = bpmn2.createItemDefinition();
-        typeDef.setId("_" + sourceName + "Item");
-        typeDef.setStructureRef(type);
-        return typeDef;
+        assignmentsInfo.getAssociations().getInputs()
+                .stream()
+                .map(this::addDataInputAssociation)
+                .forEach(dia -> {
+                    InputSet inputSet = bpmn2.createInputSet();
+                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
+                    throwEvent.setInputSet(inputSet);
+                    dia.getSourceRef().forEach(this::addBaseElement);
+                    throwEvent.getDataInputAssociation().add(dia);
+                });
     }
 
     @Override

@@ -49,11 +49,11 @@ public class AssignmentsInfos {
             boolean alternativeEncoding) {
 
         DeclarationList inputs = dataInputDeclarations(datainput);
-        List<AssociationDeclaration> inputAssociationDeclarations =
+        List<AssociationDeclaration.Input> inputAssociationDeclarations =
                 inAssociationDeclarations(inputAssociations);
 
         DeclarationList outputs = dataOutputDeclarations(dataoutput);
-        List<AssociationDeclaration> outputAssociationDeclarations =
+        List<AssociationDeclaration.Output> outputAssociationDeclarations =
                 outAssociationDeclarations(outputAssociations);
 
         AssociationList associations = new AssociationList(
@@ -92,21 +92,21 @@ public class AssignmentsInfos {
                 extractDtype(out));
     }
 
-    public static List<AssociationDeclaration> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
-        List<AssociationDeclaration> result = new ArrayList<>();
+    public static List<AssociationDeclaration.Output> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
+        List<AssociationDeclaration.Output> result = new ArrayList<>();
         for (DataOutputAssociation doa : outputAssociations) {
             DataOutput dataOutput = (DataOutput) doa.getSourceRef().get(0);
             String source = dataOutput.getName();
             String target = doa.getTargetRef().getId();
             if (source != null && source.length() > 0) {
-                result.add(AssociationDeclaration.ofOutput(source, target));
+                result.add(new AssociationDeclaration.Output(new AssociationDeclaration.SourceTarget(source, target)));
             }
         }
         return result;
     }
 
-    public static List<AssociationDeclaration> inAssociationDeclarations(List<DataInputAssociation> inputAssociations) {
-        List<AssociationDeclaration> result = new ArrayList<>();
+    public static List<AssociationDeclaration.Input> inAssociationDeclarations(List<DataInputAssociation> inputAssociations) {
+        List<AssociationDeclaration.Input> result = new ArrayList<>();
 
         for (DataInputAssociation dia : inputAssociations) {
             List<ItemAwareElement> sourceRef = dia.getSourceRef();
@@ -116,7 +116,7 @@ public class AssignmentsInfos {
             String source = sourceRef.get(0).getId();
             String target = ((DataInput) dia.getTargetRef()).getName();
             if (source != null && source.length() > 0) {
-                result.add(AssociationDeclaration.ofInput(source, target));
+                result.add(new AssociationDeclaration.Input(new AssociationDeclaration.SourceTarget(source, target)));
             }
         }
 

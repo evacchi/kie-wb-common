@@ -80,18 +80,18 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
         TimerSettingsValue timerSettingsValue = new TimerSettings().getValue();
         FormalExpression timeCycle = (FormalExpression) eventDefinition.getTimeCycle();
         if (timeCycle != null) {
-            timerSettingsValue.setTimeCycle(timeCycle.getMixed().getValue(0).toString());
+            timerSettingsValue.setTimeCycle(timeCycle.getBody());
             timerSettingsValue.setTimeCycleLanguage(timeCycle.getLanguage());
         }
 
         FormalExpression timeDate = (FormalExpression) eventDefinition.getTimeDate();
         if (timeDate != null) {
-            timerSettingsValue.setTimeDate(timeDate.getMixed().getValue(0).toString());
+            timerSettingsValue.setTimeDate(timeDate.getBody());
         }
 
         FormalExpression timeDateDuration = (FormalExpression) eventDefinition.getTimeDuration();
         if (timeDateDuration != null) {
-            timerSettingsValue.setTimeDuration(timeDateDuration.getMixed().getValue(0).toString());
+            timerSettingsValue.setTimeDuration(timeDateDuration.getBody());
         }
         return (timerSettingsValue);
     }

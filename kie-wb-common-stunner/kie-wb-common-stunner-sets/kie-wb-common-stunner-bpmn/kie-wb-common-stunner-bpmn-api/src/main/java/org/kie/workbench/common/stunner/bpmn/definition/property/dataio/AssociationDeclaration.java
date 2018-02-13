@@ -16,81 +16,140 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
-import java.util.Scanner;
-import java.util.regex.Pattern;
-
-public abstract class AssociationDeclaration {
-
-    private final String source;
-    private final String target;
-
-    public AssociationDeclaration(String source, String target) {
-        this.source = source;
-        this.target = target;
-    }
-
-    public String getSource() {
-        return source;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s->%s", source, target);
-    }
-
-    public static AssociationDeclaration ofInput(String source, String target) {
-        return new InputAssociationDeclaration(source, target);
-    }
-
-    public static AssociationDeclaration ofOutput(String source, String target) {
-        return new OutputAssociationDeclaration(source, target);
-    }
+public interface AssociationDeclaration {
 
     public static AssociationDeclaration fromString(String encoded) {
-        if (encoded.startsWith(InputAssociationDeclaration.BEGIN_MARK)) {
-            String rest = encoded.substring(InputAssociationDeclaration.BEGIN_MARK.length());
-            String[] association = rest.split("->");
-            return ofInput(association[0], association[1]);
+        return AssociationParser.parse(encoded);
+    }
+
+    public AssociationDeclaration.Pair getPair();
+
+    public boolean isInput();
+
+    interface Pair {
+
+    }
+
+    class FromTo implements AssociationDeclaration.Pair {
+
+        private final String from;
+        private final String to;
+
+        public FromTo(String from, String to) {
+            this.from = from;
+            this.to = to;
         }
 
-        if (encoded.startsWith(OutputAssociationDeclaration.BEGIN_MARK)) {
-            String rest = encoded.substring(OutputAssociationDeclaration.BEGIN_MARK.length());
-            String[] association = rest.split("->");
-            return ofOutput(association[0], association[1]);
+        public String getFrom() {
+            return from;
+        }
+
+        public String getTo() {
+            return to;
+        }
+
+        @Override
+        public String toString() {
+            return from + "=" + to;
+        }
+    }
+
+    class SourceTarget implements AssociationDeclaration.Pair {
+
+        private final String source;
+        private final String target;
+
+        public SourceTarget(String source, String target) {
+            this.source = source;
+            this.target = target;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
+        @Override
+        public String toString() {
+            return source + "->" + target;
+        }
+    }
+
+    class Input implements AssociationDeclaration {
+
+        protected static final String BEGIN_MARK = "[din]";
+        private AssociationDeclaration.Pair pair;
+
+        public Input(AssociationDeclaration.Pair pair) {
+            this.pair = pair;
+        }
+
+        public AssociationDeclaration.Pair getPair() {
+            return pair;
+        }
+
+        public boolean isInput() {
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            return "[din]" + pair.toString();
+        }
+    }
+
+    class Output implements AssociationDeclaration {
+
+        protected static final String BEGIN_MARK = "[dout]";
+        private final AssociationDeclaration.Pair pair;
+
+        public Output(AssociationDeclaration.Pair pair) {
+            this.pair = pair;
+        }
+
+        public AssociationDeclaration.Pair getPair() {
+            return pair;
+        }
+
+        public boolean isInput() {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "[dout]" + pair.toString();
+        }
+    }
+}
+
+class AssociationParser {
+
+    public static AssociationDeclaration parse(String encoded) {
+        if (encoded.startsWith(AssociationDeclaration.Input.BEGIN_MARK)) {
+            String rest = encoded.substring(AssociationDeclaration.Input.BEGIN_MARK.length());
+            AssociationDeclaration.Pair associationDeclaration = parseAssociation(rest);
+            return new AssociationDeclaration.Input(associationDeclaration);
+        }
+
+        if (encoded.startsWith(AssociationDeclaration.Output.BEGIN_MARK)) {
+            String rest = encoded.substring(AssociationDeclaration.Output.BEGIN_MARK.length());
+            AssociationDeclaration.Pair associationDeclaration = parseAssociation(rest);
+            return new AssociationDeclaration.Output(associationDeclaration);
         }
 
         throw new IllegalArgumentException("Cannot parse " + encoded);
     }
-}
 
-class InputAssociationDeclaration extends AssociationDeclaration {
-
-    protected static final String BEGIN_MARK = "[din]";
-
-    public InputAssociationDeclaration(String source, String target) {
-        super(source, target);
-    }
-
-    @Override
-    public String toString() {
-        return "[din]" + super.toString();
-    }
-}
-
-class OutputAssociationDeclaration extends AssociationDeclaration {
-
-    protected static final String BEGIN_MARK = "[dout]";
-
-    public OutputAssociationDeclaration(String source, String target) {
-        super(source, target);
-    }
-
-    @Override
-    public String toString() {
-        return "[dout]" + super.toString();
+    static AssociationDeclaration.Pair parseAssociation(String rest) {
+        if (rest.contains("=")) {
+            String[] association = rest.split("=");
+            return new AssociationDeclaration.FromTo(association[0], association[1]);
+        } else {
+            String[] association = rest.split("->");
+            return new AssociationDeclaration.SourceTarget(association[0], association[1]);
+        }
     }
 }

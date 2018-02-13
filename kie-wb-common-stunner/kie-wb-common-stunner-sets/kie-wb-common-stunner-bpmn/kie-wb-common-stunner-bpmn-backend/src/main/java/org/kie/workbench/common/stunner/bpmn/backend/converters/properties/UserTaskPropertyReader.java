@@ -132,7 +132,7 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
     }
 
     private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getMixed().getValue(0);
+        return ((FormalExpression) assignment.getFrom()).getBody();
     }
 
     public SimulationSet getSimulationSet() {

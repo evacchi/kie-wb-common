@@ -31,7 +31,7 @@ public class AssignmentDeclaration {
 
     @Override
     public String toString() {
-        if (type == null) {
+        if (type == null || type.isEmpty()) {
             return identifier;
         } else {
             return identifier + ":" + type;

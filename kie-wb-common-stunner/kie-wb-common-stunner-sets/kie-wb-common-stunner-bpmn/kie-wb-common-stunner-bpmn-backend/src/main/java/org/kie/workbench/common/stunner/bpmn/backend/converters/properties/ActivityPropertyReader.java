@@ -89,7 +89,7 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
 //    }
 
     private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getMixed().getValue(0);
+        return ((FormalExpression) assignment.getFrom()).getBody();
     }
 
     public SimulationSet getSimulationSet() {
