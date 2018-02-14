@@ -1,17 +1,12 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
-import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
-import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.OutputSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 
@@ -29,14 +24,6 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
         InputOutputSpecification ioSpec = bpmn2.createInputOutputSpecification();
         activity.setIoSpecification(ioSpec);
-
-        /*
-            <bpmn2:assignment id="_mK5jeH_mEeaT2qmUthBrDw">
-        <bpmn2:from xsi:type="bpmn2:tFormalExpression" id="_mK5jeX_mEeaT2qmUthBrDw"><![CDATA[admin,kiemgmt]]></bpmn2:from>
-        <bpmn2:to xsi:type="bpmn2:tFormalExpression" id="_mK5jen_mEeaT2qmUthBrDw">_18189082-D105-4BAB-B62C-34C5F8AF5D5B_GroupIdInputX</bpmn2:to>
-    </bpmn2:assignment>
-
-         */
 
         assignmentsInfo.getAssociations()
                 .getInputs()
