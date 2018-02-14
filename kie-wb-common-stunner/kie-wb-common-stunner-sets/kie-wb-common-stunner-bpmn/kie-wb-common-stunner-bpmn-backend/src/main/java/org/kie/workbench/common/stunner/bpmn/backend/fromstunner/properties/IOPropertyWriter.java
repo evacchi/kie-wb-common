@@ -3,6 +3,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
+import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.FormalExpression;
@@ -28,6 +29,7 @@ public class IOPropertyWriter extends PropertyWriter {
         ItemDefinition typeDef =
                 typedef(a.getSource(),
                         "java.lang.String");
+        typeDef.setId("_"+makeDataInputId(a.getTarget())+"Item");
 
         // then we declare a name (a variable) with that type,
         // e.g. foo:java.lang.String
@@ -37,6 +39,8 @@ public class IOPropertyWriter extends PropertyWriter {
         // the value that we assign to `source`
         // e.g. myInput
         DataInput target = readInputFrom(a.getTarget());
+        target.setItemSubjectRef(typeDef);
+        target.getAnyAttribute().add(Attributes.drools("dtype", "String"));
 
         // then we create the actual association between the two
         // e.g. foo := myInput (or, to put it differently, myInput -> foo)
@@ -60,7 +64,7 @@ public class IOPropertyWriter extends PropertyWriter {
 //        // e.g. myInput
         DataInput target = readInputFrom(attributeId);
 
-        Assignment assignment = assignment(target.getId(), "<![CDATA["+value.toString()+"]]>");
+        Assignment assignment = assignment(value.toString(), target.getId());
 
         // then we create the actual association between the two
         // e.g. foo := myInput (or, to put it differently, myInput -> foo)
@@ -108,6 +112,21 @@ public class IOPropertyWriter extends PropertyWriter {
         return dataInputAssociation;
     }
 
+    private DataOutputAssociation associateOutput(Property source, DataOutput dataOutput) {
+        DataOutputAssociation dataInputAssociation =
+                bpmn2.createDataOutputAssociation();
+
+        dataInputAssociation
+                .getSourceRef()
+                .add(dataOutput);
+
+        dataInputAssociation
+                .setTargetRef(source);
+
+        return dataInputAssociation;
+    }
+
+
     private DataInput readInputFrom(String targetName) {
         DataInput dataInput = bpmn2.createDataInput();
         dataInput.setName(targetName);
@@ -115,6 +134,15 @@ public class IOPropertyWriter extends PropertyWriter {
         dataInput.setId(makeDataInputId(targetName));
         return dataInput;
     }
+
+    private DataOutput writeOutputTo(String sourceName) {
+        DataOutput dataInput = bpmn2.createDataOutput();
+        dataInput.setName(sourceName);
+        // the id is an encoding of the node id + the name of the output
+        dataInput.setId(makeDataOutputId(sourceName));
+        return dataInput;
+    }
+
 
     private String makeDataInputId(String targetName) {
         return getFlowElement().getId() + "_" + targetName + "InputX";
@@ -132,5 +160,41 @@ public class IOPropertyWriter extends PropertyWriter {
         typeDef.setId("_" + sourceName + "Item");
         typeDef.setStructureRef(type);
         return typeDef;
+    }
+
+    public DataOutputAssociation addDataOutputAssociation(AssociationDeclaration.Output declaration) {
+        AssociationDeclaration.Pair pair = declaration.getPair();
+        return addOutputSourceTarget((AssociationDeclaration.SourceTarget) pair);
+    }
+
+    private DataOutputAssociation addOutputSourceTarget(AssociationDeclaration.SourceTarget a) {
+        // first we declare the type of this assignment
+        ItemDefinition typeDef =
+                typedef(a.getTarget(),
+                        "java.lang.String");
+        typeDef.setId("_"+makeDataOutputId(a.getSource())+"Item");
+
+        // then we declare a name (a variable) with that type,
+        // e.g. foo:java.lang.String
+        Property decl = varDecl(a.getTarget(), typeDef);
+
+        // then we declare the input that will provide
+        // the value that we assign to `source`
+        // e.g. myInput
+        DataOutput source = writeOutputTo(a.getSource());
+        source.setItemSubjectRef(typeDef);
+        source.getAnyAttribute().add(Attributes.drools("dtype", "String"));
+
+        // then we create the actual association between the two
+        // e.g. foo := myInput (or, to put it differently, myInput -> foo)
+        DataOutputAssociation dataOutputAssociation =
+                associateOutput(decl, source);
+        this.addBaseElement(typeDef);
+
+        return dataOutputAssociation;
+    }
+
+    private String makeDataOutputId(String targetName) {
+        return getFlowElement().getId() + "_" + targetName + "OutputX";
     }
 }

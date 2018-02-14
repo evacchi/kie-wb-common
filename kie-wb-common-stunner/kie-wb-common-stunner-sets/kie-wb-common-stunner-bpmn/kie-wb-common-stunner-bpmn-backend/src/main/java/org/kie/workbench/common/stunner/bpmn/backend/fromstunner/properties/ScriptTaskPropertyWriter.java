@@ -47,29 +47,4 @@ public class ScriptTaskPropertyWriter extends ActivityPropertyWriter {
         setMeta("customAsync", String.valueOf(async));
     }
 
-    public FeatureMap.Entry setOnEntryScript(ScriptTypeValue onEntryAction) {
-        if (onEntryAction.getScript() == null && onEntryAction.getScript().isEmpty()) {
-            return null;
-        }
-        OnEntryScriptType script = droolsFactory.createOnEntryScriptType();
-        script.setScript(asCData(onEntryAction.getScript()));
-        String scriptLanguage = Scripts.scriptLanguageToUri(onEntryAction.getLanguage());
-        script.setScriptFormat(scriptLanguage);
-        return new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_ENTRY_SCRIPT,
-                script);
-    }
-
-    public FeatureMap.Entry setOnExitScript(ScriptTypeValue onExitAction) {
-        if (onExitAction.getScript() == null && onExitAction.getScript().isEmpty()) {
-            return null;
-        }
-        OnExitScriptType script = droolsFactory.createOnExitScriptType();
-        script.setScript(asCData(onExitAction.getScript()));
-        String scriptLanguage = Scripts.scriptLanguageToUri(onExitAction.getLanguage());
-        script.setScriptFormat(scriptLanguage);
-        return new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__ON_EXIT_SCRIPT,
-                script);
-    }
 }

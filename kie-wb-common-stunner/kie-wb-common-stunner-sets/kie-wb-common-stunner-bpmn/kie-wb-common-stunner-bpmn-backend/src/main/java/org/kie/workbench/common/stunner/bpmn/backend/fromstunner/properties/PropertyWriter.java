@@ -40,7 +40,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class PropertyWriter {
 
-    private final FlowElement flowElement;
+    protected final FlowElement flowElement;
     private final Map<String, BaseElement> baseElements = new HashMap<>();
     private final BPMNShape shape;
 

@@ -1,12 +1,18 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
+import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
+import org.eclipse.bpmn2.ItemAwareElement;
+import org.eclipse.bpmn2.OutputSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
@@ -44,6 +50,25 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
                     ioSpec.getDataInputs().add((DataInput) dia.getTargetRef());
                     activity.getDataInputAssociations().add(dia);
                 });
+
+        assignmentsInfo.getAssociations()
+                .getOutputs()
+                .stream()
+                .map(this::addDataOutputAssociation)
+                .forEach(doa -> {
+                    OutputSet outputSet = bpmn2.createOutputSet();
+                    List<ItemAwareElement> sourceRef = doa.getSourceRef();
+                    ioSpec.getOutputSets().add(outputSet);
+                    doa.getSourceRef().forEach(this::addBaseElement);
+
+                    sourceRef.forEach(i -> {
+                        DataOutput dataOutput = (DataOutput) i;
+                        outputSet.getDataOutputRefs().add(dataOutput);
+                        ioSpec.getDataOutputs().add(dataOutput);
+                    });
+                    activity.getDataOutputAssociations().add(doa);
+                });
+
     }
 
     protected void setInput(String name, Object value) {

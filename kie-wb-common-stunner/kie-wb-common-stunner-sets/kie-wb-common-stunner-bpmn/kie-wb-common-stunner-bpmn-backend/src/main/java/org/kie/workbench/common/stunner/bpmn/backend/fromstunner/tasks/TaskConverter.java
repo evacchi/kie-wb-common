@@ -68,9 +68,9 @@ public class TaskConverter {
                     return p;
                 })
                 .when(BusinessRuleTask.class, n -> {
-                    org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
+                    org.eclipse.bpmn2.BusinessRuleTask task = bpmn2.createBusinessRuleTask();
                     BusinessRuleTask definition = n.getContent().getDefinition();
-                    ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
+                    BusinessRuleTaskPropertyWriter p = new BusinessRuleTaskPropertyWriter(task);
 
                     task.setId(n.getUUID());
 
@@ -78,12 +78,16 @@ public class TaskConverter {
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
-                    BusinessRuleTaskExecutionSet executionSet = definition.getExecutionSet();
-
-                    // p.setOnEntryScript(executionSet.getOnEntryAction());
-                    // p.setOnExitScript(executionSet.getOnExitAction());
+                    BusinessRuleTaskExecutionSet executionSet =
+                            definition.getExecutionSet();
 
                     p.setAsync(executionSet.getIsAsync().getValue());
+                    p.setOnEntryAction(executionSet.getOnEntryAction());
+                    p.setOnExitAction(executionSet.getOnExitAction());
+                    p.setRuleFlowGroup(executionSet.getRuleFlowGroup());
+                    p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+
+                    p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
 
                     p.setBounds(n.getContent().getBounds());
                     return p;
