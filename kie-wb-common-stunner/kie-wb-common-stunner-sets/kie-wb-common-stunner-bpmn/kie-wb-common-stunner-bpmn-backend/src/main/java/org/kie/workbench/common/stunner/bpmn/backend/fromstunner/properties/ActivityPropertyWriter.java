@@ -44,10 +44,14 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
                 .map(this::addDataInputAssociation)
                 .forEach(dia -> {
                     InputSet inputSet = bpmn2.createInputSet();
-                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
-                    ioSpec.getInputSets().add(inputSet);
                     dia.getSourceRef().forEach(this::addBaseElement);
-                    ioSpec.getDataInputs().add((DataInput) dia.getTargetRef());
+                    this.addBaseElement(dia.getTargetRef());
+                    ioSpec.getInputSets().add(inputSet);
+
+                    DataInput targetRef = (DataInput) dia.getTargetRef();
+                    inputSet.getDataInputRefs().add(targetRef);
+                    ioSpec.getDataInputs().add(targetRef);
+
                     activity.getDataInputAssociations().add(dia);
                 });
 
@@ -57,14 +61,14 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
                 .map(this::addDataOutputAssociation)
                 .forEach(doa -> {
                     OutputSet outputSet = bpmn2.createOutputSet();
-                    List<ItemAwareElement> sourceRef = doa.getSourceRef();
-                    ioSpec.getOutputSets().add(outputSet);
                     doa.getSourceRef().forEach(this::addBaseElement);
+                    this.addBaseElement(doa.getTargetRef());
+                    ioSpec.getOutputSets().add(outputSet);
 
-                    sourceRef.forEach(i -> {
-                        DataOutput dataOutput = (DataOutput) i;
-                        outputSet.getDataOutputRefs().add(dataOutput);
-                        ioSpec.getDataOutputs().add(dataOutput);
+                    doa.getSourceRef().forEach(i -> {
+                        DataOutput sourceRef = (DataOutput) i;
+                        outputSet.getDataOutputRefs().add(sourceRef);
+                        ioSpec.getDataOutputs().add(sourceRef);
                     });
                     activity.getDataOutputAssociations().add(doa);
                 });
