@@ -22,6 +22,8 @@ import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNDiagram;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.core.graph.Graph;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -35,10 +37,16 @@ public class DefinitionsConverter {
         this.processConverter = new ProcessConverter(context);
     }
 
+    public DefinitionsConverter(Graph graph) {
+        this(new DefinitionsBuildingContext(graph));
+    }
+
     public Definitions toDefinitions() {
         Definitions definitions = bpmn2.createDefinitions();
 
-        Process process = processConverter.toFlowElement();
+        ProcessPropertyWriter p = processConverter.toFlowElement();
+        Process process = p.getProcess();
+
         definitions.getRootElements().add(process);
 
         BPMNDiagram bpmnDiagram = processConverter.toBPMNDiagram();
@@ -50,9 +58,7 @@ public class DefinitionsConverter {
         relationship.getSources().add(process);
         relationship.getTargets().add(process);
 
-//        definitions.getRootElements().addAll(context.getBaseElements());
-
-        for (BaseElement baseElement : context.getBaseElements()) {
+        for (BaseElement baseElement : p.getBaseElements()) {
             if (baseElement instanceof RootElement) {
                 definitions.getRootElements().add((RootElement)baseElement);
             }

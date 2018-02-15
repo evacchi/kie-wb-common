@@ -49,6 +49,7 @@ import org.kie.workbench.common.stunner.backend.ApplicationFactoryManager;
 import org.kie.workbench.common.stunner.backend.definition.factory.TestScopeModelFactory;
 import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
 import org.kie.workbench.common.stunner.bpmn.backend.BPMNDirectDiagramMarshaller;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.AdHocSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
@@ -1565,134 +1566,139 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(result.contains("Bounds height=\"30.0\" width=\"30.0\" x=\"312.0\" y=\"195.0\""));
     }
 
-//    @Test
-//    public void testMarshallProcessVariables() throws Exception {
-//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSVARIABLES);
-//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
-//
-//        String result = tested.marshall(diagram);
-//        assertDiagram(result,
-//                      1,
-//                      7,
-//                      7);
-//
-//        Definitions definitions = (Definitions) resource.getContents().get(0);
-//        assertNotNull(definitions);
-//        List<RootElement> rootElements = definitions.getRootElements();
-//        assertNotNull(rootElements);
-//
-//        assertNotNull(getItemDefinition(rootElements,
-//                                        "_employeeItem",
-//                                        "java.lang.String"));
-//        assertNotNull(getItemDefinition(rootElements,
-//                                        "_reasonItem",
-//                                        "java.lang.String"));
-//        assertNotNull(getItemDefinition(rootElements,
-//                                        "_performanceItem",
-//                                        "java.lang.String"));
-//
-//        Process process = getProcess(definitions);
-//        assertNotNull(process);
-//        List<Property> properties = process.getProperties();
-//        assertNotNull(properties);
-//        assertNotNull(getProcessProperty(properties,
-//                                         "employee",
-//                                         "_employeeItem"));
-//        assertNotNull(getProcessProperty(properties,
-//                                         "reason",
-//                                         "_reasonItem"));
-//        assertNotNull(getProcessProperty(properties,
-//                                         "performance",
-//                                         "_performanceItem"));
-//    }
-//
-//    @Test
-//    public void testMarshallProcessProperties() throws Exception {
-//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSPROPERTIES);
-//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
-//
-//        String result = tested.marshall(diagram);
-//        assertDiagram(result,
-//                      1,
-//                      3,
-//                      2);
-//
-//        Definitions definitions = (Definitions) resource.getContents().get(0);
-//        assertNotNull(definitions);
-//        Process process = getProcess(definitions);
-//        assertNotNull(process);
-//
-//        assertEquals("JDLProj.BPSimple",
-//                     process.getId());
-//        assertEquals("BPSimple",
-//                     process.getName());
-//        assertTrue(process.isIsExecutable());
-//        assertEquals("true",
-//                     getProcessPropertyValue(process,
-//                                             "adHoc"));
-//        assertEquals("org.jbpm",
-//                     getProcessPropertyValue(process,
-//                                             "packageName"));
-//        assertEquals("1.0",
-//                     getProcessPropertyValue(process,
-//                                             "version"));
-//        assertNotNull(process.getDocumentation());
-//        assertFalse(process.getDocumentation().isEmpty());
-//        assertEquals("<![CDATA[This is a\nsimple\nprocess]]>",
-//                     process.getDocumentation().get(0).getText());
-//        assertEquals("<![CDATA[This is the\nProcess\nInstance\nDescription]]>",
-//                     getProcessExtensionValue(process,
-//                                              "customDescription"));
-//    }
+    @Test
+    public void testMarshallProcessVariables() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSVARIABLES);
 
-//    @Test
-//    public void testMarshallUserTaskAssignments() throws Exception {
-//        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_USERTASKASSIGNMENTS);
-//        JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
-//
-//        String result = tested.marshall(diagram);
-//        assertDiagram(result,
-//                      1,
-//                      7,
-//                      7);
-//
-//        Definitions definitions = (Definitions) resource.getContents().get(0);
-//        assertNotNull(definitions);
-//        Process process = getProcess(definitions);
-//        assertNotNull(process);
-//        org.eclipse.bpmn2.UserTask userTask = (org.eclipse.bpmn2.UserTask) getNamedFlowElement(process,
-//                                                                                               org.eclipse.bpmn2.UserTask.class,
-//                                                                                               "Self Evaluation");
-//        assertNotNull(userTask);
-//        DataInput dataInput = (DataInput) getDataInput(userTask,
-//                                                       "reason");
-//        validateDataInputOrOutput(dataInput,
-//                                  "_reasonInputX",
-//                                  "com.test.Reason",
-//                                  "_reasonInputXItem");
-//        DataOutput dataOutput = (DataOutput) getDataOutput(userTask,
-//                                                           "performance");
-//        validateDataInputOrOutput(dataOutput,
-//                                  "_performanceOutputX",
-//                                  "Object",
-//                                  "_performanceOutputXItem");
-//
-//        ItemAwareElement sourceRef = getDataInputAssociationSourceRef(userTask,
-//                                                                      "reason");
-//        assertNotNull(sourceRef);
-//
-//        ItemAwareElement targetRef = getDataInputAssociationTargetRef(userTask,
-//                                                                      "_reasonInputX");
-//        assertNotNull(targetRef);
-//
-//        sourceRef = getDataOutputAssociationSourceRef(userTask,
-//                                                      "_performanceOutputX");
-//        assertNotNull(sourceRef);
-//
-//        targetRef = getDataOutputAssociationTargetRef(userTask,
-//                                                      "performance");
-//        assertNotNull(targetRef);
-//    }
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      7,
+                      7);
+
+        Definitions definitions =
+                new DefinitionsConverter(diagram.getGraph()).toDefinitions();
+
+        assertNotNull(definitions);
+        List<RootElement> rootElements = definitions.getRootElements();
+        assertNotNull(rootElements);
+
+        assertNotNull(getItemDefinition(rootElements,
+                                        "_employeeItem",
+                                        "java.lang.String"));
+        assertNotNull(getItemDefinition(rootElements,
+                                        "_reasonItem",
+                                        "java.lang.String"));
+        assertNotNull(getItemDefinition(rootElements,
+                                        "_performanceItem",
+                                        "java.lang.String"));
+
+        Process process = getProcess(definitions);
+        assertNotNull(process);
+        List<Property> properties = process.getProperties();
+        assertNotNull(properties);
+        assertNotNull(getProcessProperty(properties,
+                                         "employee",
+                                         "_employeeItem"));
+        assertNotNull(getProcessProperty(properties,
+                                         "reason",
+                                         "_reasonItem"));
+        assertNotNull(getProcessProperty(properties,
+                                         "performance",
+                                         "_performanceItem"));
+    }
+
+    @Test
+    public void testMarshallProcessProperties() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_PROCESSPROPERTIES);
+
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      3,
+                      2);
+
+        Definitions definitions =
+                new DefinitionsConverter(diagram.getGraph()).toDefinitions();
+        assertNotNull(definitions);
+        Process process = getProcess(definitions);
+        assertNotNull(process);
+
+        assertEquals("JDLProj.BPSimple",
+                     process.getId());
+        assertEquals("BPSimple",
+                     process.getName());
+        assertTrue(process.isIsExecutable());
+        assertEquals("true",
+                     getProcessPropertyValue(process,
+                                             "adHoc"));
+        assertEquals("org.jbpm",
+                     getProcessPropertyValue(process,
+                                             "packageName"));
+        assertEquals("1.0",
+                     getProcessPropertyValue(process,
+                                             "version"));
+        assertNotNull(process.getDocumentation());
+        assertFalse(process.getDocumentation().isEmpty());
+        assertEquals("<![CDATA[This is a\nsimple\nprocess]]>",
+                     process.getDocumentation().get(0).getText());
+        assertEquals("<![CDATA[This is the\nProcess\nInstance\nDescription]]>",
+                     getProcessExtensionValue(process,
+                                              "customDescription"));
+    }
+
+    @Test
+    public void testMarshallUserTaskAssignments() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_USERTASKASSIGNMENTS);
+        //JBPMBpmn2ResourceImpl resource = tested.marshallToBpmn2Resource(diagram);
+
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      7,
+                      7);
+
+        DefinitionsConverter definitionsConverter = new DefinitionsConverter(diagram.getGraph());
+
+        Definitions definitions = definitionsConverter.toDefinitions();
+        assertNotNull(definitions);
+        Process process = getProcess(definitions);
+        assertNotNull(process);
+        org.eclipse.bpmn2.UserTask userTask = (org.eclipse.bpmn2.UserTask) getNamedFlowElement(process,
+                                                                                               org.eclipse.bpmn2.UserTask.class,
+                                                                                               "Self Evaluation");
+        assertNotNull(userTask);
+        DataInput dataInput = (DataInput) getDataInput(userTask,
+                                                       "reason");
+
+        // this fails because of type
+        validateDataInputOrOutput(dataInput,
+                                  "_reasonInputX",
+                                  "com.test.Reason",
+                                  "_reasonInputXItem");
+        DataOutput dataOutput = (DataOutput) getDataOutput(userTask,
+                                                           "performance");
+        validateDataInputOrOutput(dataOutput,
+                                  "_performanceOutputX",
+                                  "Object",
+                                  "_performanceOutputXItem");
+
+        ItemAwareElement sourceRef = getDataInputAssociationSourceRef(userTask,
+                                                                      "reason");
+        assertNotNull(sourceRef);
+
+        ItemAwareElement targetRef = getDataInputAssociationTargetRef(userTask,
+                                                                      "_reasonInputX");
+        assertNotNull(targetRef);
+
+        sourceRef = getDataOutputAssociationSourceRef(userTask,
+                                                      "_performanceOutputX");
+        assertNotNull(sourceRef);
+
+        targetRef = getDataOutputAssociationTargetRef(userTask,
+                                                      "performance");
+        assertNotNull(targetRef);
+    }
 
     @Test
     public void testMarshallBusinessRuleTaskAssignments() throws Exception {
@@ -2511,7 +2517,7 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(itemAwareElement.getId().endsWith(idSuffix));
         ItemDefinition itemDefinition = itemAwareElement.getItemSubjectRef();
         assertNotNull(itemDefinition);
-        assertTrue(itemDefinition.getStructureRef().equals(dataType));
+        assertEquals(itemDefinition.getStructureRef(), (dataType));
         assertTrue(itemDefinition.getId().endsWith(itemSubjectRefSuffix));
     }
 

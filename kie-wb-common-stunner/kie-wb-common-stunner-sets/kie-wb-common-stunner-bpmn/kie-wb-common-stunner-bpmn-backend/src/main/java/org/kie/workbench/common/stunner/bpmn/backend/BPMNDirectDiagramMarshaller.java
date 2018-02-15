@@ -47,10 +47,9 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingCon
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.api.FactoryManager;
 import org.kie.workbench.common.stunner.core.definition.service.DiagramMarshaller;
@@ -139,11 +138,8 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         rSet.getResources().add(resource);
 
-        DefinitionsBuildingContext context =
-                new DefinitionsBuildingContext(diagram.getGraph());
-
         DefinitionsConverter definitionsConverter =
-                new DefinitionsConverter(context);
+                new DefinitionsConverter(diagram.getGraph());
 
         Definitions definitions =
                 definitionsConverter.toDefinitions();
@@ -253,5 +249,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         final DocumentRoot root = (DocumentRoot) resource.getContents().get(0);
 
         return root.getDefinitions();
+    }
+
+    public JBPMBpmn2ResourceImpl marshallToBpmn2Resource(Diagram<Graph, Metadata> diagram) {
+        return null;
     }
 }

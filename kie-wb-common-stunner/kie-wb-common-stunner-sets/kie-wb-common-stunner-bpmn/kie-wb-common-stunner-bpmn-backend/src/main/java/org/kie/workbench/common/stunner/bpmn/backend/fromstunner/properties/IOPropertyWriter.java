@@ -10,6 +10,7 @@ import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Property;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -19,16 +20,17 @@ public class IOPropertyWriter extends PropertyWriter {
         super(flowElement);
     }
 
-    protected DataInputAssociation addDataInputAssociation(AssociationDeclaration.Input declaration) {
-        AssociationDeclaration.Pair pair = declaration.getPair();
-        return addInputSourceTarget((AssociationDeclaration.SourceTarget) pair);
+    protected DataInputAssociation addDataInputAssociation(AssociationDeclaration.Input declaration, DeclarationList inputs) {
+        AssociationDeclaration.SourceTarget pair = (AssociationDeclaration.SourceTarget) declaration.getPair();
+        String type = inputs.lookup(pair.getTarget());
+        return addInputSourceTarget(pair, type);
     }
 
-    protected DataInputAssociation addInputSourceTarget(AssociationDeclaration.SourceTarget a) {
+    protected DataInputAssociation addInputSourceTarget(AssociationDeclaration.SourceTarget a, String type) {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedefInput(a.getTarget(),
-                        "java.lang.String");
+                        type);
 
         // then we declare a name (a variable) with that type,
         // e.g. foo:java.lang.String
@@ -171,16 +173,17 @@ public class IOPropertyWriter extends PropertyWriter {
         return typeDef;
     }
 
-    public DataOutputAssociation addDataOutputAssociation(AssociationDeclaration.Output declaration) {
-        AssociationDeclaration.Pair pair = declaration.getPair();
-        return addOutputSourceTarget((AssociationDeclaration.SourceTarget) pair);
+    public DataOutputAssociation addDataOutputAssociation(AssociationDeclaration.Output declaration, DeclarationList outputs) {
+        AssociationDeclaration.SourceTarget pair =  (AssociationDeclaration.SourceTarget) declaration.getPair();
+        String type = outputs.lookup(pair.getSource());
+        return addOutputSourceTarget(pair, type);
     }
 
-    private DataOutputAssociation addOutputSourceTarget(AssociationDeclaration.SourceTarget a) {
+    private DataOutputAssociation addOutputSourceTarget(AssociationDeclaration.SourceTarget a, String type) {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedefOutput(a.getSource(),
-                        "java.lang.String");
+                        type);
 
         // then we declare a name (a variable) with that type,
         // e.g. foo:java.lang.String

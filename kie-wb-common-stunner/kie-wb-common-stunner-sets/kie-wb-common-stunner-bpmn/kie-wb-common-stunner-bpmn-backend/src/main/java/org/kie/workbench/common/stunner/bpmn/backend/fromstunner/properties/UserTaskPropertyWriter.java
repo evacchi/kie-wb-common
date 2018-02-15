@@ -67,23 +67,25 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
         setMeta("customAutoStart", String.valueOf(autoStart));
     }
 
-    public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        InputOutputSpecification ioSpec = bpmn2.createInputOutputSpecification();
-        task.setIoSpecification(ioSpec);
-        assignmentsInfo.getAssociations().getInputs()
-                .stream()
-                .map(this::addDataInputAssociation)
-                .forEach(dia -> {
-                    InputSet inputSet = bpmn2.createInputSet();
-                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
-                    ioSpec.getInputSets().add(inputSet);
-                    dia.getSourceRef().forEach(this::addBaseElement);
-                    task.getDataInputAssociations().add(dia);
-                });
-    }
+//    public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
+//        InputOutputSpecification ioSpec = bpmn2.createInputOutputSpecification();
+//        task.setIoSpecification(ioSpec);
+//        assignmentsInfo.getAssociations().getInputs()
+//                .stream()
+//                .map(as -> this.addDataInputAssociation(
+//                        as, assignmentsInfo.getInputs()))
+//                .forEach(dia -> {
+//                    InputSet inputSet = bpmn2.createInputSet();
+//                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
+//                    ioSpec.getDataInputs().add((DataInput) dia.getTargetRef());
+//                    ioSpec.getInputSets().add(inputSet);
+//                    dia.getSourceRef().forEach(this::addBaseElement);
+//                    task.getDataInputAssociations().add(dia);
+//                });
+//    }
 
     public void setTaskName(String taskName) {
-        task.setName(taskName.trim());
+        //task.setName(taskName.trim());
         setInput("TaskName", taskName);
     }
 

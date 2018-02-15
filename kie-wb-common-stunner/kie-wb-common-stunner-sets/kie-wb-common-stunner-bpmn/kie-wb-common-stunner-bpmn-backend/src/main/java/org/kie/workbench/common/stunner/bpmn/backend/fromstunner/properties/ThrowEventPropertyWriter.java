@@ -37,7 +37,7 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
         assignmentsInfo.getAssociations().getInputs()
                 .stream()
-                .map(this::addDataInputAssociation)
+                .map(declaration -> addDataInputAssociation(declaration, assignmentsInfo.getInputs()))
                 .forEach(dia -> {
                     InputSet inputSet = bpmn2.createInputSet();
                     inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());

@@ -29,6 +29,14 @@ public class AssignmentDeclaration {
         this.type = type;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
         if (type == null || type.isEmpty()) {

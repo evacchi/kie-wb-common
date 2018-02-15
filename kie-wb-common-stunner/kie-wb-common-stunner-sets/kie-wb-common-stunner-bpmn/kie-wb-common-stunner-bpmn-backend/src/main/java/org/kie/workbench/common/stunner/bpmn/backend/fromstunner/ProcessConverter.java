@@ -39,6 +39,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
@@ -59,28 +60,26 @@ public class ProcessConverter {
         this.viewDefinitionConverter = new ViewDefinitionConverter(context);
     }
 
-    public Process toFlowElement() {
+    public ProcessPropertyWriter toFlowElement() {
         Process rootLevelProcess = bpmn2.createProcess();
         rootLevelProcess.setId(context.getGraph().getUUID());
 
-        List<FlowElement> flowElements = rootLevelProcess.getFlowElements();
+        ProcessPropertyWriter p = new ProcessPropertyWriter(rootLevelProcess);
 
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
-                .forEach(p -> {
-                    flowElements.add(p.getFlowElement());
-                    p.getBaseElements().forEach(context::addBaseElement);
+                .forEach(pp -> {
+                    p.addFlowElement(pp.getFlowElement());
+                    p.addAllBaseElements(pp.getBaseElements());
                 });
 
         context.edges()
                 .map(sequenceFlowConverter::toFlowElement)
-                .forEach(context::addSequenceFlow);
+                .forEach(p::addFlowElement);
 
-        flowElements.addAll(context.getSequenceFlows());
-
-        return rootLevelProcess;
+        return p;
     }
 
     public Relationship toRelationship() {

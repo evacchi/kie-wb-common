@@ -28,7 +28,7 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getInputs()
                 .stream()
-                .map(this::addDataInputAssociation)
+                .map(declaration -> addDataInputAssociation(declaration, assignmentsInfo.getInputs()))
                 .forEach(dia -> {
                     InputSet inputSet = bpmn2.createInputSet();
                     dia.getSourceRef().forEach(this::addBaseElement);
@@ -45,7 +45,7 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getOutputs()
                 .stream()
-                .map(this::addDataOutputAssociation)
+                .map(declaration -> this.addDataOutputAssociation(declaration, assignmentsInfo.getOutputs()))
                 .forEach(doa -> {
                     OutputSet outputSet = bpmn2.createOutputSet();
                     doa.getSourceRef().forEach(this::addBaseElement);

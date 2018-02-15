@@ -25,11 +25,13 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.EndEvent
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateCatchEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways.GatewayConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
@@ -50,6 +52,7 @@ public class ViewDefinitionConverter {
     private final EndEventConverter endEventConverter;
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
+    private GatewayConverter gatewayConverter;
 
     public ViewDefinitionConverter(DefinitionsBuildingContext context) {
         this.context = context;
@@ -57,6 +60,7 @@ public class ViewDefinitionConverter {
         this.endEventConverter = new EndEventConverter();
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
         this.intermediateThrowEventConverter = new IntermediateThrowEventConverter();
+        this.gatewayConverter = new GatewayConverter();
         this.taskConverter = new TaskConverter();
     }
 
@@ -67,6 +71,7 @@ public class ViewDefinitionConverter {
                 .when(BaseThrowingIntermediateEvent.class, intermediateThrowEventConverter::toFlowElement)
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)
                 .when(BaseTask.class, taskConverter::toFlowElement)
+                .when(BaseGateway.class, gatewayConverter::toFlowElement)
                 .apply(node);
     }
 

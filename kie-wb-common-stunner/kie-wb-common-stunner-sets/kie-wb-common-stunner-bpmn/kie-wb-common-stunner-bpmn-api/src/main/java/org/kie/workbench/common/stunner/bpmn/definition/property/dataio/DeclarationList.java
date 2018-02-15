@@ -29,9 +29,13 @@ public class DeclarationList {
         this.declarations = Collections.emptyList();
     }
 
-
     public DeclarationList(List<AssignmentDeclaration> declarations) {
         this.declarations = declarations;
+    }
+
+    public String lookup(String identifier) {
+        return declarations.stream().filter(d -> identifier.equals(d.getIdentifier()))
+                .findFirst().map(AssignmentDeclaration::getType).orElse(null);
     }
 
     @Override
@@ -47,5 +51,4 @@ public class DeclarationList {
                         .map(AssignmentDeclaration::fromString)
                         .collect(Collectors.toList()));
     }
-
 }

@@ -113,19 +113,29 @@ public abstract class EventPropertyWriter extends IOPropertyWriter {
 
         TimerSettingsValue timerSettingsValue = timerSettings.getValue();
 
-        FormalExpression timeDate = bpmn2.createFormalExpression();
-        timeDate.setBody(timerSettingsValue.getTimeDate());
-        eventDefinition.setTimeDate(timeDate);
+        String date = timerSettingsValue.getTimeDate();
+        if (date != null) {
+            FormalExpression timeDate = bpmn2.createFormalExpression();
+            timeDate.setBody(date);
+            eventDefinition.setTimeDate(timeDate);
+        }
 
-        FormalExpression timeDuration = bpmn2.createFormalExpression();
-        timeDuration.setBody(timerSettingsValue.getTimeDuration());
-        eventDefinition.setTimeDuration(timeDuration);
+        String duration = timerSettingsValue.getTimeDuration();
+        if (duration != null) {
+            FormalExpression timeDuration = bpmn2.createFormalExpression();
+            timeDuration.setBody(duration);
+            eventDefinition.setTimeDuration(timeDuration);
+        }
 
-        FormalExpression timeCycleExpression = bpmn2.createFormalExpression();
-        timeCycleExpression.setBody(timerSettingsValue.getTimeCycle());
-        timeCycleExpression.setLanguage(timerSettingsValue.getTimeCycleLanguage());
-        eventDefinition.setTimeCycle(timeCycleExpression);
-
+        String cycle = timerSettingsValue.getTimeCycle();
+        String cycleLanguage = timerSettingsValue.getTimeCycleLanguage();
+        if (cycle != null && cycleLanguage != null) {
+            FormalExpression timeCycleExpression = bpmn2.createFormalExpression();
+            timeCycleExpression.setBody(cycle);
+            timeCycleExpression.setLanguage(cycleLanguage);
+            eventDefinition.setTimeCycle(timeCycleExpression);
+        }
+        
         addEventDefinition(eventDefinition);
     }
 
