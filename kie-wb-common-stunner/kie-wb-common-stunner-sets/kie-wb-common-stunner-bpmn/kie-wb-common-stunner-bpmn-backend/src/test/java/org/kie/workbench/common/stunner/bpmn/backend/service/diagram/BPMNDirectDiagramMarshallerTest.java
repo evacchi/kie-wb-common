@@ -132,6 +132,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.kie.workbench.common.stunner.bpmn.backend.service.diagram.Assertions.assertDiagram;
 import static org.kie.workbench.common.stunner.bpmn.backend.service.diagram.Assertions.assertDocumentation;
 import static org.mockito.Matchers.any;
@@ -327,7 +328,9 @@ public class BPMNDirectDiagramMarshallerTest {
         }
         assertEquals(variables.getValue(),
                      "employee:java.lang.String,reason:java.lang.String,performance:java.lang.String");
-        Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("_luRBMdEjEeWXpsZ1tNStKQ");
+        // fixme why was this test looking for the definitions id ??
+        // Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("_luRBMdEjEeWXpsZ1tNStKQ");
+        Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("processvariables");
         assertTrue(diagramNode.getContent().getDefinition() instanceof BPMNDiagram);
         BPMNDiagramImpl bpmnDiagram = (BPMNDiagramImpl) diagramNode.getContent().getDefinition();
         assertTrue(bpmnDiagram.getProcessData() != null);
@@ -1583,15 +1586,15 @@ public class BPMNDirectDiagramMarshallerTest {
         List<RootElement> rootElements = definitions.getRootElements();
         assertNotNull(rootElements);
 
-        assertNotNull(getItemDefinition(rootElements,
+        assertItemExists(rootElements,
                                         "_employeeItem",
-                                        "java.lang.String"));
-        assertNotNull(getItemDefinition(rootElements,
+                                        "java.lang.String");
+        assertItemExists(rootElements,
                                         "_reasonItem",
-                                        "java.lang.String"));
-        assertNotNull(getItemDefinition(rootElements,
+                                        "java.lang.String");
+        assertItemExists(rootElements,
                                         "_performanceItem",
-                                        "java.lang.String"));
+                                        "java.lang.String");
 
         Process process = getProcess(definitions);
         assertNotNull(process);
@@ -2406,20 +2409,21 @@ public class BPMNDirectDiagramMarshallerTest {
         return (Process) o;
     }
 
-    private ItemDefinition getItemDefinition(List<RootElement> rootElements,
+    private void assertItemExists(List<RootElement> rootElements,
                                              String id,
                                              String structureRef) {
         for (RootElement rootElement : rootElements) {
             if (id.equals(rootElement.getId()) && rootElement instanceof ItemDefinition) {
                 ItemDefinition itemDefinition = (ItemDefinition) rootElement;
                 if (structureRef.equals(itemDefinition.getStructureRef())) {
-                    return itemDefinition;
+                    // pass;
+                    return;
                 } else {
-                    return null;
+                    fail("Found mismatching item with id = "+id+" "+itemDefinition);
                 }
             }
         }
-        return null;
+        fail("Could not find item id = "+id);
     }
 
     private Property getProcessProperty(List<Property> properties,

@@ -170,7 +170,7 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         Graph<DefinitionSet, Node> graph =
                 typedFactoryManager.newGraph(
-                        definitionsId, BPMNDefinitionSet.class);
+                        process.getId(), BPMNDefinitionSet.class);
 
         GraphBuildingContext context = emptyGraphContext(graph);
 
@@ -183,7 +183,7 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
                         propertyReaderFactory,
                         context);
 
-        processConverter.convert(definitionsId, process);
+        processConverter.convert(process);
 
         LOG.debug("Diagram unmarshalling finished successfully.");
         return graph;

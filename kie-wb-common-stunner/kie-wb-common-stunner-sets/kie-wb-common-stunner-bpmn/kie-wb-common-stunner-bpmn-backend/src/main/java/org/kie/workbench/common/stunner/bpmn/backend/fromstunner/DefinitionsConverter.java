@@ -17,11 +17,19 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import org.eclipse.bpmn2.BaseElement;
+import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Definitions;
+import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNDiagram;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.jboss.drools.DroolsFactory;
+import org.jboss.drools.DroolsPackage;
+import org.jboss.drools.MetaDataType;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 
@@ -44,7 +52,8 @@ public class DefinitionsConverter {
     public Definitions toDefinitions() {
         Definitions definitions = bpmn2.createDefinitions();
 
-        ProcessPropertyWriter p = processConverter.toFlowElement();
+        ProcessPropertyWriter p =
+                processConverter.toFlowElement(context.firstNode());
         Process process = p.getProcess();
 
         definitions.getRootElements().add(process);

@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,6 +37,10 @@ public class DeclarationList {
     public String lookup(String identifier) {
         return declarations.stream().filter(d -> identifier.equals(d.getIdentifier()))
                 .findFirst().map(AssignmentDeclaration::getType).orElse(null);
+    }
+
+    public Collection<AssignmentDeclaration> getDeclarations() {
+        return declarations;
     }
 
     @Override

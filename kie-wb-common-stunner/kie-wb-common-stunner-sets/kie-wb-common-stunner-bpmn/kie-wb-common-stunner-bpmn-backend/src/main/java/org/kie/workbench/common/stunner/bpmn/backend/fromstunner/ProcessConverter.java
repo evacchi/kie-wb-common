@@ -28,11 +28,8 @@ import bpsim.Scenario;
 import bpsim.ScenarioParameters;
 import bpsim.TimeParameters;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
-import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.PotentialOwner;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
-import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.dd.di.DiagramElement;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -40,6 +37,13 @@ import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
+import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
@@ -60,11 +64,28 @@ public class ProcessConverter {
         this.viewDefinitionConverter = new ViewDefinitionConverter(context);
     }
 
-    public ProcessPropertyWriter toFlowElement() {
-        Process rootLevelProcess = bpmn2.createProcess();
-        rootLevelProcess.setId(context.getGraph().getUUID());
+    public ProcessPropertyWriter toFlowElement(Node<Definition<BPMNDiagramImpl>, ?> node) {
+        Process process = bpmn2.createProcess();
 
-        ProcessPropertyWriter p = new ProcessPropertyWriter(rootLevelProcess);
+        ProcessPropertyWriter p = new ProcessPropertyWriter(process);
+        BPMNDiagramImpl definition = node.getContent().getDefinition();
+
+        DiagramSet diagramSet = definition.getDiagramSet();
+
+        p.setName(diagramSet.getName().getValue());
+        p.setDocumentation(diagramSet.getDocumentation().getValue());
+
+        process.setId(diagramSet.getId().getValue());
+        p.setPackage(diagramSet.getPackageProperty().getValue());
+        p.setVersion(diagramSet.getVersion().getValue());
+        p.setAdHoc(diagramSet.getAdHoc().getValue());
+        p.setDescription(diagramSet.getProcessInstanceDescription().getValue());
+        p.setExecutable(diagramSet.getExecutable().getValue());
+
+        ProcessData processData = definition.getProcessData();
+        p.setProcessVariables(processData.getProcessVariables());
+
+
 
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
@@ -117,8 +138,8 @@ public class ProcessConverter {
         return relationship;
     }
 
-    public BPMNDiagram toBPMNDiagram() {
-        BPMNDiagram bpmnDiagram = di.createBPMNDiagram();
+    public org.eclipse.bpmn2.di.BPMNDiagram toBPMNDiagram() {
+        org.eclipse.bpmn2.di.BPMNDiagram bpmnDiagram = di.createBPMNDiagram();
         bpmnDiagram.setId(context.firstNode().getUUID());
 
         BPMNPlane bpmnPlane = di.createBPMNPlane();
