@@ -119,7 +119,7 @@ public class Scripts {
     }
 
     // eww
-    private static String asCData(String original) {
+    public static String asCData(String original) {
         return "<![CDATA[" + original + "]]>";
     }
 }

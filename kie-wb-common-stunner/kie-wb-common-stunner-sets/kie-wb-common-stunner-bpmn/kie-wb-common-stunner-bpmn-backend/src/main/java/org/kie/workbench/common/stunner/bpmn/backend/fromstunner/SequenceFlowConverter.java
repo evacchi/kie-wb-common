@@ -16,11 +16,16 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import org.eclipse.bpmn2.SequenceFlow;
+import org.eclipse.bpmn2.FormalExpression;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts.asCData;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class SequenceFlowConverter {
@@ -31,12 +36,26 @@ public class SequenceFlowConverter {
         this.context = context;
     }
 
-    public SequenceFlow toFlowElement(Edge<ViewConnector<BPMNViewDefinition>, ?> edge) {
-        SequenceFlow seq = bpmn2.createSequenceFlow();
+    public org.eclipse.bpmn2.SequenceFlow toFlowElement(Edge<ViewConnector<BPMNViewDefinition>, ?> edge) {
+        org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
         seq.setSourceRef(context.getFlowNode(edge.getSourceNode().getUUID()));
         seq.setTargetRef(context.getFlowNode(edge.getTargetNode().getUUID()));
         seq.setId(edge.getUUID());
-        seq.setName(edge.getContent().getDefinition().getGeneral().getName().getValue());
+        SequenceFlow definition = (SequenceFlow) edge.getContent().getDefinition();
+        seq.setName(definition.getGeneral().getName().getValue());
+
+        SequenceFlowExecutionSet executionSet = definition.getExecutionSet();
+        ScriptTypeValue scriptTypeValue = executionSet.getConditionExpression().getValue();
+        String language = scriptTypeValue.getLanguage();
+        String script = scriptTypeValue.getScript();
+
+        if (script != null) {
+            FormalExpression formalExpression = bpmn2.createFormalExpression();
+            String uri = Scripts.scriptLanguageToUri(language);
+            formalExpression.setLanguage(uri);
+            formalExpression.setBody(asCData(script));
+            seq.setConditionExpression(formalExpression);
+        }
         return seq;
     }
 }
