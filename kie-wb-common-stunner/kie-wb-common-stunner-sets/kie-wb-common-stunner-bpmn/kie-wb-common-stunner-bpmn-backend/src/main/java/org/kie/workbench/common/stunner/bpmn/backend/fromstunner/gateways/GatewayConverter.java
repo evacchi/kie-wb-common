@@ -19,6 +19,7 @@ public class GatewayConverter {
 
                     org.eclipse.bpmn2.ParallelGateway gateway = bpmn2.createParallelGateway();
                     PropertyWriter p = new PropertyWriter(gateway);
+                    gateway.setId(n.getUUID());
 
                     return p;
                 })
@@ -26,6 +27,7 @@ public class GatewayConverter {
 
                     ExclusiveGateway gateway = bpmn2.createExclusiveGateway();
                     PropertyWriter p = new PropertyWriter(gateway);
+                    gateway.setId(n.getUUID());
 
                     return p;
                 }).apply(node).value();

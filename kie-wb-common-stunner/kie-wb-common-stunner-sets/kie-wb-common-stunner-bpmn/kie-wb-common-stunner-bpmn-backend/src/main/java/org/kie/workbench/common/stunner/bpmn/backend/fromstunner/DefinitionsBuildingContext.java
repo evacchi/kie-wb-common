@@ -85,7 +85,7 @@ abstract class DefinitionsContextHelper<
 
     private final Map<String, NodeT> nodes;
 
-    private final Map<String, FlowNode> flowNodes;
+    private final Map<String, FlowElement> flowNodes;
 
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
@@ -120,15 +120,15 @@ abstract class DefinitionsContextHelper<
         return firstNode;
     }
 
-    public void addFlowNode(FlowNode flowNode) {
+    public void addFlowNode(FlowElement flowNode) {
         flowNodes.put(flowNode.getId(), flowNode);
     }
 
-    public FlowNode getFlowNode(String id) {
+    public FlowElement getFlowNode(String id) {
         return flowNodes.get(id);
     }
 
-    public Collection<FlowNode> getFlowNodes() {
+    public Collection<FlowElement> getFlowNodes() {
         return flowNodes.values();
     }
 

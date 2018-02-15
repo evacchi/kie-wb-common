@@ -77,7 +77,7 @@ public class ViewDefinitionConverter {
 
     @Deprecated
     public BPMNShape shapeFrom(Node<View<? extends BPMNViewDefinition>, ?> node) {
-        FlowNode element = context.getFlowNode(node.getUUID());
+        FlowNode element = (FlowNode) context.getFlowNode(node.getUUID());
         PropertyWriter p = new PropertyWriter(element);
         return p.getShape();
     }

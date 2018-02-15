@@ -85,20 +85,22 @@ public class ProcessConverter {
         ProcessData processData = definition.getProcessData();
         p.setProcessVariables(processData.getProcessVariables());
 
-
-
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
                 .forEach(pp -> {
                     p.addFlowElement(pp.getFlowElement());
+                    context.addFlowNode(pp.getFlowElement()); // used in seq flow fixme: drop this
                     p.addAllBaseElements(pp.getBaseElements());
                 });
 
         context.edges()
                 .map(sequenceFlowConverter::toFlowElement)
-                .forEach(p::addFlowElement);
+                .forEach(e -> {
+                    p.addFlowElement(e);
+                    context.addSequenceFlow(e); // used in shape/edges fixme: drop this
+                });
 
         return p;
     }
