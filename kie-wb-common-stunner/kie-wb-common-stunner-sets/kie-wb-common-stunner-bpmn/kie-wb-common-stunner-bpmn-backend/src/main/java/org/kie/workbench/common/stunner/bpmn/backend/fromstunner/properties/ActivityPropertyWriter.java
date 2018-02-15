@@ -1,8 +1,11 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.List;
+
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
+import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
@@ -22,8 +25,7 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
     }
 
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        InputOutputSpecification ioSpec = bpmn2.createInputOutputSpecification();
-        activity.setIoSpecification(ioSpec);
+        final InputOutputSpecification ioSpec = getIoSpecification();
 
         assignmentsInfo.getAssociations()
                 .getInputs()
@@ -62,8 +64,20 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
 
     }
 
-    protected void setInput(String name, Object value) {
-        activity.getDataInputAssociations().add(input(name, value));
+    private InputOutputSpecification getIoSpecification() {
+        InputOutputSpecification ioSpecification = activity.getIoSpecification();
+        if (ioSpecification == null) {
+            ioSpecification = bpmn2.createInputOutputSpecification();
+            activity.setIoSpecification(ioSpecification);
+        }
+        return ioSpecification;
+    }
+
+    protected void setInput(String name, String value) {
+        if (value == null || value.isEmpty()) return;
+        DataInputAssociation input = input(name, value);
+        getIoSpecification().getDataInputs().add((DataInput) input.getTargetRef());
+        activity.getDataInputAssociations().add(input);
     }
 
 //    public void setInput(String name, Object value) {

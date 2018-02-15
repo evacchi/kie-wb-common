@@ -97,7 +97,8 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
             FormalExpression formalExpression = bpmn2.createFormalExpression();
             formalExpression.setBody(actor);
 
-            ResourceAssignmentExpression resourceAssignmentExpression = bpmn2.createResourceAssignmentExpression();
+            ResourceAssignmentExpression resourceAssignmentExpression =
+                    bpmn2.createResourceAssignmentExpression();
             resourceAssignmentExpression.setExpression(formalExpression);
 
             potentialOwner.setResourceAssignmentExpression(resourceAssignmentExpression);

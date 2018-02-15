@@ -46,6 +46,8 @@ public class IOPropertyWriter extends PropertyWriter {
         // e.g. foo := myInput (or, to put it differently, myInput -> foo)
         DataInputAssociation dataInputAssociation =
                 associate(decl, target);
+        dataInputAssociation.setTargetRef(target);
+
         this.addBaseElement(typeDef);
 
         return dataInputAssociation;
@@ -72,6 +74,9 @@ public class IOPropertyWriter extends PropertyWriter {
                 associate(assignment, target);
 
         this.addBaseElement(typeDef);
+
+        dataInputAssociation.setId("AAAAA"+makeDataInputId(attributeId));
+        dataInputAssociation.setTargetRef(target);
 
         return dataInputAssociation;
     }

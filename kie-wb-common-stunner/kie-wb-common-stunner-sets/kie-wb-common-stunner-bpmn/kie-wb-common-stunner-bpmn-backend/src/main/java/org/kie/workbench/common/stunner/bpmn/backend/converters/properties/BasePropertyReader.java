@@ -148,7 +148,9 @@ public abstract class BasePropertyReader {
         return plane.getPlaneElement().stream()
                 .filter(dia -> dia instanceof BPMNShape)
                 .map(shape -> (BPMNShape) shape)
-                .filter(shape -> shape.getBpmnElement().getId().equals(elementId))
+                .filter(shape ->
+                                shape.getBpmnElement() != null // fixme not sure when this happens
+                                        && shape.getBpmnElement().getId().equals(elementId))
                 .findFirst().orElse(null);
     }
 }
