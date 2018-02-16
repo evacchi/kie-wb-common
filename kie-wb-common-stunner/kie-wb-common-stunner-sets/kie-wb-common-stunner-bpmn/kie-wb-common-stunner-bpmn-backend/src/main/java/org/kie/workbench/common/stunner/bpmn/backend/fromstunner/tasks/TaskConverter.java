@@ -41,19 +41,19 @@ public class TaskConverter {
         return NodeMatch.fromNode(BaseTask.class, PropertyWriter.class)
                 .when(NoneTask.class, n -> {
                     Task task = bpmn2.createTask();
+                    task.setId(n.getUUID());
                     NoneTask definition = n.getContent().getDefinition();
                     PropertyWriter p = new PropertyWriter(task);
-                    task.setId(n.getUUID());
                     p.setName(definition.getGeneral().getName().getValue());
                     p.setBounds(n.getContent().getBounds());
                     return p;
                 })
                 .when(ScriptTask.class, n -> {
                     org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
+                    task.setId(n.getUUID());
                     ScriptTask definition = n.getContent().getDefinition();
                     ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
 
-                    task.setId(n.getUUID());
 
                     TaskGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -69,10 +69,10 @@ public class TaskConverter {
                 })
                 .when(BusinessRuleTask.class, n -> {
                     org.eclipse.bpmn2.BusinessRuleTask task = bpmn2.createBusinessRuleTask();
+                    task.setId(n.getUUID());
                     BusinessRuleTask definition = n.getContent().getDefinition();
                     BusinessRuleTaskPropertyWriter p = new BusinessRuleTaskPropertyWriter(task);
 
-                    task.setId(n.getUUID());
 
                     TaskGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -94,10 +94,10 @@ public class TaskConverter {
                 })
                 .when(UserTask.class, n -> {
                     org.eclipse.bpmn2.UserTask task = bpmn2.createUserTask();
+                    task.setId(n.getUUID());
                     UserTask definition = n.getContent().getDefinition();
                     UserTaskPropertyWriter p = new UserTaskPropertyWriter(task);
 
-                    task.setId(n.getUUID());
 
                     TaskGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());

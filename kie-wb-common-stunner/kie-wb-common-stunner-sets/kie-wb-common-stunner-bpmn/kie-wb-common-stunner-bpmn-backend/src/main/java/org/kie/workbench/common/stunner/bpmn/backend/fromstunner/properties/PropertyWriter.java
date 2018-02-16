@@ -48,11 +48,10 @@ public class PropertyWriter {
         this.flowElement = flowElement;
         this.shape = di.createBPMNShape();
         shape.setBpmnElement(flowElement);
-        shape.setBounds(dc.createBounds());
     }
 
     public void setBounds(Bounds rect) {
-        org.eclipse.dd.dc.Bounds bounds = shape.getBounds();
+        org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
 
         Bounds.Bound upperLeft = rect.getUpperLeft();
         Bounds.Bound lowerRight = rect.getLowerRight();
@@ -61,6 +60,8 @@ public class PropertyWriter {
         bounds.setY(upperLeft.getY().floatValue());
         bounds.setWidth(lowerRight.getX().floatValue() - upperLeft.getX().floatValue());
         bounds.setHeight(lowerRight.getY().floatValue() - upperLeft.getY().floatValue());
+
+        shape.setBounds(bounds);
     }
 
     public FlowElement getFlowElement() {

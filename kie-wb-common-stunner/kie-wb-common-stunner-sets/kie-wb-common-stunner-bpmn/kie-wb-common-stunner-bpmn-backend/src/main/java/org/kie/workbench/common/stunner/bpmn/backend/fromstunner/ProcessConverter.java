@@ -16,7 +16,10 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import bpsim.BPSimDataType;
 import bpsim.BpsimPackage;
@@ -37,6 +40,7 @@ import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
@@ -57,6 +61,7 @@ public class ProcessConverter {
 
     private final SequenceFlowConverter sequenceFlowConverter;
     private final ViewDefinitionConverter viewDefinitionConverter;
+    List<PropertyWriter> props = new ArrayList<>();
 
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
@@ -85,11 +90,13 @@ public class ProcessConverter {
         ProcessData processData = definition.getProcessData();
         p.setProcessVariables(processData.getProcessVariables());
 
+
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
                 .forEach(pp -> {
+                    props.add(pp);
                     p.addFlowElement(pp.getFlowElement());
                     context.addFlowNode(pp.getFlowElement()); // used in seq flow fixme: drop this
                     p.addAllBaseElements(pp.getBaseElements());
@@ -150,9 +157,7 @@ public class ProcessConverter {
         List<DiagramElement> planeElement =
                 bpmnPlane.getPlaneElement();
 
-        context.nodes()
-                .map(viewDefinitionConverter::shapeFrom)
-                .forEach(planeElement::add);
+        props.forEach(p -> planeElement.add(p.getShape()));
 
         context.edges()
                 .map(viewDefinitionConverter::edgeFrom)

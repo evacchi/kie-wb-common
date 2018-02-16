@@ -21,6 +21,8 @@ public class GatewayConverter {
                     PropertyWriter p = new PropertyWriter(gateway);
                     gateway.setId(n.getUUID());
 
+                    p.setBounds(n.getContent().getBounds());
+
                     return p;
                 })
                 .when(ExclusiveDatabasedGateway.class, n -> {
@@ -28,6 +30,8 @@ public class GatewayConverter {
                     ExclusiveGateway gateway = bpmn2.createExclusiveGateway();
                     PropertyWriter p = new PropertyWriter(gateway);
                     gateway.setId(n.getUUID());
+
+                    p.setBounds(n.getContent().getBounds());
 
                     return p;
                 }).apply(node).value();

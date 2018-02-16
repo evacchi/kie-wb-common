@@ -1,13 +1,9 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import java.util.List;
-
 import org.eclipse.bpmn2.Activity;
-import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
-import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.OutputSet;
@@ -61,7 +57,6 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
                     });
                     activity.getDataOutputAssociations().add(doa);
                 });
-
     }
 
     private InputOutputSpecification getIoSpecification() {
@@ -74,38 +69,11 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
     }
 
     protected void setInput(String name, String value) {
-        if (value == null || value.isEmpty()) return;
+        if (value == null || value.isEmpty()) {
+            return;
+        }
         DataInputAssociation input = input(name, value);
         getIoSpecification().getDataInputs().add((DataInput) input.getTargetRef());
         activity.getDataInputAssociations().add(input);
-    }
-
-//    public void setInput(String name, Object value) {
-//        DataInputAssociation association = bpmn2.createDataInputAssociation();
-//
-//        DataInput input = bpmn2.createDataInput();
-//        input.setName(name);
-//
-//        Assignment assignment = bpmn2.createAssignment();
-//        FormalExpression fromExpression = bpmn2.createFormalExpression();
-////        fromExpression.setBody();
-////        assignment.setFrom();
-//
-//        activity.getDataInputAssociations().add(association);
-//    }
-
-//    public Optional<String> optionalInput(String name) {
-//        for (DataInputAssociation din : task.getDataInputAssociations()) {
-//            DataInput targetRef = (DataInput) (din.getTargetRef());
-//            if (targetRef.getName().equalsIgnoreCase(name)) {
-//                Assignment assignment = din.getAssignment().get(0);
-//                return Optional.of(evaluate(assignment).toString());
-//            }
-//        }
-//        return Optional.empty();
-//    }
-
-    private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getBody();
     }
 }
