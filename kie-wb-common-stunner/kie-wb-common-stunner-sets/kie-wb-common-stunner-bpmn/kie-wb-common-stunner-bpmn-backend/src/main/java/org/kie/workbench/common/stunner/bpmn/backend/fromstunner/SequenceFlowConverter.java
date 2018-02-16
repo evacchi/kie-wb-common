@@ -19,12 +19,14 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.FormalExpression;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
+import org.kie.workbench.common.stunner.core.graph.content.view.DiscreteConnection;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts.asCData;
@@ -42,14 +44,17 @@ public class SequenceFlowConverter {
         BPMNViewDefinition def = edge.getContent().getDefinition();
         if (def instanceof SequenceFlow) {
             SequenceFlow definition = (SequenceFlow) def;
-
             org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
+            SequenceFlowPropertyWriter p = new SequenceFlowPropertyWriter(seq);
+
             seq.setId(edge.getUUID());
 
             seq.setSourceRef((FlowNode) context.getFlowNode(edge.getSourceNode().getUUID()));
             seq.setTargetRef((FlowNode) context.getFlowNode(edge.getTargetNode().getUUID()));
             seq.setId(edge.getUUID());
             seq.setName(definition.getGeneral().getName().getValue());
+
+            p.setAutoConnection(edge.getContent());
 
             SequenceFlowExecutionSet executionSet = definition.getExecutionSet();
             ScriptTypeValue scriptTypeValue = executionSet.getConditionExpression().getValue();

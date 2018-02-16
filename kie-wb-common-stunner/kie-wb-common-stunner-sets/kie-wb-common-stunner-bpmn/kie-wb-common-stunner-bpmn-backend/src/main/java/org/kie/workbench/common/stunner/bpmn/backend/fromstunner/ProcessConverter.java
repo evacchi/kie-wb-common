@@ -61,7 +61,7 @@ public class ProcessConverter {
 
     private final SequenceFlowConverter sequenceFlowConverter;
     private final ViewDefinitionConverter viewDefinitionConverter;
-    List<PropertyWriter> props = new ArrayList<>();
+    Map<String, PropertyWriter> props = new HashMap<>();
 
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
@@ -90,13 +90,12 @@ public class ProcessConverter {
         ProcessData processData = definition.getProcessData();
         p.setProcessVariables(processData.getProcessVariables());
 
-
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
                 .filter(Result::notIgnored)
                 .map(Result::value)
                 .forEach(pp -> {
-                    props.add(pp);
+                    props.put(pp.getFlowElement().getId(), pp);
                     p.addFlowElement(pp.getFlowElement());
                     context.addFlowNode(pp.getFlowElement()); // used in seq flow fixme: drop this
                     p.addAllBaseElements(pp.getBaseElements());
@@ -157,10 +156,10 @@ public class ProcessConverter {
         List<DiagramElement> planeElement =
                 bpmnPlane.getPlaneElement();
 
-        props.forEach(p -> planeElement.add(p.getShape()));
+        props.values().forEach(p -> planeElement.add(p.getShape()));
 
         context.edges()
-                .map(viewDefinitionConverter::edgeFrom)
+                .map(e -> viewDefinitionConverter.edgeFrom(props, e))
                 .forEach(planeElement::add);
 
         return bpmnDiagram;

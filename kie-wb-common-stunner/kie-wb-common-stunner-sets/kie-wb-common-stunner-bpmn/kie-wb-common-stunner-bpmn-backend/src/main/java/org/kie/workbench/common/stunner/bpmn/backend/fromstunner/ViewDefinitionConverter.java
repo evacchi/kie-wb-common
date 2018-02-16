@@ -16,7 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import org.eclipse.bpmn2.FlowNode;
+import java.util.Map;
+
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
@@ -38,6 +39,9 @@ import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediate
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
+import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
+import org.kie.workbench.common.stunner.core.graph.content.view.DiscreteConnection;
+import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
@@ -76,6 +80,7 @@ public class ViewDefinitionConverter {
     }
 
     public BPMNEdge edgeFrom(
+            Map<String, PropertyWriter> props,
             Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
                     Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
 
@@ -84,15 +89,38 @@ public class ViewDefinitionConverter {
         BPMNEdge bpmnEdge = di.createBPMNEdge();
         bpmnEdge.setBpmnElement(element);
 
-        Bounds.Bound sourceUpperLeft = edge.getSourceNode().getContent().getBounds().getUpperLeft();
-        org.eclipse.dd.dc.Point sourcePoint = dc.createPoint();
-        sourcePoint.setX(sourceUpperLeft.getX().floatValue());
-        sourcePoint.setY(sourceUpperLeft.getY().floatValue());
+        PropertyWriter sourcePropertyWriter = props.get(element.getSourceRef().getId());
+        BPMNShape sourceShape = sourcePropertyWriter.getShape();
+        bpmnEdge.setSourceElement(sourceShape);
 
-        Bounds.Bound targetUpperLeft = edge.getTargetNode().getContent().getBounds().getUpperLeft();
+        PropertyWriter targetPropertyWriter = props.get(element.getTargetRef().getId());
+        BPMNShape targetShape = targetPropertyWriter.getShape();
+        bpmnEdge.setTargetElement(targetShape);
+
+        ViewConnector<? extends BPMNViewDefinition> content = edge.getContent();
+        Point2D sourcePt = content.getSourceConnection().get().getLocation();
+        Point2D targetPt = content.getTargetConnection().get().getLocation();
+
+        org.eclipse.dd.dc.Point sourcePoint = dc.createPoint();
+        sourcePoint.setX(
+                sourceShape.getBounds().getX() + (float) sourcePt.getX());
+        sourcePoint.setY(
+                sourceShape.getBounds().getY() + (float) sourcePt.getY());
+
         org.eclipse.dd.dc.Point targetPoint = dc.createPoint();
-        targetPoint.setX(targetUpperLeft.getX().floatValue());
-        targetPoint.setY(targetUpperLeft.getY().floatValue());
+        targetPoint.setX(
+                targetShape.getBounds().getX() + (float) targetPt.getX());
+        targetPoint.setY(
+                targetShape.getBounds().getY() + (float) targetPt.getY());
+
+//        Bounds.Bound sourceUpperLeft = edge.getSourceNode().getContent().getBounds().getUpperLeft();
+//        sourcePoint.setX(sourceUpperLeft.getX().floatValue() + sourceShape.getBounds().getWidth()/2);
+//        sourcePoint.setY(sourceUpperLeft.getY().floatValue());
+//
+//        Bounds.Bound targetUpperLeft = edge.getTargetNode().getContent().getBounds().getUpperLeft();
+//        org.eclipse.dd.dc.Point targetPoint = dc.createPoint();
+//        targetPoint.setX(targetUpperLeft.getX().floatValue());
+//        targetPoint.setY(targetUpperLeft.getY().floatValue() +  targetShape.getBounds().getHeight()/2);
 
         bpmnEdge.getWaypoint().add(sourcePoint);
         bpmnEdge.getWaypoint().add(targetPoint);
