@@ -124,4 +124,35 @@ public class PropertyWriter {
     public void setTarget(PropertyWriter target) {
 
     }
+
+    public void setParent(PropertyWriter parent) {
+        org.eclipse.dd.dc.Bounds parentBounds =
+                getParentBounds(parent.getShape().getBounds());
+        getShape().setBounds(parentBounds);
+    }
+
+    protected org.eclipse.dd.dc.Bounds getParentBounds(org.eclipse.dd.dc.Bounds parentRect) {
+        if (getShape().getBounds() == null)
+            throw new IllegalArgumentException(
+                    "Cannot set parent bounds if the child " +
+                            "has undefined bounds. Use setBounds() first.");
+
+        org.eclipse.dd.dc.Bounds relativeBounds = getShape().getBounds();
+        float x = relativeBounds.getX();
+        float y = relativeBounds.getY();
+        float width = relativeBounds.getWidth();
+        float height = relativeBounds.getHeight();
+
+        float parentX = parentRect.getX();
+        float parentY = parentRect.getY();
+
+        org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
+        bounds.setX(parentX + x);
+        bounds.setY(parentY + y);
+        bounds.setWidth(width);
+        bounds.setHeight(height);
+
+        return bounds;
+    }
+
 }

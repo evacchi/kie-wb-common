@@ -36,6 +36,7 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
 import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
 import org.kie.workbench.common.stunner.core.graph.content.relationship.Child;
+import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 import org.kie.workbench.common.stunner.core.graph.util.GraphUtils;
@@ -164,6 +165,16 @@ abstract class DefinitionsContextHelper<
                 .distinct()
                 .filter(e -> (e.getContent() instanceof ViewConnector));
     }
+
+    public Stream<EdgeT> dockEdges() {
+        return nodes()
+                .flatMap(e -> Stream.concat(
+                        e.getInEdges().stream(),
+                        e.getOutEdges().stream()))
+                .distinct()
+                .filter(e -> (e.getContent() instanceof Dock));
+    }
+
 
     public Graph<DefinitionSet, NodeT> getGraph() {
         return graph;

@@ -18,9 +18,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
 import java.util.List;
 
-import org.eclipse.bpmn2.CatchEvent;
-import org.eclipse.bpmn2.IntermediateCatchEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
@@ -45,11 +44,10 @@ public class IntermediateCatchEventConverter {
     public PropertyWriter toFlowElement(Node<View<BaseCatchingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseCatchingIntermediateEvent.class, PropertyWriter.class)
                 .when(IntermediateMessageEventCatching.class, n -> {
-                    CatchEvent event = createCatchEvent(n);
-                    event.setId(node.getUUID());
+                    CatchEventPropertyWriter p = createCatchEventPropertyWriter(n);
+                    p.getFlowElement().setId(node.getUUID());
 
                     IntermediateMessageEventCatching definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -66,11 +64,10 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateSignalEventCatching.class, n -> {
-                    CatchEvent event = createCatchEvent(n);
-                    event.setId(node.getUUID());
+                    CatchEventPropertyWriter p = createCatchEventPropertyWriter(n);
+                    p.getFlowElement().setId(node.getUUID());
 
                     IntermediateSignalEventCatching definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -85,11 +82,10 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateErrorEventCatching.class, n -> {
-                    CatchEvent event = createCatchEvent(n);
-                    event.setId(node.getUUID());
+                    CatchEventPropertyWriter p = createCatchEventPropertyWriter(n);
+                    p.getFlowElement().setId(node.getUUID());
 
                     IntermediateErrorEventCatching definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -105,11 +101,10 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateTimerEvent.class, n -> {
-                    CatchEvent event = createCatchEvent(n);
-                    event.setId(node.getUUID());
+                    CatchEventPropertyWriter p = createCatchEventPropertyWriter(n);
+                    p.getFlowElement().setId(node.getUUID());
 
                     IntermediateTimerEvent definition = n.getContent().getDefinition();
-                    CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
 
                     BPMNGeneralSet general = definition.getGeneral();
                     p.setName(general.getName().getValue());
@@ -125,8 +120,10 @@ public class IntermediateCatchEventConverter {
                 .apply(node).value();
     }
 
-    private CatchEvent createCatchEvent(Node n) {
-        return isDocked(n)? bpmn2.createBoundaryEvent() : bpmn2.createIntermediateCatchEvent();
+    private CatchEventPropertyWriter createCatchEventPropertyWriter(Node n) {
+        return isDocked(n) ?
+                new BoundaryEventPropertyWriter(bpmn2.createBoundaryEvent()) :
+                new CatchEventPropertyWriter(bpmn2.createIntermediateCatchEvent());
     }
 
     private boolean isDocked(Node node) {

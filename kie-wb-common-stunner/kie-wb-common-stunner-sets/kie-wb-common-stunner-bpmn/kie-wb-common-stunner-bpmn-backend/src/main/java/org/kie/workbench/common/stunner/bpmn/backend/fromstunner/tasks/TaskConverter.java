@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks;
 
 import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.UserTaskPropertyWriter;
@@ -43,7 +44,7 @@ public class TaskConverter {
                     Task task = bpmn2.createTask();
                     task.setId(n.getUUID());
                     NoneTask definition = n.getContent().getDefinition();
-                    PropertyWriter p = new PropertyWriter(task);
+                    ActivityPropertyWriter p = new ActivityPropertyWriter(task);
                     p.setName(definition.getGeneral().getName().getValue());
                     p.setBounds(n.getContent().getBounds());
                     return p;

@@ -4,6 +4,7 @@ import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
+import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.OutputSet;
@@ -18,6 +19,11 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
     public ActivityPropertyWriter(Activity activity) {
         super(activity);
         this.activity = activity;
+    }
+
+    @Override
+    public Activity getFlowElement() {
+        return activity;
     }
 
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
