@@ -27,7 +27,7 @@ public class SequenceFlowPropertyWriter extends PropertyWriter {
         setMeta("isAutoConnection.target", Boolean.toString(c.isAuto()));
     }
 
-    public void setAutoConnection(ViewConnector<BPMNViewDefinition> content) {
+    public void setAutoConnection(ViewConnector<?> content) {
         Optional<Connection> sourceConnection = content.getSourceConnection();
         setAutoConnectionSource(sourceConnection.get());
 

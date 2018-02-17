@@ -24,7 +24,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.Edge;
-import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts.asCData;
@@ -39,40 +39,32 @@ public class SequenceFlowConverter {
     }
 
     public org.eclipse.bpmn2.SequenceFlow toFlowElement(Edge<?, ?> edge) {
-        if (edge.getContent() instanceof ViewConnector) {
-            Object def = ((ViewConnector) edge.getContent()).getDefinition();
-            if (def instanceof SequenceFlow) {
-                SequenceFlow definition = (SequenceFlow) def;
-                org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
-                SequenceFlowPropertyWriter p = new SequenceFlowPropertyWriter(seq);
+        ViewConnector<SequenceFlow> content = (ViewConnector<SequenceFlow>) edge.getContent();
+        SequenceFlow definition = content.getDefinition();
+        org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
+        SequenceFlowPropertyWriter p = new SequenceFlowPropertyWriter(seq);
 
-                seq.setId(edge.getUUID());
+        seq.setId(edge.getUUID());
 
-                seq.setSourceRef((FlowNode) context.getFlowNode(edge.getSourceNode().getUUID()));
-                seq.setTargetRef((FlowNode) context.getFlowNode(edge.getTargetNode().getUUID()));
-                seq.setId(edge.getUUID());
-                seq.setName(definition.getGeneral().getName().getValue());
+        seq.setSourceRef((FlowNode) context.getFlowNode(edge.getSourceNode().getUUID()));
+        seq.setTargetRef((FlowNode) context.getFlowNode(edge.getTargetNode().getUUID()));
+        seq.setId(edge.getUUID());
+        seq.setName(definition.getGeneral().getName().getValue());
 
-                p.setAutoConnection((ViewConnector) edge.getContent());
+        p.setAutoConnection(content);
 
-                SequenceFlowExecutionSet executionSet = definition.getExecutionSet();
-                ScriptTypeValue scriptTypeValue = executionSet.getConditionExpression().getValue();
-                String language = scriptTypeValue.getLanguage();
-                String script = scriptTypeValue.getScript();
+        SequenceFlowExecutionSet executionSet = definition.getExecutionSet();
+        ScriptTypeValue scriptTypeValue = executionSet.getConditionExpression().getValue();
+        String language = scriptTypeValue.getLanguage();
+        String script = scriptTypeValue.getScript();
 
-                if (script != null) {
-                    FormalExpression formalExpression = bpmn2.createFormalExpression();
-                    String uri = Scripts.scriptLanguageToUri(language);
-                    formalExpression.setLanguage(uri);
-                    formalExpression.setBody(asCData(script));
-                    seq.setConditionExpression(formalExpression);
-                }
-                return seq;
-            }
-        } else if (edge.getContent() instanceof Dock) {
-            throw new UnsupportedOperationException("not yet implemented " + edge.getContent().toString());
+        if (script != null) {
+            FormalExpression formalExpression = bpmn2.createFormalExpression();
+            String uri = Scripts.scriptLanguageToUri(language);
+            formalExpression.setLanguage(uri);
+            formalExpression.setBody(asCData(script));
+            seq.setConditionExpression(formalExpression);
         }
-
-        throw new UnsupportedOperationException(edge.getContent().toString());
+        return seq;
     }
 }
