@@ -162,7 +162,7 @@ abstract class DefinitionsContextHelper<
                         e.getInEdges().stream(),
                         e.getOutEdges().stream()))
                 .distinct()
-                .filter(e -> !(e.getContent() instanceof Child));
+                .filter(e -> (e.getContent() instanceof ViewConnector));
     }
 
     public Graph<DefinitionSet, NodeT> getGraph() {

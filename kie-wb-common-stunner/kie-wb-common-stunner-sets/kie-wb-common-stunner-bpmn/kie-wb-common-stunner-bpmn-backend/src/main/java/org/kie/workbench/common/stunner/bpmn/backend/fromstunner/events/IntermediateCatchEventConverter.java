@@ -16,12 +16,14 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
+import java.util.List;
+
+import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.IntermediateCatchEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateSignalEventCatching;
@@ -30,8 +32,11 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.Can
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.CancellingMessageEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.CancellingTimerEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
+import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -40,7 +45,7 @@ public class IntermediateCatchEventConverter {
     public PropertyWriter toFlowElement(Node<View<BaseCatchingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseCatchingIntermediateEvent.class, PropertyWriter.class)
                 .when(IntermediateMessageEventCatching.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    CatchEvent event = createCatchEvent(n);
                     event.setId(node.getUUID());
 
                     IntermediateMessageEventCatching definition = n.getContent().getDefinition();
@@ -61,7 +66,7 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateSignalEventCatching.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    CatchEvent event = createCatchEvent(n);
                     event.setId(node.getUUID());
 
                     IntermediateSignalEventCatching definition = n.getContent().getDefinition();
@@ -80,7 +85,7 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateErrorEventCatching.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    CatchEvent event = createCatchEvent(n);
                     event.setId(node.getUUID());
 
                     IntermediateErrorEventCatching definition = n.getContent().getDefinition();
@@ -100,7 +105,7 @@ public class IntermediateCatchEventConverter {
                     return p;
                 })
                 .when(IntermediateTimerEvent.class, n -> {
-                    IntermediateCatchEvent event = bpmn2.createIntermediateCatchEvent();
+                    CatchEvent event = createCatchEvent(n);
                     event.setId(node.getUUID());
 
                     IntermediateTimerEvent definition = n.getContent().getDefinition();
@@ -118,5 +123,34 @@ public class IntermediateCatchEventConverter {
                 })
 
                 .apply(node).value();
+    }
+
+    private CatchEvent createCatchEvent(Node n) {
+        return isDocked(n)? bpmn2.createBoundaryEvent() : bpmn2.createIntermediateCatchEvent();
+    }
+
+    private boolean isDocked(Node node) {
+        return null != getDockSourceNode(node);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Node<View, Edge> getDockSourceNode(final Node<View, Edge> node) {
+        List<Edge> inEdges = node.getInEdges();
+        if (null != inEdges && !inEdges.isEmpty()) {
+            for (Edge edge : inEdges) {
+                if (isDockEdge(edge)) {
+                    return edge.getSourceNode();
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isViewEdge(final Edge edge) {
+        return edge.getContent() instanceof ViewConnector;
+    }
+
+    private boolean isDockEdge(final Edge edge) {
+        return edge.getContent() instanceof Dock;
     }
 }
