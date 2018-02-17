@@ -116,4 +116,12 @@ public class PropertyWriter {
     public BPMNShape getShape() {
         return shape;
     }
+
+    public void setSource(PropertyWriter source) {
+
+    }
+
+    public void setTarget(PropertyWriter target) {
+
+    }
 }

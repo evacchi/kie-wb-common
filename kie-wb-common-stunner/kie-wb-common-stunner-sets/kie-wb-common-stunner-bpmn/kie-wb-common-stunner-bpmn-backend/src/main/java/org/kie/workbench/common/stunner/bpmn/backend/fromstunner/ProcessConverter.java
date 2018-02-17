@@ -106,7 +106,7 @@ public class ProcessConverter {
                 });
 
         context.edges()
-                .map(sequenceFlowConverter::toFlowElement)
+                .map(e -> sequenceFlowConverter.toFlowElement(e, props))
                 .forEach(e -> {
                     p.addFlowElement(e);
                     context.addSequenceFlow(e); // used in shape/edges fixme: drop this

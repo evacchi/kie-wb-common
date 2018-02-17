@@ -1,13 +1,20 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways;
 
+import java.util.List;
+
 import org.eclipse.bpmn2.ExclusiveGateway;
+import org.eclipse.bpmn2.GatewayDirection;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.GatewayPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveDatabasedGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.property.gateway.ExclusiveGatewayExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -18,8 +25,16 @@ public class GatewayConverter {
                 .when(ParallelGateway.class, n -> {
 
                     org.eclipse.bpmn2.ParallelGateway gateway = bpmn2.createParallelGateway();
-                    PropertyWriter p = new PropertyWriter(gateway);
+                    GatewayPropertyWriter p = new GatewayPropertyWriter(gateway);
                     gateway.setId(n.getUUID());
+
+                    ParallelGateway definition = n.getContent().getDefinition();
+
+                    p.setGatewayDirection(n);
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
 
                     p.setBounds(n.getContent().getBounds());
 
@@ -28,12 +43,25 @@ public class GatewayConverter {
                 .when(ExclusiveDatabasedGateway.class, n -> {
 
                     ExclusiveGateway gateway = bpmn2.createExclusiveGateway();
-                    PropertyWriter p = new PropertyWriter(gateway);
+                    GatewayPropertyWriter p = new GatewayPropertyWriter(gateway);
                     gateway.setId(n.getUUID());
+
+                    ExclusiveDatabasedGateway definition = n.getContent().getDefinition();
+
+                    p.setGatewayDirection(n);
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    ExclusiveGatewayExecutionSet executionSet = definition.getExecutionSet();
+                    p.setDefaultRoute(executionSet.getDefaultRoute().getValue());
 
                     p.setBounds(n.getContent().getBounds());
 
                     return p;
                 }).apply(node).value();
     }
+
+
 }

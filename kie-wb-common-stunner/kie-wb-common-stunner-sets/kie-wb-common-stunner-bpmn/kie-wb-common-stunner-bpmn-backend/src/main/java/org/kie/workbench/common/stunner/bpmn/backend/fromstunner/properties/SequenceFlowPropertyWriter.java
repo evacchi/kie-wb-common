@@ -2,6 +2,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import java.util.Optional;
 
+import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
@@ -33,5 +34,15 @@ public class SequenceFlowPropertyWriter extends PropertyWriter {
 
         Optional<Connection> targetConnection = content.getTargetConnection();
         setAutoConnectionTarget(targetConnection.get());
+    }
+
+    public void setSource(PropertyWriter pSrc) {
+        sequenceFlow.setSourceRef((FlowNode) pSrc.getFlowElement());
+        pSrc.setTarget(this);
+    }
+
+    public void setTarget(PropertyWriter pTgt) {
+        sequenceFlow.setTargetRef((FlowNode) pTgt.getFlowElement());
+        pTgt.setSource(this);
     }
 }
