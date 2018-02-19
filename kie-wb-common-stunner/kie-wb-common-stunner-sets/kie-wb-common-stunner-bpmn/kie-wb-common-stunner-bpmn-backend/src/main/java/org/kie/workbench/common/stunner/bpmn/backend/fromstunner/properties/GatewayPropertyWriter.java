@@ -29,18 +29,18 @@ public class GatewayPropertyWriter extends PropertyWriter {
         this.defaultGatewayId = (split.length == 1) ? split[0] : split[1];
     }
 
-    public void setSource(PropertyWriter source) {
+    public void setSource(BasePropertyWriter source) {
         setDefaultGateway(source);
     }
 
-    public void setTarget(PropertyWriter target) {
+    public void setTarget(BasePropertyWriter target) {
         setDefaultGateway(target);
     }
 
-    private void setDefaultGateway(PropertyWriter propertyWriter) {
-        if (propertyWriter.getFlowElement().getId().equals(defaultGatewayId)) {
+    private void setDefaultGateway(BasePropertyWriter propertyWriter) {
+        if (propertyWriter.getElement().getId().equals(defaultGatewayId)) {
             if (gateway instanceof ExclusiveGateway) {
-                ((ExclusiveGateway) gateway).setDefault((SequenceFlow) propertyWriter.getFlowElement());
+                ((ExclusiveGateway) gateway).setDefault((SequenceFlow) propertyWriter.getElement());
             }
         }
     }

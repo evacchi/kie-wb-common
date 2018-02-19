@@ -1,36 +1,25 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.eclipse.bpmn2.BaseElement;
-import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Documentation;
-import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
-import org.eclipse.emf.ecore.util.FeatureMap;
-import org.jboss.drools.DroolsFactory;
-import org.jboss.drools.DroolsPackage;
-import org.jboss.drools.MetaDataType;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.AdHoc;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-public class ProcessPropertyWriter {
+public class ProcessPropertyWriter extends BasePropertyWriter {
 
     private final Process process;
-    private List<BaseElement> baseElements = new ArrayList<>();
 
-    public ProcessPropertyWriter(Process rootLevelProcess) {
-        this.process = rootLevelProcess;
+    public ProcessPropertyWriter(Process process) {
+        super(process);
+        this.process = process;
     }
 
     public Process getProcess() {
@@ -42,11 +31,7 @@ public class ProcessPropertyWriter {
     }
 
     public void addAllBaseElements(Collection<BaseElement> baseElements) {
-        this.baseElements.addAll(baseElements);
-    }
-
-    public List<BaseElement> getBaseElements() {
-        return baseElements;
+        baseElements.forEach(el -> this.baseElements.put(el.getId(), el));
     }
 
     public void setName(String value) {
@@ -70,7 +55,6 @@ public class ProcessPropertyWriter {
 
     public void setVersion(String value) {
         process.getAnyAttribute().add(Attributes.drools("version", String.valueOf(value)));
-
     }
 
     public void setAdHoc(Boolean adHoc) {
@@ -79,27 +63,6 @@ public class ProcessPropertyWriter {
 
     public void setDescription(String value) {
         setMeta("customDescription", value);
-    }
-
-    protected void setMeta(
-            String attributeId,
-            String metaDataValue) {
-
-        if (process != null) {
-            MetaDataType eleMetadata = DroolsFactory.eINSTANCE.createMetaDataType();
-            eleMetadata.setName(attributeId);
-            eleMetadata.setMetaValue(asCData(metaDataValue));
-
-            if (process.getExtensionValues() == null || process.getExtensionValues().isEmpty()) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                process.getExtensionValues().add(extensionElement);
-            }
-
-            FeatureMap.Entry eleExtensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                    (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__META_DATA,
-                    eleMetadata);
-            process.getExtensionValues().get(0).getValue().add(eleExtensionElementEntry);
-        }
     }
 
     // eww
@@ -112,7 +75,7 @@ public class ProcessPropertyWriter {
         DeclarationList declarationList = DeclarationList.fromString(value);
         declarationList.getDeclarations().forEach(decl -> {
             ItemDefinition typeDef = bpmn2.createItemDefinition();
-            typeDef.setId("_"+decl.getIdentifier()+"Item");
+            typeDef.setId("_" + decl.getIdentifier() + "Item");
             typeDef.setStructureRef(decl.getType());
 
             Property property = bpmn2.createProperty();
@@ -121,11 +84,6 @@ public class ProcessPropertyWriter {
 
             process.getProperties().add(property);
             this.addBaseElement(typeDef);
-
         });
-    }
-
-    private void addBaseElement(BaseElement typeDef) {
-        this.baseElements.add(typeDef);
     }
 }

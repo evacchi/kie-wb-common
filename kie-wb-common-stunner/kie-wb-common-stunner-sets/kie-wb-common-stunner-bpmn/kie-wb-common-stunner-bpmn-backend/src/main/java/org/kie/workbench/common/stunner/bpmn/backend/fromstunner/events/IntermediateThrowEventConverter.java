@@ -16,10 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
-import org.eclipse.bpmn2.IntermediateCatchEvent;
 import org.eclipse.bpmn2.IntermediateThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ThrowEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
