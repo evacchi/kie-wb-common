@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.bpmn2.ExclusiveGateway;
 import org.eclipse.bpmn2.Gateway;
 import org.eclipse.bpmn2.GatewayDirection;
+import org.eclipse.bpmn2.InclusiveGateway;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -44,6 +45,8 @@ public class GatewayPropertyWriter extends PropertyWriter {
         if (propertyWriter.getElement().getId().equals(defaultGatewayId)) {
             if (gateway instanceof ExclusiveGateway) {
                 ((ExclusiveGateway) gateway).setDefault((SequenceFlow) propertyWriter.getElement());
+            } else if (gateway instanceof InclusiveGateway) {
+                ((InclusiveGateway) gateway).setDefault((SequenceFlow) propertyWriter.getElement());
             }
         }
     }

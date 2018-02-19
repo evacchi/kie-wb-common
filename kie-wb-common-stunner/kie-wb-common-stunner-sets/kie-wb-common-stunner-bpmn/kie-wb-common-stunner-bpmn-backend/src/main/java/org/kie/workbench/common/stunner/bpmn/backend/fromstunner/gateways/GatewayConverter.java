@@ -8,6 +8,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Gate
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.property.gateway.GatewayExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
@@ -46,6 +47,26 @@ public class GatewayConverter {
                     gateway.setId(n.getUUID());
 
                     ExclusiveGateway definition = n.getContent().getDefinition();
+
+                    p.setGatewayDirection(n);
+
+                    BPMNGeneralSet general = definition.getGeneral();
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    GatewayExecutionSet executionSet = definition.getExecutionSet();
+                    p.setDefaultRoute(executionSet.getDefaultRoute().getValue());
+
+                    p.setBounds(n.getContent().getBounds());
+
+                    return p;
+                })
+                .when(InclusiveGateway.class, n -> {
+                    org.eclipse.bpmn2.InclusiveGateway gateway = bpmn2.createInclusiveGateway();
+                    GatewayPropertyWriter p = new GatewayPropertyWriter(gateway);
+                    gateway.setId(n.getUUID());
+
+                    InclusiveGateway definition = n.getContent().getDefinition();
 
                     p.setGatewayDirection(n);
 

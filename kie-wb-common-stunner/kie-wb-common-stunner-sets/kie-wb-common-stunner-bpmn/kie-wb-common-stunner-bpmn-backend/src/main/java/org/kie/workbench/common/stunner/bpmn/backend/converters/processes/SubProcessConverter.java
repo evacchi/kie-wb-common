@@ -24,12 +24,14 @@ import org.eclipse.bpmn2.SubProcess;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SubProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Documentation;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Name;
@@ -100,31 +102,59 @@ public class SubProcessConverter {
     }
 
     private Node<? extends View<? extends BPMNViewDefinition>, ?> convertSubProcessNode(SubProcess subProcess) {
-        Node<View<EmbeddedSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
+        return Match.ofNode(SubProcess.class, BPMNViewDefinition.class)
+                .when(EventSubprocess.class, e -> {
+                    Node<View<EventSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
 
-        EmbeddedSubprocess definition = node.getContent().getDefinition();
-        SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
+                    EventSubprocess definition = node.getContent().getDefinition();
+                    SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
 
-        definition.setGeneral(new BPMNGeneralSet(
-                new Name(subProcess.getName()),
-                new Documentation(p.getDocumentation())
-        ));
+                    definition.setGeneral(new BPMNGeneralSet(
+                            new Name(subProcess.getName()),
+                            new Documentation(p.getDocumentation())
+                    ));
 
-        definition.getOnEntryAction().setValue(p.getOnEntryAction());
-        definition.getOnExitAction().setValue(p.getOnExitAction());
-        definition.getIsAsync().setValue(p.isAsync());
+                    definition.getIsAsync().setValue(p.isAsync());
 
-        definition.setProcessData(new ProcessData(
-                new ProcessVariables(p.getProcessVariables())));
+                    definition.setProcessData(new ProcessData(
+                            new ProcessVariables(p.getProcessVariables())));
 
-        definition.setSimulationSet(p.getSimulationSet());
+                    definition.setSimulationSet(p.getSimulationSet());
 
-        definition.setDimensionsSet(p.getRectangleDimensionsSet());
-        definition.setFontSet(p.getFontSet());
-        definition.setBackgroundSet(p.getBackgroundSet());
+                    definition.setDimensionsSet(p.getRectangleDimensionsSet());
+                    definition.setFontSet(p.getFontSet());
+                    definition.setBackgroundSet(p.getBackgroundSet());
 
+                    node.getContent().setBounds(p.getBounds());
+                    return node;
 
-        node.getContent().setBounds(p.getBounds());
-        return node;
+                })
+                .orElse(e -> {
+                    Node<View<EmbeddedSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
+
+                    EmbeddedSubprocess definition = node.getContent().getDefinition();
+                    SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
+
+                    definition.setGeneral(new BPMNGeneralSet(
+                            new Name(subProcess.getName()),
+                            new Documentation(p.getDocumentation())
+                    ));
+
+                    definition.getOnEntryAction().setValue(p.getOnEntryAction());
+                    definition.getOnExitAction().setValue(p.getOnExitAction());
+                    definition.getIsAsync().setValue(p.isAsync());
+
+                    definition.setProcessData(new ProcessData(
+                            new ProcessVariables(p.getProcessVariables())));
+
+                    definition.setSimulationSet(p.getSimulationSet());
+
+                    definition.setDimensionsSet(p.getRectangleDimensionsSet());
+                    definition.setFontSet(p.getFontSet());
+                    definition.setBackgroundSet(p.getBackgroundSet());
+
+                    node.getContent().setBounds(p.getBounds());
+                    return node;
+                }).apply(subProcess).value();
     }
 }
