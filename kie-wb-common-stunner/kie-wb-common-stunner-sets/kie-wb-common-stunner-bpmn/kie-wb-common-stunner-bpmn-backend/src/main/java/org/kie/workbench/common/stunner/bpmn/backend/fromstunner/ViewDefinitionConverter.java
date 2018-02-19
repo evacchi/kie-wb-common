@@ -53,7 +53,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class ViewDefinitionConverter {
 
-    private final DefinitionsBuildingContext context;
     private final StartEventConverter startEventConverter;
     private final TaskConverter taskConverter;
     private final EndEventConverter endEventConverter;
@@ -61,8 +60,7 @@ public class ViewDefinitionConverter {
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private GatewayConverter gatewayConverter;
 
-    public ViewDefinitionConverter(DefinitionsBuildingContext context) {
-        this.context = context;
+    public ViewDefinitionConverter() {
         this.startEventConverter = new StartEventConverter();
         this.endEventConverter = new EndEventConverter();
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
@@ -82,54 +80,54 @@ public class ViewDefinitionConverter {
                 .ignore(Lane.class)
                 .apply(node);
     }
-
-    public BPMNEdge edgeFrom(
-            Map<String, BasePropertyWriter> props,
-            Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
-                    Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
-
-        org.eclipse.bpmn2.SequenceFlow element = context.getSequenceFlow(edge.getUUID());
-
-        BPMNEdge bpmnEdge = di.createBPMNEdge();
-        bpmnEdge.setBpmnElement(element);
-
-        BasePropertyWriter sourcePropertyWriter = props.get(element.getSourceRef().getId());
-        BPMNShape sourceShape = sourcePropertyWriter.getShape();
-        bpmnEdge.setSourceElement(sourceShape);
-
-        BasePropertyWriter targetPropertyWriter = props.get(element.getTargetRef().getId());
-        BPMNShape targetShape = targetPropertyWriter.getShape();
-        bpmnEdge.setTargetElement(targetShape);
-
-        ViewConnector<? extends BPMNViewDefinition> content = edge.getContent();
-        Point2D sourcePt = content.getSourceConnection().get().getLocation();
-        Point2D targetPt = content.getTargetConnection().get().getLocation();
-
-        org.eclipse.dd.dc.Point sourcePoint = dc.createPoint();
-        sourcePoint.setX(
-                sourceShape.getBounds().getX() + (float) sourcePt.getX());
-        sourcePoint.setY(
-                sourceShape.getBounds().getY() + (float) sourcePt.getY());
-
-        org.eclipse.dd.dc.Point targetPoint = dc.createPoint();
-        targetPoint.setX(
-                targetShape.getBounds().getX() + (float) targetPt.getX());
-        targetPoint.setY(
-                targetShape.getBounds().getY() + (float) targetPt.getY());
-
-//        Bounds.Bound sourceUpperLeft = edge.getSourceNode().getContent().getBounds().getUpperLeft();
-//        sourcePoint.setX(sourceUpperLeft.getX().floatValue() + sourceShape.getBounds().getWidth()/2);
-//        sourcePoint.setY(sourceUpperLeft.getY().floatValue());
 //
-//        Bounds.Bound targetUpperLeft = edge.getTargetNode().getContent().getBounds().getUpperLeft();
+//    public BPMNEdge edgeFrom(
+//            Map<String, BasePropertyWriter> props,
+//            Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
+//                    Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
+//
+//        org.eclipse.bpmn2.SequenceFlow element = context.getSequenceFlow(edge.getUUID());
+//
+//        BPMNEdge bpmnEdge = di.createBPMNEdge();
+//        bpmnEdge.setBpmnElement(element);
+//
+//        BasePropertyWriter sourcePropertyWriter = props.get(element.getSourceRef().getId());
+//        BPMNShape sourceShape = sourcePropertyWriter.getShape();
+//        bpmnEdge.setSourceElement(sourceShape);
+//
+//        BasePropertyWriter targetPropertyWriter = props.get(element.getTargetRef().getId());
+//        BPMNShape targetShape = targetPropertyWriter.getShape();
+//        bpmnEdge.setTargetElement(targetShape);
+//
+//        ViewConnector<? extends BPMNViewDefinition> content = edge.getContent();
+//        Point2D sourcePt = content.getSourceConnection().get().getLocation();
+//        Point2D targetPt = content.getTargetConnection().get().getLocation();
+//
+//        org.eclipse.dd.dc.Point sourcePoint = dc.createPoint();
+//        sourcePoint.setX(
+//                sourceShape.getBounds().getX() + (float) sourcePt.getX());
+//        sourcePoint.setY(
+//                sourceShape.getBounds().getY() + (float) sourcePt.getY());
+//
 //        org.eclipse.dd.dc.Point targetPoint = dc.createPoint();
-//        targetPoint.setX(targetUpperLeft.getX().floatValue());
-//        targetPoint.setY(targetUpperLeft.getY().floatValue() +  targetShape.getBounds().getHeight()/2);
-
-        bpmnEdge.getWaypoint().add(sourcePoint);
-        bpmnEdge.getWaypoint().add(targetPoint);
-
-        return bpmnEdge;
-    }
+//        targetPoint.setX(
+//                targetShape.getBounds().getX() + (float) targetPt.getX());
+//        targetPoint.setY(
+//                targetShape.getBounds().getY() + (float) targetPt.getY());
+//
+////        Bounds.Bound sourceUpperLeft = edge.getSourceNode().getContent().getBounds().getUpperLeft();
+////        sourcePoint.setX(sourceUpperLeft.getX().floatValue() + sourceShape.getBounds().getWidth()/2);
+////        sourcePoint.setY(sourceUpperLeft.getY().floatValue());
+////
+////        Bounds.Bound targetUpperLeft = edge.getTargetNode().getContent().getBounds().getUpperLeft();
+////        org.eclipse.dd.dc.Point targetPoint = dc.createPoint();
+////        targetPoint.setX(targetUpperLeft.getX().floatValue());
+////        targetPoint.setY(targetUpperLeft.getY().floatValue() +  targetShape.getBounds().getHeight()/2);
+//
+//        bpmnEdge.getWaypoint().add(sourcePoint);
+//        bpmnEdge.getWaypoint().add(targetPoint);
+//
+//        return bpmnEdge;
+//    }
 }
 

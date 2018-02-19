@@ -41,6 +41,7 @@ import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
+import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.dd.di.DiagramElement;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -54,6 +55,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Boun
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -83,7 +85,7 @@ public class ProcessConverter {
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
         this.sequenceFlowConverter = new SequenceFlowConverter(context);
-        this.viewDefinitionConverter = new ViewDefinitionConverter(context);
+        this.viewDefinitionConverter = new ViewDefinitionConverter();
         this.laneConverter = new LaneConverter();
     }
 
@@ -136,13 +138,6 @@ public class ProcessConverter {
             p.getProcess().getLaneSets().add(laneSet);
         }
 
-        context.edges()
-                .map(e -> sequenceFlowConverter.toFlowElement(e, props))
-                .forEach(e -> {
-                    p.addFlowElement(e);
-                    context.addSequenceFlow(e); // used in shape/edges fixme: drop this
-                });
-
         context.childEdges()
                 .forEach(e -> {
                     BasePropertyWriter pSrc = props.get(e.getSourceNode().getUUID());
@@ -166,8 +161,11 @@ public class ProcessConverter {
 
         props.values().forEach(pp -> p.addChildShape(pp.getShape()));
         context.edges()
-                .map(e -> viewDefinitionConverter.edgeFrom(props, e))
-                .forEach(p::addChildEdge);
+                .forEach(e -> {
+                    SequenceFlowPropertyWriter pp = sequenceFlowConverter.toFlowElement(e, props);
+                    p.addFlowElement(pp.getFlowElement());
+                    p.addChildEdge(pp.getEdge());
+                });
 
         return p;
     }
