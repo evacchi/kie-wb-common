@@ -2,15 +2,14 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways;
 
 import java.util.List;
 
-import org.eclipse.bpmn2.ExclusiveGateway;
 import org.eclipse.bpmn2.GatewayDirection;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.GatewayPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
-import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveDatabasedGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
-import org.kie.workbench.common.stunner.bpmn.definition.property.gateway.ExclusiveGatewayExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.gateway.GatewayExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -40,13 +39,13 @@ public class GatewayConverter {
 
                     return p;
                 })
-                .when(ExclusiveDatabasedGateway.class, n -> {
+                .when(ExclusiveGateway.class, n -> {
 
-                    ExclusiveGateway gateway = bpmn2.createExclusiveGateway();
+                    org.eclipse.bpmn2.ExclusiveGateway gateway = bpmn2.createExclusiveGateway();
                     GatewayPropertyWriter p = new GatewayPropertyWriter(gateway);
                     gateway.setId(n.getUUID());
 
-                    ExclusiveDatabasedGateway definition = n.getContent().getDefinition();
+                    ExclusiveGateway definition = n.getContent().getDefinition();
 
                     p.setGatewayDirection(n);
 
@@ -54,7 +53,7 @@ public class GatewayConverter {
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
-                    ExclusiveGatewayExecutionSet executionSet = definition.getExecutionSet();
+                    GatewayExecutionSet executionSet = definition.getExecutionSet();
                     p.setDefaultRoute(executionSet.getDefaultRoute().getValue());
 
                     p.setBounds(n.getContent().getBounds());
