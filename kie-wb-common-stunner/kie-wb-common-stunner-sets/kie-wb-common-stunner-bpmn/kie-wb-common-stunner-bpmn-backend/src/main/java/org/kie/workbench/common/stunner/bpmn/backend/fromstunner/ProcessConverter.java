@@ -27,14 +27,11 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Base
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
-import org.kie.workbench.common.stunner.core.graph.content.relationship.Child;
-import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
@@ -54,27 +51,7 @@ public class ProcessConverter {
     }
 
     public ProcessPropertyWriter toFlowElement(Node<Definition<BPMNDiagramImpl>, ?> node) {
-        Process process = bpmn2.createProcess();
-
-        ProcessPropertyWriter p = new ProcessPropertyWriter(process);
-        BPMNDiagramImpl definition = node.getContent().getDefinition();
-
-        DiagramSet diagramSet = definition.getDiagramSet();
-
-        p.setName(diagramSet.getName().getValue());
-        p.setDocumentation(diagramSet.getDocumentation().getValue());
-
-        process.setId(diagramSet.getId().getValue());
-        p.setPackage(diagramSet.getPackageProperty().getValue());
-        p.setVersion(diagramSet.getVersion().getValue());
-        p.setAdHoc(diagramSet.getAdHoc().getValue());
-        p.setDescription(diagramSet.getProcessInstanceDescription().getValue());
-        p.setExecutable(diagramSet.getExecutable().getValue());
-
-        ProcessData processData = definition.getProcessData();
-        p.setProcessVariables(processData.getProcessVariables());
-
-        p.setSimulationSet(null); // fixme: inserting default data
+        ProcessPropertyWriter p = convertProcessNode(node);
 
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
@@ -115,6 +92,31 @@ public class ProcessConverter {
                 .map(e -> sequenceFlowConverter.toFlowElement(e, p))
                 .forEach(p::addChildElement);
 
+        return p;
+    }
+
+    private ProcessPropertyWriter convertProcessNode(Node<Definition<BPMNDiagramImpl>, ?> node) {
+        Process process = bpmn2.createProcess();
+
+        ProcessPropertyWriter p = new ProcessPropertyWriter(process);
+        BPMNDiagramImpl definition = node.getContent().getDefinition();
+
+        DiagramSet diagramSet = definition.getDiagramSet();
+
+        p.setName(diagramSet.getName().getValue());
+        p.setDocumentation(diagramSet.getDocumentation().getValue());
+
+        process.setId(diagramSet.getId().getValue());
+        p.setPackage(diagramSet.getPackageProperty().getValue());
+        p.setVersion(diagramSet.getVersion().getValue());
+        p.setAdHoc(diagramSet.getAdHoc().getValue());
+        p.setDescription(diagramSet.getProcessInstanceDescription().getValue());
+        p.setExecutable(diagramSet.getExecutable().getValue());
+
+        ProcessData processData = definition.getProcessData();
+        p.setProcessVariables(processData.getProcessVariables());
+
+        p.setSimulationSet(null); // fixme: inserting default data
         return p;
     }
 }
