@@ -16,18 +16,12 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.eclipse.bpmn2.BaseElement;
-import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.FlowNode;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Edge;
@@ -86,12 +80,8 @@ abstract class DefinitionsContextHelper<
 
     private final Map<String, NodeT> nodes;
 
-    private final Map<String, FlowElement> flowNodes;
-
     private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
     private final Graph<DefinitionSet, NodeT> graph;
-    private Map<String, org.eclipse.bpmn2.SequenceFlow> sequenceFlows;
-    private Map<String, BaseElement> baseElements;
 
     public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
         this.graph = graph;
@@ -103,10 +93,6 @@ abstract class DefinitionsContextHelper<
                         .stream(graph.nodes().spliterator(), false)
                         .filter(n -> !firstNode.getUUID().equals(n.getUUID()))
                         .collect(Collectors.toMap(Node::getUUID, Function.identity()));
-
-        this.flowNodes = new HashMap<>();
-        this.sequenceFlows = new HashMap<>();
-        this.baseElements = new HashMap<>();
     }
 
     public Stream<NodeT> nodes() {
@@ -121,40 +107,15 @@ abstract class DefinitionsContextHelper<
         return firstNode;
     }
 
-    public void addFlowNode(FlowElement flowNode) {
-        flowNodes.put(flowNode.getId(), flowNode);
-    }
-
-    public FlowElement getFlowNode(String id) {
-        return flowNodes.get(id);
-    }
-
-    public Collection<FlowElement> getFlowNodes() {
-        return flowNodes.values();
-    }
-
-    public void addSequenceFlow(org.eclipse.bpmn2.SequenceFlow seq) {
-        sequenceFlows.put(seq.getId(), seq);
-    }
-
-    public org.eclipse.bpmn2.SequenceFlow getSequenceFlow(String id) {
-        return sequenceFlows.get(id);
-    }
-
-    public Collection<org.eclipse.bpmn2.SequenceFlow> getSequenceFlows() {
-        return sequenceFlows.values();
-    }
-
-    public void addBaseElement(BaseElement element) {
-        baseElements.put(element.getId(), element);
-    }
-
-    public BaseElement getBaseElements(String id) {
-        return baseElements.get(id);
-    }
-
-    public Collection<BaseElement> getBaseElements() {
-        return baseElements.values();
+    public Stream<EdgeT> allEdges() {
+        return nodes()
+                .flatMap(e -> Stream.concat(
+                        e.getInEdges().stream(),
+                        e.getOutEdges().stream()))
+                .distinct()
+                .filter(e -> (e.getContent() instanceof ViewConnector)
+                        || (e.getContent() instanceof Dock)
+                        || (e.getContent() instanceof Child));
     }
 
     public Stream<EdgeT> edges() {
@@ -175,7 +136,6 @@ abstract class DefinitionsContextHelper<
                 .filter(e -> (e.getContent() instanceof Dock));
     }
 
-
     public Stream<EdgeT> childEdges() {
         return nodes()
                 .flatMap(e -> Stream.concat(
@@ -184,7 +144,6 @@ abstract class DefinitionsContextHelper<
                 .distinct()
                 .filter(e -> (e.getContent() instanceof Child));
     }
-
 
     public Graph<DefinitionSet, NodeT> getGraph() {
         return graph;

@@ -41,15 +41,16 @@ public class BasePropertyWriter {
 
     protected final BaseElement baseElement;
     protected final Map<String, BaseElement> baseElements = new HashMap<>();
-    protected final BPMNShape shape;
+    protected BPMNShape shape;
 
     public BasePropertyWriter(BaseElement baseElement) {
         this.baseElement = baseElement;
-        this.shape = di.createBPMNShape();
-        shape.setBpmnElement(baseElement);
     }
 
     public void setBounds(Bounds rect) {
+        this.shape = di.createBPMNShape();
+        shape.setBpmnElement(baseElement);
+
         org.eclipse.dd.dc.Bounds bounds = dc.createBounds();
 
         Bounds.Bound upperLeft = rect.getUpperLeft();

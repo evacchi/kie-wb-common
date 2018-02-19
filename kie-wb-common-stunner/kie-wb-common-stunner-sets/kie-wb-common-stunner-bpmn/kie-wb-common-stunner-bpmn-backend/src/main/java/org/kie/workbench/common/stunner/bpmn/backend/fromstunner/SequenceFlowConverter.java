@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.bpmn2.FormalExpression;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
@@ -39,7 +40,7 @@ public class SequenceFlowConverter {
         this.context = context;
     }
 
-    public SequenceFlowPropertyWriter toFlowElement(Edge<?, ?> edge, Map<String, BasePropertyWriter> props) {
+    public SequenceFlowPropertyWriter toFlowElement(Edge<?, ?> edge, ProcessPropertyWriter process) {
         ViewConnector<SequenceFlow> content = (ViewConnector<SequenceFlow>) edge.getContent();
         SequenceFlow definition = content.getDefinition();
         org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
@@ -47,8 +48,8 @@ public class SequenceFlowConverter {
 
         seq.setId(edge.getUUID());
 
-        BasePropertyWriter pSrc = props.get(edge.getSourceNode().getUUID());
-        BasePropertyWriter pTgt = props.get(edge.getTargetNode().getUUID());
+        BasePropertyWriter pSrc = process.getChildElement(edge.getSourceNode().getUUID());
+        BasePropertyWriter pTgt = process.getChildElement(edge.getTargetNode().getUUID());
 
         p.setSource(pSrc);
         p.setTarget(pTgt);
@@ -71,6 +72,9 @@ public class SequenceFlowConverter {
             formalExpression.setBody(asCData(script));
             seq.setConditionExpression(formalExpression);
         }
+
+        process.addChildElement(p);
+        process.addChildEdge(p.getEdge());
         return p;
     }
 }
