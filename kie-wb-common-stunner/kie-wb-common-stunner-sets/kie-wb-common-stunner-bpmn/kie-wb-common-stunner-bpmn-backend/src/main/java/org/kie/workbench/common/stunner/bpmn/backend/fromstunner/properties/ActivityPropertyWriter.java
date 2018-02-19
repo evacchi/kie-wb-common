@@ -14,7 +14,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class ActivityPropertyWriter extends IOPropertyWriter {
 
-    private final Activity activity;
+    protected final Activity activity;
 
     public ActivityPropertyWriter(Activity activity) {
         super(activity);

@@ -23,6 +23,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.Intermed
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways.GatewayConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.SubProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -30,8 +31,10 @@ import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediate
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -44,13 +47,18 @@ public class ViewDefinitionConverter {
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private GatewayConverter gatewayConverter;
+    private SubProcessConverter subProcessConverter;
+    private DefinitionsBuildingContext context;
 
-    public ViewDefinitionConverter() {
+    public ViewDefinitionConverter(DefinitionsBuildingContext context) {
+        this.context = context;
+
         this.startEventConverter = new StartEventConverter();
         this.endEventConverter = new EndEventConverter();
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
         this.intermediateThrowEventConverter = new IntermediateThrowEventConverter();
         this.gatewayConverter = new GatewayConverter();
+        this.subProcessConverter = new SubProcessConverter(context);
         this.taskConverter = new TaskConverter();
     }
 
@@ -62,6 +70,7 @@ public class ViewDefinitionConverter {
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)
                 .when(BaseTask.class, taskConverter::toFlowElement)
                 .when(BaseGateway.class, gatewayConverter::toFlowElement)
+                .when(BaseSubprocess.class, subProcessConverter::toFlowElement)
                 .ignore(Lane.class)
                 .apply(node);
     }

@@ -30,6 +30,7 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
@@ -39,7 +40,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
-public class ProcessPropertyWriter extends BasePropertyWriter {
+public class ProcessPropertyWriter extends BasePropertyWriter implements ElementContainer {
 
     public static final String defaultRelationshipType = "BPSimData";
 

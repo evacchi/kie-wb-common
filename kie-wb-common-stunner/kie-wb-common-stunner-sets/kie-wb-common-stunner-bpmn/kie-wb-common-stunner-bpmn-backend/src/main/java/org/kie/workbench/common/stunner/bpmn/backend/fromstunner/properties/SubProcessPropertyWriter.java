@@ -23,6 +23,7 @@ import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.Relationship;
+import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNPlane;
@@ -30,7 +31,7 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
-import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
@@ -39,57 +40,30 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
-public class ProcessPropertyWriter extends BasePropertyWriter {
+public class SubProcessPropertyWriter extends PropertyWriter implements ElementContainer {
 
     public static final String defaultRelationshipType = "BPSimData";
 
-    private final Process process;
-    private final BPMNDiagram bpmnDiagram;
+    private final SubProcess process;
     private Relationship relationship;
     private Map<String, BasePropertyWriter> childElements = new HashMap<>();
 
-    public ProcessPropertyWriter(Process process) {
+    public SubProcessPropertyWriter(SubProcess process) {
         super(process);
         this.process = process;
-
-        this.bpmnDiagram = di.createBPMNDiagram();
-        bpmnDiagram.setId(process.getId());
-
-        BPMNPlane bpmnPlane = di.createBPMNPlane();
-        bpmnDiagram.setPlane(bpmnPlane);
-    }
-
-    public Process getProcess() {
-        return process;
     }
 
     public Relationship getRelationship() {
         return relationship;
     }
 
-    public void addChildShape(BPMNShape shape) {
-        if (shape != null) {
-            bpmnDiagram.getPlane().getPlaneElement().add(shape);
-        }
-    }
 
-    public void addChildEdge(BPMNEdge edge) {
-        bpmnDiagram.getPlane().getPlaneElement().add(edge);
-    }
-
-    public BPMNDiagram getBpmnDiagram() {
-        return bpmnDiagram;
-    }
 
     public void addChildElement(BasePropertyWriter p) {
         this.childElements.put(p.getElement().getId(), p);
         if (p.getElement() instanceof FlowElement) {
             process.getFlowElements().add((FlowElement) p.getElement());
         }
-        if (p instanceof SequenceFlowPropertyWriter) {
-            addChildEdge(((SequenceFlowPropertyWriter) p).getEdge());
-        }
-        addChildShape(p.getShape());
         addAllBaseElements(p.getBaseElements());
     }
 
@@ -97,17 +71,18 @@ public class ProcessPropertyWriter extends BasePropertyWriter {
         return this.childElements.get(id);
     }
 
+    @Override
+    public void addChildEdge(BPMNEdge edge) {
+
+    }
+
     public void addAllBaseElements(Collection<BaseElement> baseElements) {
         baseElements.forEach(el -> this.baseElements.put(el.getId(), el));
     }
 
-    public void setName(String value) {
-        process.setName(value);
-    }
-
-    public void setExecutable(Boolean value) {
-        process.setIsExecutable(value);
-    }
+//    public void setName(String value) {
+//        process.setName(value);
+//    }
 
     public void setDocumentation(String documentation) {
         Documentation d = bpmn2.createDocumentation();

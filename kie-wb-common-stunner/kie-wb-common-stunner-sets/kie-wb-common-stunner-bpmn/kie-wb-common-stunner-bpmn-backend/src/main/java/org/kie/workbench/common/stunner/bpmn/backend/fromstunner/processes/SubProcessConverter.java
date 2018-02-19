@@ -19,7 +19,9 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.bpmn2.Process;
+import org.eclipse.bpmn2.CallActivity;
+import org.eclipse.bpmn2.SubProcess;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.SequenceFlowConverter;
@@ -28,98 +30,127 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.lanes.LaneConve
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CallActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SubProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-public class ProcessConverter {
+public class SubProcessConverter {
 
     private final DefinitionsBuildingContext context;
 
     private final SequenceFlowConverter sequenceFlowConverter;
-    private final ViewDefinitionConverter viewDefinitionConverter;
     private final LaneConverter laneConverter;
 
-    public ProcessConverter(DefinitionsBuildingContext context) {
+    public SubProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
-        this.sequenceFlowConverter = new SequenceFlowConverter(context);
-        this.viewDefinitionConverter = new ViewDefinitionConverter();
+        this.sequenceFlowConverter = new SequenceFlowConverter();
         this.laneConverter = new LaneConverter();
     }
 
-    public ProcessPropertyWriter toFlowElement(Node<Definition<BPMNDiagramImpl>, ?> node) {
-        ProcessPropertyWriter p = convertProcessNode(node);
+    public PropertyWriter toFlowElement(Node<View<BaseSubprocess>, ?> node) {
+        return NodeMatch.fromNode(BaseSubprocess.class, PropertyWriter.class)
+                .when(EmbeddedSubprocess.class, n -> {
 
-        context.nodes()
-                .map(viewDefinitionConverter::toFlowElement)
-                .filter(Result::notIgnored)
-                .map(Result::value)
-                .forEach(p::addChildElement);
+                    DefinitionsBuildingContext subContext = context.withRootNode(n);
 
-        List<LanePropertyWriter> lanes = context.nodes()
-                .map(laneConverter::toElement)
-                .filter(Result::notIgnored)
-                .map(Result::value)
-                .collect(Collectors.toList());
+                    ViewDefinitionConverter viewDefinitionConverter =
+                            new ViewDefinitionConverter(subContext);
 
-        p.addLaneSet(lanes);
-        lanes.forEach(p::addChildElement);
+                    SubProcess process = bpmn2.createSubProcess();
+                    process.setId(n.getUUID());
 
-        context.childEdges()
-                .forEach(e -> {
-                    BasePropertyWriter pSrc = p.getChildElement(e.getSourceNode().getUUID());
-                    // if it's null, then it's a root: skip it
-                    if (pSrc != null) {
-                        BasePropertyWriter pTgt = p.getChildElement(e.getTargetNode().getUUID());
-                        pTgt.setParent(pSrc);
-                    }
-                });
+                    SubProcessPropertyWriter p = new SubProcessPropertyWriter(process);
 
-        context.dockEdges()
-                .forEach(e -> {
-                    ActivityPropertyWriter pSrc =
-                            (ActivityPropertyWriter) p.getChildElement(e.getSourceNode().getUUID());
-                    BoundaryEventPropertyWriter pTgt =
-                            (BoundaryEventPropertyWriter) p.getChildElement(e.getTargetNode().getUUID());
+                    EmbeddedSubprocess definition = n.getContent().getDefinition();
 
-                    pTgt.setParentActivity(pSrc);
-                });
+                    BPMNGeneralSet general = definition.getGeneral();
 
-        context.edges()
-                .map(e -> sequenceFlowConverter.toFlowElement(e, p))
-                .forEach(p::addChildElement);
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
 
-        return p;
-    }
+                    ProcessData processData = definition.getProcessData();
+                    p.setProcessVariables(processData.getProcessVariables());
 
-    private ProcessPropertyWriter convertProcessNode(Node<Definition<BPMNDiagramImpl>, ?> node) {
-        Process process = bpmn2.createProcess();
+                    p.setSimulationSet(null); // fixme: inserting default data
 
-        ProcessPropertyWriter p = new ProcessPropertyWriter(process);
-        BPMNDiagramImpl definition = node.getContent().getDefinition();
+                    p.setBounds(n.getContent().getBounds());
 
-        DiagramSet diagramSet = definition.getDiagramSet();
+                    context.nodes()
+                            .map(viewDefinitionConverter::toFlowElement)
+                            .filter(Result::notIgnored)
+                            .map(Result::value)
+                            .forEach(p::addChildElement);
 
-        p.setName(diagramSet.getName().getValue());
-        p.setDocumentation(diagramSet.getDocumentation().getValue());
+                    List<LanePropertyWriter> lanes = context.nodes()
+                            .map(laneConverter::toElement)
+                            .filter(Result::notIgnored)
+                            .map(Result::value)
+                            .collect(Collectors.toList());
 
-        process.setId(diagramSet.getId().getValue());
-        p.setPackage(diagramSet.getPackageProperty().getValue());
-        p.setVersion(diagramSet.getVersion().getValue());
-        p.setAdHoc(diagramSet.getAdHoc().getValue());
-        p.setDescription(diagramSet.getProcessInstanceDescription().getValue());
-        p.setExecutable(diagramSet.getExecutable().getValue());
+                    p.addLaneSet(lanes);
+                    lanes.forEach(p::addChildElement);
 
-        ProcessData processData = definition.getProcessData();
-        p.setProcessVariables(processData.getProcessVariables());
+                    context.childEdges()
+                            .forEach(e -> {
+                                BasePropertyWriter pSrc = p.getChildElement(e.getSourceNode().getUUID());
+                                // if it's null, then it's a root: skip it
+                                if (pSrc != null) {
+                                    BasePropertyWriter pTgt = p.getChildElement(e.getTargetNode().getUUID());
+                                    pTgt.setParent(pSrc);
+                                }
+                            });
 
-        p.setSimulationSet(null); // fixme: inserting default data
-        return p;
+                    context.dockEdges()
+                            .forEach(e -> {
+                                ActivityPropertyWriter pSrc =
+                                        (ActivityPropertyWriter) p.getChildElement(e.getSourceNode().getUUID());
+                                BoundaryEventPropertyWriter pTgt =
+                                        (BoundaryEventPropertyWriter) p.getChildElement(e.getTargetNode().getUUID());
+
+                                pTgt.setParentActivity(pSrc);
+                            });
+
+                    context.edges()
+                            .map(e -> sequenceFlowConverter.toFlowElement(e, p))
+                            .forEach(p::addChildElement);
+                    return p;
+                })
+                .when(ReusableSubprocess.class, n -> {
+                    CallActivity activity = bpmn2.createCallActivity();
+                    activity.setId(n.getUUID());
+
+                    CallActivityPropertyWriter p = new CallActivityPropertyWriter(activity);
+
+                    ReusableSubprocess definition = n.getContent().getDefinition();
+
+                    BPMNGeneralSet general = definition.getGeneral();
+
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    ReusableSubprocessTaskExecutionSet executionSet = definition.getExecutionSet();
+                    p.setCalledElement(executionSet.getCalledElement().getValue());
+                    p.setAsync(executionSet.getIsAsync().getValue());
+                    p.setIndependent(executionSet.getIndependent().getValue());
+                    p.setWaitForCompletion(executionSet.getIndependent().getValue());
+
+                    p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
+
+                    //p.setSimulationSet(null); // fixme: inserting default data
+
+                    p.setBounds(n.getContent().getBounds());
+                    return p;
+                }).apply(node).value();
     }
 }

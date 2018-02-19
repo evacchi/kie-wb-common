@@ -24,6 +24,8 @@ import java.util.stream.StreamSupport;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
@@ -61,6 +63,16 @@ public class DefinitionsBuildingContext
                                     Node<? extends View<? extends BPMNViewDefinition>, ?>>>> graph) {
         super(graph);
     }
+
+    public DefinitionsBuildingContext(
+            Node<?, ?> firstNode,
+            Map<String,
+                    Node<View<? extends BPMNViewDefinition>,
+                            Edge<ViewConnector<BPMNViewDefinition>,
+                                    Node<? extends View<? extends BPMNViewDefinition>, ?>>>> nodes) {
+        super(firstNode, nodes);
+    }
+
 }
 
 //
@@ -80,11 +92,9 @@ abstract class DefinitionsContextHelper<
 
     private final Map<String, NodeT> nodes;
 
-    private final Node<Definition<BPMNDiagramImpl>, ?> firstNode;
-    private final Graph<DefinitionSet, NodeT> graph;
+    private final Node firstNode;
 
     public DefinitionsContextHelper(Graph<DefinitionSet, NodeT> graph) {
-        this.graph = graph;
         this.firstNode =
                 GraphUtils.getFirstNode((Graph) graph, BPMNDiagramImpl.class);
 
@@ -95,6 +105,13 @@ abstract class DefinitionsContextHelper<
                         .collect(Collectors.toMap(Node::getUUID, Function.identity()));
     }
 
+    public DefinitionsContextHelper(
+            Node<?, ?> firstNode,
+            Map<String, NodeT> nodes) {
+        this.firstNode = firstNode;
+        this.nodes = nodes;
+    }
+
     public Stream<NodeT> nodes() {
         return nodes.values().stream();
     }
@@ -103,7 +120,7 @@ abstract class DefinitionsContextHelper<
         return nodes.get(id);
     }
 
-    public Node<Definition<BPMNDiagramImpl>, ?> firstNode() {
+    public Node firstNode() {
         return firstNode;
     }
 
@@ -145,7 +162,16 @@ abstract class DefinitionsContextHelper<
                 .filter(e -> (e.getContent() instanceof Child));
     }
 
-    public Graph<DefinitionSet, NodeT> getGraph() {
-        return graph;
+    // fixme, do we need to go further deep with nesting? here we're stopping at the first level
+    public DefinitionsBuildingContext withRootNode(Node<?, ?> node) {
+        Map<String, ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> collect =
+                childEdges()
+                    .filter(e -> e.getSourceNode().getUUID().equals(node.getUUID()))
+                    .map(e -> e.getTargetNode())
+                    .collect(Collectors.toMap(Node::getUUID, Function.identity()));
+
+        return new DefinitionsBuildingContext(
+                node, (Map<String, Node<View<? extends BPMNViewDefinition>, Edge<ViewConnector<BPMNViewDefinition>, Node<? extends View<? extends BPMNViewDefinition>, ?>>>>) collect);
     }
+
 }

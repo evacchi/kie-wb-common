@@ -14,13 +14,16 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
+package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.Process;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.SequenceFlowConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ViewDefinitionConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.lanes.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
@@ -45,8 +48,8 @@ public class ProcessConverter {
 
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
-        this.sequenceFlowConverter = new SequenceFlowConverter(context);
-        this.viewDefinitionConverter = new ViewDefinitionConverter();
+        this.sequenceFlowConverter = new SequenceFlowConverter();
+        this.viewDefinitionConverter = new ViewDefinitionConverter(context);
         this.laneConverter = new LaneConverter();
     }
 
