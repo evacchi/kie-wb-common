@@ -58,10 +58,10 @@ public class DefinitionsConverter {
 
         definitions.getRootElements().add(process);
 
-        BPMNDiagram bpmnDiagram = processConverter.toBPMNDiagram();
+        BPMNDiagram bpmnDiagram = p.getBpmnDiagram();
         definitions.getDiagrams().add(bpmnDiagram);
 
-        Relationship relationship = processConverter.toRelationship();
+        Relationship relationship = p.getRelationship();
         definitions.getRelationships().add(relationship);
 
         relationship.getSources().add(process);

@@ -72,7 +72,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class ProcessConverter {
 
-    public static final String defaultRelationshipType = "BPSimData";
 
     private final DefinitionsBuildingContext context;
 
@@ -108,6 +107,8 @@ public class ProcessConverter {
 
         ProcessData processData = definition.getProcessData();
         p.setProcessVariables(processData.getProcessVariables());
+
+        p.setSimulationSet(null); // fixme: inserting default data
 
         context.nodes()
                 .map(viewDefinitionConverter::toFlowElement)
@@ -162,60 +163,13 @@ public class ProcessConverter {
                     pTgt.setParentActivity(pSrc);
                 });
 
+
+        props.values().forEach(pp -> p.addChildShape(pp.getShape()));
+        context.edges()
+                .map(e -> viewDefinitionConverter.edgeFrom(props, e))
+                .forEach(p::addChildEdge);
+
         return p;
     }
 
-    public Relationship toRelationship() {
-        Relationship relationship = bpmn2.createRelationship();
-        relationship.setType(defaultRelationshipType);
-        BPSimDataType simDataType = bpsim.createBPSimDataType();
-        // currently support single scenario
-        Scenario defaultScenario = bpsim.createScenario();
-        ScenarioParameters scenarioParameters = bpsim.createScenarioParameters();
-        defaultScenario.setId("default"); // single scenario suppoert
-        defaultScenario.setName("Simulationscenario"); // single scenario support
-        defaultScenario.setScenarioParameters(scenarioParameters);
-        simDataType.getScenario().add(defaultScenario);
-        ExtensionAttributeValue extensionElement = bpmn2.createExtensionAttributeValue();
-        relationship.getExtensionValues().add(extensionElement);
-        FeatureMap.Entry extensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA,
-                simDataType);
-        relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-
-        ElementParameters elementParameters = bpsim.createElementParameters();
-
-        ControlParameters controlParameters = bpsim.createControlParameters();
-        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
-        ResourceParameters resourceParameters = bpsim.createResourceParameters();
-        TimeParameters timeParameters = bpsim.createTimeParameters();
-
-        elementParameters.setControlParameters(controlParameters);
-        elementParameters.setPriorityParameters(priorityParameters);
-        elementParameters.setResourceParameters(resourceParameters);
-        elementParameters.setTimeParameters(timeParameters);
-
-        defaultScenario.getElementParameters().add(elementParameters);
-
-        return relationship;
-    }
-
-    public org.eclipse.bpmn2.di.BPMNDiagram toBPMNDiagram() {
-        org.eclipse.bpmn2.di.BPMNDiagram bpmnDiagram = di.createBPMNDiagram();
-        bpmnDiagram.setId(context.firstNode().getUUID());
-
-        BPMNPlane bpmnPlane = di.createBPMNPlane();
-        bpmnDiagram.setPlane(bpmnPlane);
-
-        List<DiagramElement> planeElement =
-                bpmnPlane.getPlaneElement();
-
-        props.values().forEach(p -> planeElement.add(p.getShape()));
-
-        context.edges()
-                .map(e -> viewDefinitionConverter.edgeFrom(props, e))
-                .forEach(planeElement::add);
-
-        return bpmnDiagram;
-    }
 }
