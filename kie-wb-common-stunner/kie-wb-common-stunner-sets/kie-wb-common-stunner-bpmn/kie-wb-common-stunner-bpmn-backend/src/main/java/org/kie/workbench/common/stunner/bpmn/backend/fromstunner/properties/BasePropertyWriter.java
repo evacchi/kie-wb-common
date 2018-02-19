@@ -120,6 +120,11 @@ public class BasePropertyWriter {
     }
 
     public void setParent(BasePropertyWriter parent) {
+        if (parent.getShape() == null) {
+            throw new IllegalArgumentException(
+                    "Cannot set parent with undefined shape: " +
+                            parent.getElement().getId());
+        }
         org.eclipse.dd.dc.Bounds parentBounds =
                 getParentBounds(parent.getShape().getBounds());
         getShape().setBounds(parentBounds);
@@ -129,7 +134,7 @@ public class BasePropertyWriter {
         if (getShape().getBounds() == null) {
             throw new IllegalArgumentException(
                     "Cannot set parent bounds if the child " +
-                            "has undefined bounds. Use setBounds() first.");
+                            "has undefined bounds. Use setBounds() first." + getElement().getId());
         }
 
         org.eclipse.dd.dc.Bounds relativeBounds = getShape().getBounds();

@@ -176,6 +176,16 @@ abstract class DefinitionsContextHelper<
     }
 
 
+    public Stream<EdgeT> childEdges() {
+        return nodes()
+                .flatMap(e -> Stream.concat(
+                        e.getInEdges().stream(),
+                        e.getOutEdges().stream()))
+                .distinct()
+                .filter(e -> (e.getContent() instanceof Child));
+    }
+
+
     public Graph<DefinitionSet, NodeT> getGraph() {
         return graph;
     }

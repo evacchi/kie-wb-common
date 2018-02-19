@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.FormalExpression;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
@@ -41,7 +42,7 @@ public class SequenceFlowConverter {
         this.context = context;
     }
 
-    public org.eclipse.bpmn2.SequenceFlow toFlowElement(Edge<?, ?> edge, Map<String, PropertyWriter> props) {
+    public org.eclipse.bpmn2.SequenceFlow toFlowElement(Edge<?, ?> edge, Map<String, BasePropertyWriter> props) {
         ViewConnector<SequenceFlow> content = (ViewConnector<SequenceFlow>) edge.getContent();
         SequenceFlow definition = content.getDefinition();
         org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
@@ -49,8 +50,8 @@ public class SequenceFlowConverter {
 
         seq.setId(edge.getUUID());
 
-        PropertyWriter pSrc = props.get(edge.getSourceNode().getUUID());
-        PropertyWriter pTgt = props.get(edge.getTargetNode().getUUID());
+        BasePropertyWriter pSrc = props.get(edge.getSourceNode().getUUID());
+        BasePropertyWriter pTgt = props.get(edge.getTargetNode().getUUID());
 
         p.setSource(pSrc);
         p.setTarget(pTgt);

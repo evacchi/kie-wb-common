@@ -17,9 +17,12 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import bpsim.BPSimDataType;
 import bpsim.BpsimPackage;
@@ -34,6 +37,8 @@ import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.Lane;
+import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.di.BPMNPlane;
@@ -42,8 +47,11 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.lanes.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagram;
@@ -70,12 +78,14 @@ public class ProcessConverter {
 
     private final SequenceFlowConverter sequenceFlowConverter;
     private final ViewDefinitionConverter viewDefinitionConverter;
-    Map<String, PropertyWriter> props = new HashMap<>();
+    private final LaneConverter laneConverter;
+    Map<String, BasePropertyWriter> props = new HashMap<>();
 
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
         this.sequenceFlowConverter = new SequenceFlowConverter(context);
         this.viewDefinitionConverter = new ViewDefinitionConverter(context);
+        this.laneConverter = new LaneConverter();
     }
 
     public ProcessPropertyWriter toFlowElement(Node<Definition<BPMNDiagramImpl>, ?> node) {
@@ -110,11 +120,36 @@ public class ProcessConverter {
                     p.addAllBaseElements(pp.getBaseElements());
                 });
 
+        LaneSet laneSet = bpmn2.createLaneSet();
+
+        context.nodes()
+                .map(laneConverter::toElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .forEach(pp -> {
+                    laneSet.getLanes().add(pp.getElement());
+                    props.put(pp.getElement().getId(), pp);
+                });
+
+        if (!laneSet.getLanes().isEmpty()) {
+            p.getProcess().getLaneSets().add(laneSet);
+        }
+
         context.edges()
                 .map(e -> sequenceFlowConverter.toFlowElement(e, props))
                 .forEach(e -> {
                     p.addFlowElement(e);
                     context.addSequenceFlow(e); // used in shape/edges fixme: drop this
+                });
+
+        context.childEdges()
+                .forEach(e -> {
+                    BasePropertyWriter pSrc = props.get(e.getSourceNode().getUUID());
+                    // if it's null, then it's a root: skip it
+                    if (pSrc != null) {
+                        BasePropertyWriter pTgt = props.get(e.getTargetNode().getUUID());
+                        pTgt.setParent(pSrc);
+                    }
                 });
 
         context.dockEdges()

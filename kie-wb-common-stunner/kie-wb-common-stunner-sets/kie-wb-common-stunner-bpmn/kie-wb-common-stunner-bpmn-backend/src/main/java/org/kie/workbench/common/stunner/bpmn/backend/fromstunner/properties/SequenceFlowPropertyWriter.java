@@ -36,13 +36,13 @@ public class SequenceFlowPropertyWriter extends PropertyWriter {
         setAutoConnectionTarget(targetConnection.get());
     }
 
-    public void setSource(PropertyWriter pSrc) {
-        sequenceFlow.setSourceRef((FlowNode) pSrc.getFlowElement());
+    public void setSource(BasePropertyWriter pSrc) {
+        sequenceFlow.setSourceRef((FlowNode) pSrc.getElement());
         pSrc.setTarget(this);
     }
 
-    public void setTarget(PropertyWriter pTgt) {
-        sequenceFlow.setTargetRef((FlowNode) pTgt.getFlowElement());
+    public void setTarget(BasePropertyWriter pTgt) {
+        sequenceFlow.setTargetRef((FlowNode) pTgt.getElement());
         pTgt.setSource(this);
     }
 }

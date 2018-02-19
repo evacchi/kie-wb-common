@@ -27,6 +27,8 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.Intermed
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways.GatewayConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.lanes.LaneConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -36,6 +38,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.Bounds;
@@ -76,11 +79,12 @@ public class ViewDefinitionConverter {
                 .when(BaseEndEvent.class, endEventConverter::toFlowElement)
                 .when(BaseTask.class, taskConverter::toFlowElement)
                 .when(BaseGateway.class, gatewayConverter::toFlowElement)
+                .ignore(Lane.class)
                 .apply(node);
     }
 
     public BPMNEdge edgeFrom(
-            Map<String, PropertyWriter> props,
+            Map<String, BasePropertyWriter> props,
             Edge<? extends ViewConnector<? extends BPMNViewDefinition>,
                     Node<? extends View<? extends BPMNViewDefinition>, ?>> edge) {
 
@@ -89,11 +93,11 @@ public class ViewDefinitionConverter {
         BPMNEdge bpmnEdge = di.createBPMNEdge();
         bpmnEdge.setBpmnElement(element);
 
-        PropertyWriter sourcePropertyWriter = props.get(element.getSourceRef().getId());
+        BasePropertyWriter sourcePropertyWriter = props.get(element.getSourceRef().getId());
         BPMNShape sourceShape = sourcePropertyWriter.getShape();
         bpmnEdge.setSourceElement(sourceShape);
 
-        PropertyWriter targetPropertyWriter = props.get(element.getTargetRef().getId());
+        BasePropertyWriter targetPropertyWriter = props.get(element.getTargetRef().getId());
         BPMNShape targetShape = targetPropertyWriter.getShape();
         bpmnEdge.setTargetElement(targetShape);
 
