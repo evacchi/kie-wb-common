@@ -60,7 +60,9 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndSignalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
+import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventThrowing;
@@ -177,6 +179,7 @@ public class BPMNDirectDiagramMarshallerTest {
     private static final String BPMN_USERTASKPROPERTIES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/userTaskProperties.bpmn";
     private static final String BPMN_SEQUENCEFLOW = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/sequenceFlow.bpmn";
     private static final String BPMN_XORGATEWAY = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/xorGateway.bpmn";
+    private static final String BPMN_INCLUSIVE_GATEWAY = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/inclusiveGateway.bpmn";
     private static final String BPMN_TIMER_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/timerEvent.bpmn";
     private static final String BPMN_SIMULATIONPROPERTIES = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/simulationProperties.bpmn";
     private static final String BPMN_MAGNETDOCKERS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/magnetDockers.bpmn";
@@ -1154,6 +1157,43 @@ public class BPMNDirectDiagramMarshallerTest {
                      sequenceFlow1.getGeneral().getName().getValue());
         assertNotNull(sequenceFlow2);
         assertEquals("under 10",
+                     sequenceFlow2.getGeneral().getName().getValue());
+    }
+
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallInclusiveGateway() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INCLUSIVE_GATEWAY);
+        assertDiagram(diagram,
+                      7);
+        assertEquals(diagram.getMetadata().getTitle(),
+                     "TestInclusiveGateway");
+        Graph graph = diagram.getGraph();
+        Node<? extends Definition, ?> gatewayNode = graph.getNode("_526EE472-FE8B-4E9A-A951-CFBA86C3691F");
+        assertTrue(gatewayNode.getContent().getDefinition() instanceof InclusiveGateway);
+        InclusiveGateway inclusiveGateway = (InclusiveGateway) gatewayNode.getContent().getDefinition();
+        assertEquals("InclusiveGatewayName",
+                     inclusiveGateway.getGeneral().getName().getValue());
+        assertEquals("_3D5701E9-CFD3-4218-9200-897B6D4FF041",
+                     inclusiveGateway.getExecutionSet().getDefaultRoute().getValue());
+        SequenceFlow sequenceFlow1 = null;
+        SequenceFlow sequenceFlow2 = null;
+        List<Edge> outEdges = (List<Edge>) gatewayNode.getOutEdges();
+        if (outEdges != null) {
+            for (Edge edge : outEdges) {
+                if ("_3D5701E9-CFD3-4218-9200-897B6D4FF041".equals(edge.getUUID())) {
+                    sequenceFlow1 = (SequenceFlow) ((ViewConnector) edge.getContent()).getDefinition();
+                } else if ("_A414F16D-90BB-4742-A4E7-EBF7EA1ECD7E".equals(edge.getUUID())) {
+                    sequenceFlow2 = (SequenceFlow) ((ViewConnector) edge.getContent()).getDefinition();
+                }
+            }
+        }
+        assertNotNull(sequenceFlow1);
+        assertEquals("OutSequence1",
+                     sequenceFlow1.getGeneral().getName().getValue());
+        assertNotNull(sequenceFlow2);
+        assertEquals("OutSequence2",
                      sequenceFlow2.getGeneral().getName().getValue());
     }
 
@@ -2236,6 +2276,18 @@ public class BPMNDirectDiagramMarshallerTest {
         assertTrue(flatResult.contains("<drools:script><![CDATA[System.out.println(\"Bye\");]]></drools:script>"));
     }
 
+
+    @Test
+    public void testMarshallInclusiveGateway() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_INCLUSIVE_GATEWAY);
+        String result = tested.marshall(diagram);
+        assertDiagram(result,
+                      1,
+                      6,
+                      6);
+        assertTrue(result.contains("<bpmn2:inclusiveGateway id=\"_526EE472-FE8B-4E9A-A951-CFBA86C3691F\" drools:dg=\"_3D5701E9-CFD3-4218-9200-897B6D4FF041\" name=\"InclusiveGatewayName\" gatewayDirection=\"Diverging\" default=\"_3D5701E9-CFD3-4218-9200-897B6D4FF041\">"));
+    }
+
     @Test
     public void testMarshallXorGateway() throws Exception {
         Diagram<Graph, Metadata> diagram = unmarshall(BPMN_XORGATEWAY);
@@ -2370,6 +2422,21 @@ public class BPMNDirectDiagramMarshallerTest {
             }
         }
         assertNotNull(subprocess);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testUnmarshallEventSubprocess() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_EVENT_SUBPROCESS);
+        assertDiagram(diagram,
+                      2);
+        assertEquals("EventSubProcess",
+                     diagram.getMetadata().getTitle());
+        Node<? extends Definition, ?> eventSubprocessNode = diagram.getGraph().getNode("_DF031493-5F1C-4D2B-9916-2FEABB1FADFF");
+        EventSubprocess eventSubprocess = (EventSubprocess) eventSubprocessNode.getContent().getDefinition();
+        assertTrue(eventSubprocess.getIsAsync().getValue());
+        assertEquals(eventSubprocess.getProcessData().getProcessVariables().getValue(),
+                     "Var1:String");
     }
 
     @Test
