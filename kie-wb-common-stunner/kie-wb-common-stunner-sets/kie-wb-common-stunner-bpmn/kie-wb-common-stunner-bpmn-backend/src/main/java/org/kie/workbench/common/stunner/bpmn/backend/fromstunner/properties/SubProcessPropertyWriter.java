@@ -1,5 +1,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import bpsim.ResourceParameters;
 import bpsim.Scenario;
 import bpsim.ScenarioParameters;
 import bpsim.TimeParameters;
+import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
@@ -31,6 +33,7 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
@@ -45,7 +48,7 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     public static final String defaultRelationshipType = "BPSimData";
 
     private final SubProcess process;
-    private Relationship relationship;
+    private Collection<ElementParameters> simulationParameters = new ArrayList<>();
     private Map<String, BasePropertyWriter> childElements = new HashMap<>();
 
     public SubProcessPropertyWriter(SubProcess process) {
@@ -53,17 +56,26 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
         this.process = process;
     }
 
-    public Relationship getRelationship() {
-        return relationship;
+    public void addSimulationSet(SimulationSet simulations) {
+        this.simulationParameters.add(Simulations.toElementParameters(simulations));
     }
 
-
+    public Collection<ElementParameters> getSimulationParameters() {
+        return simulationParameters;
+    }
 
     public void addChildElement(BasePropertyWriter p) {
         this.childElements.put(p.getElement().getId(), p);
         if (p.getElement() instanceof FlowElement) {
             process.getFlowElements().add((FlowElement) p.getElement());
         }
+        if (p instanceof ActivityPropertyWriter) {
+            ElementParameters simulationParameters = ((ActivityPropertyWriter) p).getSimulationParameters();
+            if (simulationParameters != null) {
+                this.simulationParameters.add(simulationParameters);
+            }
+        }
+
         addAllBaseElements(p.getBaseElements());
     }
 
@@ -108,38 +120,7 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     }
 
     public void setSimulationSet(SimulationSet simulations) {
-        Relationship relationship = bpmn2.createRelationship();
-        relationship.setType(defaultRelationshipType);
-        BPSimDataType simDataType = bpsim.createBPSimDataType();
-        // currently support single scenario
-        Scenario defaultScenario = bpsim.createScenario();
-        ScenarioParameters scenarioParameters = bpsim.createScenarioParameters();
-        defaultScenario.setId("default"); // single scenario suppoert
-        defaultScenario.setName("Simulationscenario"); // single scenario support
-        defaultScenario.setScenarioParameters(scenarioParameters);
-        simDataType.getScenario().add(defaultScenario);
-        ExtensionAttributeValue extensionElement = bpmn2.createExtensionAttributeValue();
-        relationship.getExtensionValues().add(extensionElement);
-        FeatureMap.Entry extensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA,
-                simDataType);
-        relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-
-        ElementParameters elementParameters = bpsim.createElementParameters();
-
-        ControlParameters controlParameters = bpsim.createControlParameters();
-        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
-        ResourceParameters resourceParameters = bpsim.createResourceParameters();
-        TimeParameters timeParameters = bpsim.createTimeParameters();
-
-        elementParameters.setControlParameters(controlParameters);
-        elementParameters.setPriorityParameters(priorityParameters);
-        elementParameters.setResourceParameters(resourceParameters);
-        elementParameters.setTimeParameters(timeParameters);
-
-        defaultScenario.getElementParameters().add(elementParameters);
-
-        this.relationship = relationship;
+        this.simulationParameters.add(Simulations.toElementParameters(simulations));
     }
 
     // eww

@@ -1,53 +1,36 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import bpsim.BPSimDataType;
-import bpsim.BpsimPackage;
-import bpsim.ControlParameters;
 import bpsim.ElementParameters;
-import bpsim.PriorityParameters;
-import bpsim.ResourceParameters;
-import bpsim.Scenario;
-import bpsim.ScenarioParameters;
-import bpsim.TimeParameters;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
-import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
-import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BPMNShape;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
-import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
-import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
 public class ProcessPropertyWriter extends BasePropertyWriter implements ElementContainer {
 
-    public static final String defaultRelationshipType = "BPSimData";
-
     private final Process process;
     private final BPMNDiagram bpmnDiagram;
-    private Relationship relationship;
     private Map<String, BasePropertyWriter> childElements = new HashMap<>();
+    private Collection<ElementParameters> simulationParameters = new ArrayList<>();
 
     public ProcessPropertyWriter(Process process) {
         super(process);
@@ -62,10 +45,6 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
 
     public Process getProcess() {
         return process;
-    }
-
-    public Relationship getRelationship() {
-        return relationship;
     }
 
     public void addChildShape(BPMNShape shape) {
@@ -87,6 +66,18 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         if (p.getElement() instanceof FlowElement) {
             process.getFlowElements().add((FlowElement) p.getElement());
         }
+        if (p instanceof ActivityPropertyWriter) {
+            ElementParameters simulationParameters = ((ActivityPropertyWriter) p).getSimulationParameters();
+            if (simulationParameters != null) {
+                this.simulationParameters.add(simulationParameters);
+            }
+        }
+
+        if (p instanceof SubProcessPropertyWriter) {
+            Collection<ElementParameters> simulationParameters = ((SubProcessPropertyWriter) p).getSimulationParameters();
+            this.simulationParameters.addAll(simulationParameters);
+        }
+
         if (p instanceof SequenceFlowPropertyWriter) {
             addChildEdge(((SequenceFlowPropertyWriter) p).getEdge());
         }
@@ -133,41 +124,6 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         setMeta("customDescription", value);
     }
 
-    public void setSimulationSet(SimulationSet simulations) {
-        Relationship relationship = bpmn2.createRelationship();
-        relationship.setType(defaultRelationshipType);
-        BPSimDataType simDataType = bpsim.createBPSimDataType();
-        // currently support single scenario
-        Scenario defaultScenario = bpsim.createScenario();
-        ScenarioParameters scenarioParameters = bpsim.createScenarioParameters();
-        defaultScenario.setId("default"); // single scenario suppoert
-        defaultScenario.setName("Simulationscenario"); // single scenario support
-        defaultScenario.setScenarioParameters(scenarioParameters);
-        simDataType.getScenario().add(defaultScenario);
-        ExtensionAttributeValue extensionElement = bpmn2.createExtensionAttributeValue();
-        relationship.getExtensionValues().add(extensionElement);
-        FeatureMap.Entry extensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA,
-                simDataType);
-        relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-
-        ElementParameters elementParameters = bpsim.createElementParameters();
-
-        ControlParameters controlParameters = bpsim.createControlParameters();
-        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
-        ResourceParameters resourceParameters = bpsim.createResourceParameters();
-        TimeParameters timeParameters = bpsim.createTimeParameters();
-
-        elementParameters.setControlParameters(controlParameters);
-        elementParameters.setPriorityParameters(priorityParameters);
-        elementParameters.setResourceParameters(resourceParameters);
-        elementParameters.setTimeParameters(timeParameters);
-
-        defaultScenario.getElementParameters().add(elementParameters);
-
-        this.relationship = relationship;
-    }
-
     // eww
     protected String asCData(String original) {
         return "<![CDATA[" + original + "]]>";
@@ -198,5 +154,9 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         List<org.eclipse.bpmn2.Lane> laneList = laneSet.getLanes();
         lanes.forEach(l -> laneList.add(l.getElement()));
         process.getLaneSets().add(laneSet);
+    }
+
+    public Collection<ElementParameters> getSimulationParameters() {
+        return simulationParameters;
     }
 }

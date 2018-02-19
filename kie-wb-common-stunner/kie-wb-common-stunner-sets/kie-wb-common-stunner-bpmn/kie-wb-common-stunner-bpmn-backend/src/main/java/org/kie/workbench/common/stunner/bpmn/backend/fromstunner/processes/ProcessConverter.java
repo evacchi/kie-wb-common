@@ -37,6 +37,7 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.metaData;
 
 public class ProcessConverter {
 
@@ -119,7 +120,6 @@ public class ProcessConverter {
         ProcessData processData = definition.getProcessData();
         p.setProcessVariables(processData.getProcessVariables());
 
-        p.setSimulationSet(null); // fixme: inserting default data
         return p;
     }
 }

@@ -47,6 +47,8 @@ public class TaskConverter {
                     ActivityPropertyWriter p = new ActivityPropertyWriter(task);
                     p.setName(definition.getGeneral().getName().getValue());
                     p.setBounds(n.getContent().getBounds());
+
+                    p.setSimulationSet(definition.getSimulationSet());
                     return p;
                 })
                 .when(ScriptTask.class, n -> {
@@ -64,6 +66,8 @@ public class TaskConverter {
 
                     p.setScript(executionSet.getScript().getValue());
                     p.setAsync(executionSet.getIsAsync().getValue());
+
+                    p.setSimulationSet(definition.getSimulationSet());
 
                     p.setBounds(n.getContent().getBounds());
                     return p;
@@ -89,6 +93,8 @@ public class TaskConverter {
                     p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
 
                     p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
+
+                    p.setSimulationSet(definition.getSimulationSet());
 
                     p.setBounds(n.getContent().getBounds());
                     return p;

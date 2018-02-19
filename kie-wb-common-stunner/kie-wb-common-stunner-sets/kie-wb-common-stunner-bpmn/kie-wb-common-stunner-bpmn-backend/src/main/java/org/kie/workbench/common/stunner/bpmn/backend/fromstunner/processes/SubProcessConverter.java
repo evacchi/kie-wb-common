@@ -103,7 +103,7 @@ public class SubProcessConverter {
                     ProcessData processData = definition.getProcessData();
                     p.setProcessVariables(processData.getProcessVariables());
 
-                    p.setSimulationSet(null); // fixme: inserting default data
+                    p.setSimulationSet(definition.getSimulationSet());
 
                     p.setBounds(n.getContent().getBounds());
 
@@ -132,7 +132,7 @@ public class SubProcessConverter {
 
                     p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
 
-                    //p.setSimulationSet(null); // fixme: inserting default data
+                    p.setSimulationSet(definition.getSimulationSet());
 
                     p.setBounds(n.getContent().getBounds());
                     return p;

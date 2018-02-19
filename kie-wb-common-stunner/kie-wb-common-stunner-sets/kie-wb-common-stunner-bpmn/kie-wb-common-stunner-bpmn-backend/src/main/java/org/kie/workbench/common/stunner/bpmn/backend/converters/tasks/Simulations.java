@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tasks;
 
+import bpsim.ControlParameters;
 import bpsim.CostParameters;
 import bpsim.ElementParameters;
 import bpsim.FloatingParameterType;
@@ -23,6 +24,7 @@ import bpsim.NormalDistributionType;
 import bpsim.Parameter;
 import bpsim.ParameterValue;
 import bpsim.PoissonDistributionType;
+import bpsim.PriorityParameters;
 import bpsim.ResourceParameters;
 import bpsim.TimeParameters;
 import bpsim.UniformDistributionType;
@@ -32,7 +34,25 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.VoidMatch;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
+
 public class Simulations {
+
+    public static ElementParameters toElementParameters(SimulationSet simulationSet) {
+        ElementParameters elementParameters = bpsim.createElementParameters();
+
+        ControlParameters controlParameters = bpsim.createControlParameters();
+        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
+        ResourceParameters resourceParameters = bpsim.createResourceParameters();
+        TimeParameters timeParameters = bpsim.createTimeParameters();
+
+        elementParameters.setControlParameters(controlParameters);
+        elementParameters.setPriorityParameters(priorityParameters);
+        elementParameters.setResourceParameters(resourceParameters);
+        elementParameters.setTimeParameters(timeParameters);
+
+        return elementParameters;
+    }
 
     public static SimulationSet simulationSet(ElementParameters eleType) {
         SimulationSet simulationSet = new SimulationSet();
@@ -65,7 +85,7 @@ public class Simulations {
             simulationSet.getUnitCost().setValue(extractDouble(costParams.getUnitCost()));
         }
 
-        //controlParams(eleType, simulationSet);
+        //todo? controlParams(eleType, simulationSet);
         ResourceParameters resourceParams = eleType.getResourceParameters();
 
         if (resourceParams != null) {
@@ -107,7 +127,6 @@ public class Simulations {
                     simulationSet.getDistributionType().setValue("poisson");
                     return simulationSet;
                 }).apply(paramValue).asSuccess().value();
-
     }
 
     private static Double extractDouble(Parameter parameter) {
