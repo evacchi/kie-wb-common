@@ -30,7 +30,7 @@ public class IOPropertyWriter extends PropertyWriter {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedefInput(a.getTarget(),
-                        type);
+                             type);
 
         // then we declare a name (a variable) with that type,
         // e.g. foo:java.lang.String
@@ -57,7 +57,7 @@ public class IOPropertyWriter extends PropertyWriter {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedefInput(attributeId,
-                        "java.lang.String");
+                             "java.lang.String");
 
         Property decl = varDecl(attributeId, typeDef);
 
@@ -75,7 +75,7 @@ public class IOPropertyWriter extends PropertyWriter {
 
         this.addBaseElement(typeDef);
 
-        dataInputAssociation.setId("AAAAA"+makeDataInputId(attributeId));
+        dataInputAssociation.setId("AAAAA" + makeDataInputId(attributeId));
         dataInputAssociation.setTargetRef(target);
 
         return dataInputAssociation;
@@ -130,14 +130,14 @@ public class IOPropertyWriter extends PropertyWriter {
         return dataInputAssociation;
     }
 
-
     private DataInput readInputFrom(String targetName, ItemDefinition typeDef) {
         DataInput dataInput = bpmn2.createDataInput();
         dataInput.setName(targetName);
         // the id is an encoding of the node id + the name of the input
         dataInput.setId(makeDataInputId(targetName));
         dataInput.setItemSubjectRef(typeDef);
-        dataInput.getAnyAttribute().add(Attributes.drools("dtype", "String"));
+        dataInput.getAnyAttribute().add(
+                Attributes.drools("dtype", typeDef.getStructureRef()));
         return dataInput;
     }
 
@@ -147,11 +147,10 @@ public class IOPropertyWriter extends PropertyWriter {
         // the id is an encoding of the node id + the name of the output
         dataOutput.setId(makeDataOutputId(sourceName));
         dataOutput.setItemSubjectRef(typeDef);
-        dataOutput.getAnyAttribute().add(Attributes.drools("dtype", "String"));
+        dataOutput.getAnyAttribute().add(
+                Attributes.drools("dtype", typeDef.getStructureRef()));
         return dataOutput;
     }
-
-
 
     private Property varDecl(String varName, ItemDefinition typeDef) {
         Property source = bpmn2.createProperty();
@@ -179,7 +178,7 @@ public class IOPropertyWriter extends PropertyWriter {
     }
 
     public DataOutputAssociation addDataOutputAssociation(AssociationDeclaration.Output declaration, DeclarationList outputs) {
-        AssociationDeclaration.SourceTarget pair =  (AssociationDeclaration.SourceTarget) declaration.getPair();
+        AssociationDeclaration.SourceTarget pair = (AssociationDeclaration.SourceTarget) declaration.getPair();
         String type = outputs.lookup(pair.getSource());
         return addOutputSourceTarget(pair, type);
     }
@@ -188,7 +187,7 @@ public class IOPropertyWriter extends PropertyWriter {
         // first we declare the type of this assignment
         ItemDefinition typeDef =
                 typedefOutput(a.getSource(),
-                        type);
+                              type);
 
         // then we declare a name (a variable) with that type,
         // e.g. foo:java.lang.String
@@ -199,7 +198,6 @@ public class IOPropertyWriter extends PropertyWriter {
         // e.g. myInput
         DataOutput source =
                 writeOutputTo(a.getSource(), typeDef);
-
 
         // then we create the actual association between the two
         // e.g. foo := myInput (or, to put it differently, myInput -> foo)
