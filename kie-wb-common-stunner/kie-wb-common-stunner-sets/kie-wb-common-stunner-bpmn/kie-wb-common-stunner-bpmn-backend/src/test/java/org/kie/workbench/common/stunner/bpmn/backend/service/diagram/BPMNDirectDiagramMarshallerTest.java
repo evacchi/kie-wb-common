@@ -329,8 +329,7 @@ public class BPMNDirectDiagramMarshallerTest {
         assertEquals(variables.getValue(),
                      "employee:java.lang.String,reason:java.lang.String,performance:java.lang.String");
         // fixme why was this test looking for the definitions id ??
-        // Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("_luRBMdEjEeWXpsZ1tNStKQ");
-        Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("processvariables");
+        Node<? extends Definition, ?> diagramNode = diagram.getGraph().getNode("_luRBMdEjEeWXpsZ1tNStKQ");
         assertTrue(diagramNode.getContent().getDefinition() instanceof BPMNDiagram);
         BPMNDiagramImpl bpmnDiagram = (BPMNDiagramImpl) diagramNode.getContent().getDefinition();
         assertTrue(bpmnDiagram.getProcessData() != null);
@@ -2245,7 +2244,7 @@ public class BPMNDirectDiagramMarshallerTest {
                       1,
                       6,
                       5);
-        assertTrue(result.contains("<bpmn2:exclusiveGateway id=\"_877EA035-1A14-42E9-8CAA-43E9BF908C70\" drools:dg=\"under 10 : _5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\" name=\"AgeSplit\" gatewayDirection=\"Diverging\" default=\"_5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\">"));
+        assertTrue(result.contains("<bpmn2:exclusiveGateway id=\"_877EA035-1A14-42E9-8CAA-43E9BF908C70\" drools:dg=\"_5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\" name=\"AgeSplit\" gatewayDirection=\"Diverging\" default=\"_5110D608-BDAD-47BF-A3F9-E1DBE43ED7CD\">"));
     }
 
     @Test

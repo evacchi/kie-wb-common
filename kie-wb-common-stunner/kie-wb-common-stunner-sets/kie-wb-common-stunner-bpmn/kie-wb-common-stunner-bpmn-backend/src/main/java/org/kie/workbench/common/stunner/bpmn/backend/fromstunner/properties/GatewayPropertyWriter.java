@@ -22,6 +22,9 @@ public class GatewayPropertyWriter extends PropertyWriter {
     }
 
     public void setDefaultRoute(String defaultRouteExpression) {
+        if (defaultRouteExpression == null) {
+            return;
+        }
         FeatureMap.Entry dg = Attributes.drools("dg", defaultRouteExpression);
         this.gateway.getAnyAttribute().add(dg);
 
