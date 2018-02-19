@@ -36,6 +36,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Prop
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SubProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
+import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
@@ -62,11 +63,6 @@ public class SubProcessConverter {
         return NodeMatch.fromNode(BaseSubprocess.class, PropertyWriter.class)
                 .when(EmbeddedSubprocess.class, n -> {
 
-                    DefinitionsBuildingContext subContext = context.withRootNode(n);
-
-                    ViewDefinitionConverter viewDefinitionConverter =
-                            new ViewDefinitionConverter(subContext);
-
                     SubProcess process = bpmn2.createSubProcess();
                     process.setId(n.getUUID());
 
@@ -86,46 +82,35 @@ public class SubProcessConverter {
 
                     p.setBounds(n.getContent().getBounds());
 
-                    context.nodes()
-                            .map(viewDefinitionConverter::toFlowElement)
-                            .filter(Result::notIgnored)
-                            .map(Result::value)
-                            .forEach(p::addChildElement);
-
-                    List<LanePropertyWriter> lanes = context.nodes()
-                            .map(laneConverter::toElement)
-                            .filter(Result::notIgnored)
-                            .map(Result::value)
-                            .collect(Collectors.toList());
-
-                    p.addLaneSet(lanes);
-                    lanes.forEach(p::addChildElement);
-
-                    context.childEdges()
-                            .forEach(e -> {
-                                BasePropertyWriter pSrc = p.getChildElement(e.getSourceNode().getUUID());
-                                // if it's null, then it's a root: skip it
-                                if (pSrc != null) {
-                                    BasePropertyWriter pTgt = p.getChildElement(e.getTargetNode().getUUID());
-                                    pTgt.setParent(pSrc);
-                                }
-                            });
-
-                    context.dockEdges()
-                            .forEach(e -> {
-                                ActivityPropertyWriter pSrc =
-                                        (ActivityPropertyWriter) p.getChildElement(e.getSourceNode().getUUID());
-                                BoundaryEventPropertyWriter pTgt =
-                                        (BoundaryEventPropertyWriter) p.getChildElement(e.getTargetNode().getUUID());
-
-                                pTgt.setParentActivity(pSrc);
-                            });
-
-                    context.edges()
-                            .map(e -> sequenceFlowConverter.toFlowElement(e, p))
-                            .forEach(p::addChildElement);
+                    addChildNodes(p, node);
                     return p;
                 })
+                .when(EventSubprocess.class, n -> {
+
+                    SubProcess process = bpmn2.createSubProcess();
+                    process.setId(n.getUUID());
+
+                    SubProcessPropertyWriter p = new SubProcessPropertyWriter(process);
+
+                    EventSubprocess definition = n.getContent().getDefinition();
+                    process.setTriggeredByEvent(true);
+
+                    BPMNGeneralSet general = definition.getGeneral();
+
+                    p.setName(general.getName().getValue());
+                    p.setDocumentation(general.getDocumentation().getValue());
+
+                    ProcessData processData = definition.getProcessData();
+                    p.setProcessVariables(processData.getProcessVariables());
+
+                    p.setSimulationSet(null); // fixme: inserting default data
+
+                    p.setBounds(n.getContent().getBounds());
+
+                    addChildNodes(p, node);
+                    return p;
+                })
+
                 .when(ReusableSubprocess.class, n -> {
                     CallActivity activity = bpmn2.createCallActivity();
                     activity.setId(n.getUUID());
@@ -152,5 +137,51 @@ public class SubProcessConverter {
                     p.setBounds(n.getContent().getBounds());
                     return p;
                 }).apply(node).value();
+    }
+
+    private void addChildNodes(SubProcessPropertyWriter p, Node<View<BaseSubprocess>, ?> node) {
+        DefinitionsBuildingContext subContext = context.withRootNode(node);
+
+        ViewDefinitionConverter viewDefinitionConverter =
+                new ViewDefinitionConverter(subContext);
+
+        context.nodes()
+                .map(viewDefinitionConverter::toFlowElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .forEach(p::addChildElement);
+
+        List<LanePropertyWriter> lanes = context.nodes()
+                .map(laneConverter::toElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .collect(Collectors.toList());
+
+        p.addLaneSet(lanes);
+        lanes.forEach(p::addChildElement);
+
+        context.childEdges()
+                .forEach(e -> {
+                    BasePropertyWriter pSrc = p.getChildElement(e.getSourceNode().getUUID());
+                    // if it's null, then it's a root: skip it
+                    if (pSrc != null) {
+                        BasePropertyWriter pTgt = p.getChildElement(e.getTargetNode().getUUID());
+                        pTgt.setParent(pSrc);
+                    }
+                });
+
+        context.dockEdges()
+                .forEach(e -> {
+                    ActivityPropertyWriter pSrc =
+                            (ActivityPropertyWriter) p.getChildElement(e.getSourceNode().getUUID());
+                    BoundaryEventPropertyWriter pTgt =
+                            (BoundaryEventPropertyWriter) p.getChildElement(e.getTargetNode().getUUID());
+
+                    pTgt.setParentActivity(pSrc);
+                });
+
+        context.edges()
+                .map(e -> sequenceFlowConverter.toFlowElement(e, p))
+                .forEach(p::addChildElement);
     }
 }
