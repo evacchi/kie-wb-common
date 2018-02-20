@@ -32,10 +32,6 @@ public class BoundaryEventPropertyWriter extends CatchEventPropertyWriter {
         this.event = event;
     }
 
-    public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        // todo
-    }
-
     public void setParentActivity(ActivityPropertyWriter parent) {
         org.eclipse.dd.dc.Bounds parentBounds =
                 getParentActivityBounds(parent.getShape().getBounds());

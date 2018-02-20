@@ -40,9 +40,9 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
                 .map(declaration -> addDataInputAssociation(declaration, assignmentsInfo.getInputs()))
                 .forEach(dia -> {
                     InputSet inputSet = bpmn2.createInputSet();
+                    dia.getSourceRef().forEach(this::addBaseElement);
                     inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
                     throwEvent.setInputSet(inputSet);
-                    dia.getSourceRef().forEach(this::addBaseElement);
                     throwEvent.getDataInputAssociation().add(dia);
                 });
     }

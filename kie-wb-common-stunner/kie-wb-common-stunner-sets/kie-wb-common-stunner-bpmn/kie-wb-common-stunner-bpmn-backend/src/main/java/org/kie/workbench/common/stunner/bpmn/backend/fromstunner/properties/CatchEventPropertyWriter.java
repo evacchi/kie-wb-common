@@ -18,11 +18,14 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import bpsim.ElementParameters;
 import org.eclipse.bpmn2.CatchEvent;
+import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.EventDefinition;
+import org.eclipse.bpmn2.OutputSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class CatchEventPropertyWriter extends EventPropertyWriter {
 
@@ -35,7 +38,21 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
     }
 
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        // todo
+        assignmentsInfo.getAssociations()
+                .getOutputs()
+                .stream()
+                .map(declaration -> this.addDataOutputAssociation(declaration, assignmentsInfo.getOutputs()))
+                .forEach(doa -> {
+                    OutputSet outputSet = bpmn2.createOutputSet();
+                    doa.getSourceRef().forEach(this::addBaseElement);
+                    this.addBaseElement(doa.getTargetRef());
+                    doa.getSourceRef().forEach(i -> {
+                        DataOutput sourceRef = (DataOutput) i;
+                        outputSet.getDataOutputRefs().add(sourceRef);
+                    });
+                    event.setOutputSet(outputSet);
+                    event.getDataOutputAssociation().add(doa);
+                });
     }
 
     public void setSimulationSet(SimulationAttributeSet simulationSet) {
