@@ -88,7 +88,7 @@ public abstract class EventPropertyWriter extends IOPropertyWriter {
         errorEventDefinition.setErrorRef(error);
 
         FeatureMap.Entry erefname =
-                Attributes.drools("erefname", errorCode);
+                attribute("erefname", errorCode);
         errorEventDefinition.getAnyAttribute().add(erefname);
 
         addEventDefinition(errorEventDefinition);

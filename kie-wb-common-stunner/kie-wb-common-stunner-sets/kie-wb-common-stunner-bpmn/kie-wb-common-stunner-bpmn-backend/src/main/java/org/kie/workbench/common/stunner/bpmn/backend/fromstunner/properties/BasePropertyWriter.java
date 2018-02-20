@@ -26,6 +26,7 @@ import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EAttributeImpl;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.DroolsFactory;
@@ -36,6 +37,7 @@ import org.kie.workbench.common.stunner.core.graph.content.Bounds;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.dc;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.metaData;
 
 public class BasePropertyWriter {
 
@@ -74,32 +76,6 @@ public class BasePropertyWriter {
 
     public Collection<BaseElement> getBaseElements() {
         return this.baseElements.values();
-    }
-
-    protected void setMeta(
-            String attributeId,
-            String metaDataValue) {
-
-        if (baseElement != null) {
-            MetaDataType eleMetadata = DroolsFactory.eINSTANCE.createMetaDataType();
-            eleMetadata.setName(attributeId);
-            eleMetadata.setMetaValue(asCData(metaDataValue));
-
-            if (baseElement.getExtensionValues() == null || baseElement.getExtensionValues().isEmpty()) {
-                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
-                baseElement.getExtensionValues().add(extensionElement);
-            }
-
-            FeatureMap.Entry eleExtensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                    (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__META_DATA,
-                    eleMetadata);
-            baseElement.getExtensionValues().get(0).getValue().add(eleExtensionElementEntry);
-        }
-    }
-
-    // eww
-    protected String asCData(String original) {
-        return "<![CDATA[" + original + "]]>";
     }
 
     public void setDocumentation(String value) {
@@ -154,5 +130,42 @@ public class BasePropertyWriter {
         bounds.setHeight(height);
 
         return bounds;
+    }
+
+    public static FeatureMap.Entry attribute(String attributeId, Object value) {
+        EAttributeImpl extensionAttribute = (EAttributeImpl) metaData.demandFeature(
+                "http://www.jboss.org/drools",
+                attributeId,
+                false,
+                false);
+
+        return new EStructuralFeatureImpl.SimpleFeatureMapEntry(
+                extensionAttribute, value);
+    }
+
+    protected void setMeta(
+            String attributeId,
+            String metaDataValue) {
+
+        if (baseElement != null) {
+            MetaDataType eleMetadata = DroolsFactory.eINSTANCE.createMetaDataType();
+            eleMetadata.setName(attributeId);
+            eleMetadata.setMetaValue(asCData(metaDataValue));
+
+            if (baseElement.getExtensionValues() == null || baseElement.getExtensionValues().isEmpty()) {
+                ExtensionAttributeValue extensionElement = Bpmn2Factory.eINSTANCE.createExtensionAttributeValue();
+                baseElement.getExtensionValues().add(extensionElement);
+            }
+
+            FeatureMap.Entry eleExtensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
+                    (EStructuralFeature.Internal) DroolsPackage.Literals.DOCUMENT_ROOT__META_DATA,
+                    eleMetadata);
+            baseElement.getExtensionValues().get(0).getValue().add(eleExtensionElementEntry);
+        }
+    }
+
+    // eww
+    protected String asCData(String original) {
+        return "<![CDATA[" + original + "]]>";
     }
 }

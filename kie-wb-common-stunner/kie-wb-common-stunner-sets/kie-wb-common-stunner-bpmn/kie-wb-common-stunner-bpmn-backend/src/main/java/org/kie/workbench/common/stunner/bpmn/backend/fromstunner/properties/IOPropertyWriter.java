@@ -137,7 +137,7 @@ public class IOPropertyWriter extends PropertyWriter {
         dataInput.setId(makeDataInputId(targetName));
         dataInput.setItemSubjectRef(typeDef);
         dataInput.getAnyAttribute().add(
-                Attributes.drools("dtype", typeDef.getStructureRef()));
+                attribute("dtype", typeDef.getStructureRef()));
         return dataInput;
     }
 
@@ -148,7 +148,7 @@ public class IOPropertyWriter extends PropertyWriter {
         dataOutput.setId(makeDataOutputId(sourceName));
         dataOutput.setItemSubjectRef(typeDef);
         dataOutput.getAnyAttribute().add(
-                Attributes.drools("dtype", typeDef.getStructureRef()));
+                attribute("dtype", typeDef.getStructureRef()));
         return dataOutput;
     }
 

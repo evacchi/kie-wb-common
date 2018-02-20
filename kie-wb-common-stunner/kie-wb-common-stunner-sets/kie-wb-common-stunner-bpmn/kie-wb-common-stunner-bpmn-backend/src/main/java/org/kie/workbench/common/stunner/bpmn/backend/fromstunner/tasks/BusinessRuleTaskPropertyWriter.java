@@ -10,7 +10,6 @@ import org.jboss.drools.OnEntryScriptType;
 import org.jboss.drools.OnExitScriptType;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Attributes;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.RuleFlowGroup;
@@ -34,7 +33,7 @@ public class BusinessRuleTaskPropertyWriter extends ActivityPropertyWriter {
 
     public void setRuleFlowGroup(RuleFlowGroup ruleFlowGroup) {
         String value = ruleFlowGroup.getValue();
-        FeatureMap.Entry attribute = Attributes.drools("ruleFlowGroup", value);
+        FeatureMap.Entry attribute = attribute("ruleFlowGroup", value);
         getFlowElement().getAnyAttribute().add(attribute);
     }
 

@@ -116,15 +116,15 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
 
     public void setPackage(String value) {
         process.getAnyAttribute().add(
-                Attributes.drools("packageName", String.valueOf(value)));
+                attribute("packageName", String.valueOf(value)));
     }
 
     public void setVersion(String value) {
-        process.getAnyAttribute().add(Attributes.drools("version", String.valueOf(value)));
+        process.getAnyAttribute().add(attribute("version", String.valueOf(value)));
     }
 
     public void setAdHoc(Boolean adHoc) {
-        process.getAnyAttribute().add(Attributes.drools("adHoc", String.valueOf(adHoc)));
+        process.getAnyAttribute().add(attribute("adHoc", String.valueOf(adHoc)));
     }
 
     public void setDescription(String value) {

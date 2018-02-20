@@ -16,10 +16,20 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import org.eclipse.bpmn2.Bpmn2Factory;
 import org.eclipse.bpmn2.Documentation;
+import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EAttributeImpl;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
+import org.jboss.drools.DroolsFactory;
+import org.jboss.drools.DroolsPackage;
+import org.jboss.drools.MetaDataType;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.metaData;
 
 public class PropertyWriter extends BasePropertyWriter {
 
@@ -44,4 +54,5 @@ public class PropertyWriter extends BasePropertyWriter {
         documentation.setText(asCData(value));
         flowElement.getDocumentation().add(documentation);
     }
+
 }

@@ -13,12 +13,12 @@ public class CallActivityPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setIndependent(Boolean independent) {
-        FeatureMap.Entry value = Attributes.drools("independent", independent);
+        FeatureMap.Entry value = attribute("independent", independent);
         this.activity.getAnyAttribute().add(value);
     }
 
     public void setWaitForCompletion(Boolean waitForCompletion) {
-        FeatureMap.Entry value = Attributes.drools("waitForCompletion", waitForCompletion);
+        FeatureMap.Entry value = attribute("waitForCompletion", waitForCompletion);
         this.activity.getAnyAttribute().add(value);
     }
 
