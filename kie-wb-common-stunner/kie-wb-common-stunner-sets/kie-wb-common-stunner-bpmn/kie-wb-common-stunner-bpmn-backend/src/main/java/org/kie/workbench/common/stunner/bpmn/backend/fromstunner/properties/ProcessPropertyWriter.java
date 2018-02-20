@@ -66,6 +66,13 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         if (p.getElement() instanceof FlowElement) {
             process.getFlowElements().add((FlowElement) p.getElement());
         }
+        if (p instanceof CatchEventPropertyWriter) {
+            ElementParameters simulationParameters = ((CatchEventPropertyWriter) p).getSimulationParameters();
+            if (simulationParameters != null) {
+                this.simulationParameters.add(simulationParameters);
+            }
+        }
+
         if (p instanceof ActivityPropertyWriter) {
             ElementParameters simulationParameters = ((ActivityPropertyWriter) p).getSimulationParameters();
             if (simulationParameters != null) {

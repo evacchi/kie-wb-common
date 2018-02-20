@@ -53,6 +53,8 @@ public class StartEventConverter {
                     p.setName(general.getName().getValue());
                     p.setDocumentation(general.getDocumentation().getValue());
 
+                    p.setSimulationSet(definition.getSimulationSet());
+
                     p.setBounds(n.getContent().getBounds());
                     return p;
                 })

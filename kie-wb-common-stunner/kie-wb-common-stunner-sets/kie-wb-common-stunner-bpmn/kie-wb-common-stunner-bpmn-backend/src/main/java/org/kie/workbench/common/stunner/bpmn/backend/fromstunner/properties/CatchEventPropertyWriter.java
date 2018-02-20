@@ -16,13 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
+import bpsim.ElementParameters;
 import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.EventDefinition;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 public class CatchEventPropertyWriter extends EventPropertyWriter {
 
     private final CatchEvent event;
+    private ElementParameters simulationParameters;
 
     public CatchEventPropertyWriter(CatchEvent event) {
         super(event);
@@ -31,6 +36,15 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
 
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
         // todo
+    }
+
+    public void setSimulationSet(SimulationAttributeSet simulationSet) {
+        ElementParameters elementParameters = Simulations.toElementParameters(simulationSet);
+        this.simulationParameters = elementParameters;
+    }
+
+    public ElementParameters getSimulationParameters() {
+        return simulationParameters;
     }
 
     @Override

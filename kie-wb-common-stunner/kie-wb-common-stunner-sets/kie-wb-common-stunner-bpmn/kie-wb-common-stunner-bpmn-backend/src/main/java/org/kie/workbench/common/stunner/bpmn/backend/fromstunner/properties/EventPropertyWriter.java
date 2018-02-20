@@ -16,18 +16,13 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import org.eclipse.bpmn2.DataInput;
-import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.Error;
 import org.eclipse.bpmn2.ErrorEventDefinition;
 import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.InputSet;
-import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Message;
 import org.eclipse.bpmn2.MessageEventDefinition;
-import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.TerminateEventDefinition;
@@ -35,7 +30,6 @@ import org.eclipse.bpmn2.TimerEventDefinition;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Ids;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalRef;
@@ -135,7 +129,7 @@ public abstract class EventPropertyWriter extends IOPropertyWriter {
             timeCycleExpression.setLanguage(cycleLanguage);
             eventDefinition.setTimeCycle(timeCycleExpression);
         }
-        
+
         addEventDefinition(eventDefinition);
     }
 

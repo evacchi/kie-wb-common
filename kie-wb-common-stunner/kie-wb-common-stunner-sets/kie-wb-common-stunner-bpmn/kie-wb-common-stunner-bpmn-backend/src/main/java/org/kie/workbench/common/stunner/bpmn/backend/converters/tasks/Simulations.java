@@ -66,7 +66,6 @@ public class Simulations {
                 processingTime.getParameterValue().add(pdt);
 
                 break;
-
         }
 
         elementParameters.setTimeParameters(timeParameters);
@@ -190,5 +189,39 @@ public class Simulations {
         ParameterValue value = parameterValues.get(0);
         FloatingParameterType floatingValue = (FloatingParameterType) value;
         return floatingValue.getValue();
+    }
+
+    public static ElementParameters toElementParameters(SimulationAttributeSet simulationSet) {
+        ElementParameters elementParameters = bpsim.createElementParameters();
+
+        TimeParameters timeParameters = bpsim.createTimeParameters();
+        Parameter processingTime = bpsim.createParameter();
+        timeParameters.setProcessingTime(processingTime);
+
+        switch (simulationSet.getDistributionType().getValue()) {
+            case "normal":
+                NormalDistributionType ndt = bpsim.createNormalDistributionType();
+                ndt.setMean(simulationSet.getMean().getValue());
+                ndt.setStandardDeviation(simulationSet.getStandardDeviation().getValue());
+                processingTime.getParameterValue().add(ndt);
+
+                break;
+            case "uniform":
+                UniformDistributionType udt = bpsim.createUniformDistributionType();
+                udt.setMin(simulationSet.getMin().getValue());
+                udt.setMax(simulationSet.getMax().getValue());
+                processingTime.getParameterValue().add(udt);
+
+                break;
+            case "poisson":
+                PoissonDistributionType pdt = bpsim.createPoissonDistributionType();
+                pdt.setMean(simulationSet.getMean().getValue());
+                processingTime.getParameterValue().add(pdt);
+
+                break;
+        }
+
+        elementParameters.setTimeParameters(timeParameters);
+        return elementParameters;
     }
 }
