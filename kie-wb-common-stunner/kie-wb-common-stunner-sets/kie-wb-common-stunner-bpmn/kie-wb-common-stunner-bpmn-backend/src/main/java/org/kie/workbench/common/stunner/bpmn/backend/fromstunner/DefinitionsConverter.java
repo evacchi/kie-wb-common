@@ -66,7 +66,10 @@ public class DefinitionsConverter {
         BPMNDiagram bpmnDiagram = p.getBpmnDiagram();
         definitions.getDiagrams().add(bpmnDiagram);
 
-        setRelationship(definitions, p.getSimulationParameters());
+        Relationship relationship = toRelationship(p.getSimulationParameters());
+        relationship.getSources().add(definitions);
+        relationship.getTargets().add(definitions);
+        definitions.getRelationships().add(relationship);
 
         for (BaseElement baseElement : p.getBaseElements()) {
             if (baseElement instanceof RootElement) {
@@ -78,8 +81,8 @@ public class DefinitionsConverter {
     }
 
 
-    public static final String defaultRelationshipType = "BPSimData";
-    void setRelationship(Definitions definitions, Collection<ElementParameters> parameters) {
+    private static final String defaultRelationshipType = "BPSimData";
+    private Relationship toRelationship(Collection<ElementParameters> parameters) {
         Relationship relationship = bpmn2.createRelationship();
         relationship.setType(defaultRelationshipType);
         BPSimDataType simDataType = bpsim.createBPSimDataType();
@@ -97,10 +100,8 @@ public class DefinitionsConverter {
                 simDataType);
         relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
         defaultScenario.getElementParameters().addAll(parameters);
-        definitions.getRelationships().add(relationship);
 
-        relationship.getSources().add(definitions);
-        relationship.getTargets().add(definitions);
+        return relationship;
 
     }
 

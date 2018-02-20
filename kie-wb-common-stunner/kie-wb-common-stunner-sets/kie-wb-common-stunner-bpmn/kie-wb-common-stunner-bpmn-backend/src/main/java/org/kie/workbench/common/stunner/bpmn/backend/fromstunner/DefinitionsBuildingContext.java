@@ -16,6 +16,7 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -24,12 +25,9 @@ import java.util.stream.StreamSupport;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
 import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
 import org.kie.workbench.common.stunner.core.graph.content.relationship.Child;
 import org.kie.workbench.common.stunner.core.graph.content.relationship.Dock;
@@ -66,13 +64,9 @@ public class DefinitionsBuildingContext
 
     public DefinitionsBuildingContext(
             Node<?, ?> firstNode,
-            Map<String,
-                    Node<View<? extends BPMNViewDefinition>,
-                            Edge<ViewConnector<BPMNViewDefinition>,
-                                    Node<? extends View<? extends BPMNViewDefinition>, ?>>>> nodes) {
+            Map<String, Node> nodes) {
         super(firstNode, nodes);
     }
-
 }
 
 //
@@ -90,7 +84,7 @@ abstract class DefinitionsContextHelper<
                 Node<View<? extends BPMNViewDefinition>, EdgeT>
         > {
 
-    private final Map<String, NodeT> nodes;
+    private final Map<String, ? extends NodeT> nodes;
 
     private final Node firstNode;
 
@@ -107,12 +101,12 @@ abstract class DefinitionsContextHelper<
 
     public DefinitionsContextHelper(
             Node<?, ?> firstNode,
-            Map<String, NodeT> nodes) {
+            Map<String, ? extends Node> nodes) {
         this.firstNode = firstNode;
-        this.nodes = nodes;
+        this.nodes = (Map<String, ? extends NodeT>) nodes;
     }
 
-    public Stream<NodeT> nodes() {
+    public Stream<? extends NodeT> nodes() {
         return nodes.values().stream();
     }
 
@@ -124,24 +118,13 @@ abstract class DefinitionsContextHelper<
         return firstNode;
     }
 
-    public Stream<EdgeT> allEdges() {
-        return nodes()
-                .flatMap(e -> Stream.concat(
-                        e.getInEdges().stream(),
-                        e.getOutEdges().stream()))
-                .distinct()
-                .filter(e -> (e.getContent() instanceof ViewConnector)
-                        || (e.getContent() instanceof Dock)
-                        || (e.getContent() instanceof Child));
-    }
-
     public Stream<EdgeT> edges() {
         return nodes()
                 .flatMap(e -> Stream.concat(
                         e.getInEdges().stream(),
                         e.getOutEdges().stream()))
                 .distinct()
-                .filter(e -> (e.getContent() instanceof ViewConnector));
+                .filter(e -> (isViewConnector(e)));
     }
 
     public Stream<EdgeT> dockEdges() {
@@ -150,7 +133,7 @@ abstract class DefinitionsContextHelper<
                         e.getInEdges().stream(),
                         e.getOutEdges().stream()))
                 .distinct()
-                .filter(e -> (e.getContent() instanceof Dock));
+                .filter(e -> (isDock(e)));
     }
 
     public Stream<EdgeT> childEdges() {
@@ -159,19 +142,29 @@ abstract class DefinitionsContextHelper<
                         e.getInEdges().stream(),
                         e.getOutEdges().stream()))
                 .distinct()
-                .filter(e -> (e.getContent() instanceof Child));
+                .filter(e -> (isChild(e)));
     }
 
-    // fixme, do we need to go further deep with nesting? here we're stopping at the first level
     public DefinitionsBuildingContext withRootNode(Node<?, ?> node) {
-        Map<String, ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> collect =
-                childEdges()
-                    .filter(e -> e.getSourceNode().getUUID().equals(node.getUUID()))
-                    .map(e -> e.getTargetNode())
-                    .collect(Collectors.toMap(Node::getUUID, Function.identity()));
+        Map<String, Node> nodes = new HashMap<>();
 
-        return new DefinitionsBuildingContext(
-                node, (Map<String, Node<View<? extends BPMNViewDefinition>, Edge<ViewConnector<BPMNViewDefinition>, Node<? extends View<? extends BPMNViewDefinition>, ?>>>>) collect);
+        childEdges()
+                .filter(e -> e.getSourceNode().getUUID().equals(node.getUUID()))
+                .map(Edge::getTargetNode)
+                .forEach(n -> nodes.put(n.getUUID(), n)); // use forEach instead of collect to avoid issues with type inference
+
+        return new DefinitionsBuildingContext(node, nodes);
     }
 
+    private boolean isChild(EdgeT e) {
+        return e.getContent() instanceof Child;
+    }
+
+    private boolean isDock(EdgeT e) {
+        return e.getContent() instanceof Dock;
+    }
+
+    private boolean isViewConnector(EdgeT e) {
+        return e.getContent() instanceof ViewConnector;
+    }
 }

@@ -23,12 +23,12 @@ import org.eclipse.dd.dc.DcFactory;
 import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.jboss.drools.DroolsFactory;
 
-public class Factories {
+public interface Factories {
 
-    public static final Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
-    public static final BpsimFactory bpsim = BpsimFactory.eINSTANCE;
-    public static final BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
-    public static final DcFactory dc = DcFactory.eINSTANCE;
-    public static final ExtendedMetaData metaData = ExtendedMetaData.INSTANCE;
-    public static final DroolsFactory droolsFactory = DroolsFactory.eINSTANCE;
+    Bpmn2Factory bpmn2 = Bpmn2Factory.eINSTANCE;
+    BpsimFactory bpsim = BpsimFactory.eINSTANCE;
+    BpmnDiFactory di = BpmnDiFactory.eINSTANCE;
+    DcFactory dc = DcFactory.eINSTANCE;
+    ExtendedMetaData metaData = ExtendedMetaData.INSTANCE;
+    DroolsFactory droolsFactory = DroolsFactory.eINSTANCE;
 }
