@@ -120,7 +120,9 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     }
 
     public void setSimulationSet(SimulationSet simulations) {
-        this.simulationParameters.add(Simulations.toElementParameters(simulations));
+        ElementParameters elementParameters = Simulations.toElementParameters(simulations);
+        elementParameters.setElementRef(this.baseElement.getId());
+        this.simulationParameters.add(elementParameters);
     }
 
     // eww

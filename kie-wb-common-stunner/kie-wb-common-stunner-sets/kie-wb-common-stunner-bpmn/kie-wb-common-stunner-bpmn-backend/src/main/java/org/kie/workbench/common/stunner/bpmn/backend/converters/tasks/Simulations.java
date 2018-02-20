@@ -41,17 +41,64 @@ public class Simulations {
     public static ElementParameters toElementParameters(SimulationSet simulationSet) {
         ElementParameters elementParameters = bpsim.createElementParameters();
 
-        ControlParameters controlParameters = bpsim.createControlParameters();
-        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
-        ResourceParameters resourceParameters = bpsim.createResourceParameters();
         TimeParameters timeParameters = bpsim.createTimeParameters();
+        Parameter processingTime = bpsim.createParameter();
+        timeParameters.setProcessingTime(processingTime);
 
-        elementParameters.setControlParameters(controlParameters);
-        elementParameters.setPriorityParameters(priorityParameters);
-        elementParameters.setResourceParameters(resourceParameters);
+        switch (simulationSet.getDistributionType().getValue()) {
+            case "normal":
+                NormalDistributionType ndt = bpsim.createNormalDistributionType();
+                ndt.setMean(simulationSet.getMean().getValue());
+                ndt.setStandardDeviation(simulationSet.getStandardDeviation().getValue());
+                processingTime.getParameterValue().add(ndt);
+
+                break;
+            case "uniform":
+                UniformDistributionType udt = bpsim.createUniformDistributionType();
+                udt.setMin(simulationSet.getMin().getValue());
+                udt.setMax(simulationSet.getMax().getValue());
+                processingTime.getParameterValue().add(udt);
+
+                break;
+            case "poisson":
+                PoissonDistributionType pdt = bpsim.createPoissonDistributionType();
+                pdt.setMean(simulationSet.getMean().getValue());
+                processingTime.getParameterValue().add(pdt);
+
+                break;
+
+        }
+
         elementParameters.setTimeParameters(timeParameters);
 
+        Double unitCost = simulationSet.getUnitCost().getValue();
+        Double quantity = simulationSet.getQuantity().getValue();
+        Double workingHours = simulationSet.getWorkingHours().getValue();
+
+        CostParameters costParameters = bpsim.createCostParameters();
+        costParameters.setUnitCost(toParameter(unitCost));
+        elementParameters.setCostParameters(costParameters);
+
+        // ControlParameters controlParameters = bpsim.createControlParameters();
+        // elementParameters.setControlParameters(controlParameters);
+
+        // PriorityParameters priorityParameters = bpsim.createPriorityParameters();
+        // elementParameters.setPriorityParameters(priorityParameters);
+
+        ResourceParameters resourceParameters = bpsim.createResourceParameters();
+        resourceParameters.setQuantity(toParameter(quantity));
+        resourceParameters.setAvailability(toParameter(workingHours));
+        elementParameters.setResourceParameters(resourceParameters);
+
         return elementParameters;
+    }
+
+    private static Parameter toParameter(Double value) {
+        Parameter parameter = bpsim.createParameter();
+        FloatingParameterType parameterValue = bpsim.createFloatingParameterType();
+        parameterValue.setValue(value);
+        parameter.getParameterValue().add(parameterValue);
+        return parameter;
     }
 
     public static SimulationSet simulationSet(ElementParameters eleType) {

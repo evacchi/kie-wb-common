@@ -12,6 +12,7 @@ import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.OutputSet;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
@@ -34,19 +35,8 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
     }
 
     public void setSimulationSet(SimulationSet simulationSet) {
-        ElementParameters elementParameters = bpsim.createElementParameters();
-
-        ControlParameters controlParameters = bpsim.createControlParameters();
-        PriorityParameters priorityParameters = bpsim.createPriorityParameters();
-        ResourceParameters resourceParameters = bpsim.createResourceParameters();
-        TimeParameters timeParameters = bpsim.createTimeParameters();
-
-        elementParameters.setControlParameters(controlParameters);
-        elementParameters.setPriorityParameters(priorityParameters);
-        elementParameters.setResourceParameters(resourceParameters);
-        elementParameters.setTimeParameters(timeParameters);
-
-        this.simulationParameters = elementParameters;
+        this.simulationParameters = Simulations.toElementParameters(simulationSet);
+        simulationParameters.setElementRef(activity.getId());
     }
 
     public ElementParameters getSimulationParameters() {

@@ -99,8 +99,8 @@ public class DefinitionsConverter {
         defaultScenario.getElementParameters().addAll(parameters);
         definitions.getRelationships().add(relationship);
 
-        //relationship.getSources().add(process);
-        //relationship.getTargets().add(process);
+        relationship.getSources().add(definitions);
+        relationship.getTargets().add(definitions);
 
     }
 

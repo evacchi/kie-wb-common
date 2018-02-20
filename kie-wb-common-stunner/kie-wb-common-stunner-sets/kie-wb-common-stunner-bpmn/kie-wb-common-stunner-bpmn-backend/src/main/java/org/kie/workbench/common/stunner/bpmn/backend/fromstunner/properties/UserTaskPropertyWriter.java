@@ -156,7 +156,4 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
         eav.getValue().add(value);
     }
 
-    public void setSimulationSet(SimulationSet simulationSet) {
-
-    }
 }
