@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.activities;
 
 import org.eclipse.bpmn2.CallActivity;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ActivityPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
@@ -45,7 +46,7 @@ public class CallActivityConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(CallActivity activity) {
+    public NodeResult convert(CallActivity activity) {
         Node<View<ReusableSubprocess>, Edge> node = factoryManager.newNode(activity.getId(), ReusableSubprocess.class);
 
         ReusableSubprocess definition = node.getContent().getDefinition();
@@ -76,6 +77,6 @@ public class CallActivityConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 }

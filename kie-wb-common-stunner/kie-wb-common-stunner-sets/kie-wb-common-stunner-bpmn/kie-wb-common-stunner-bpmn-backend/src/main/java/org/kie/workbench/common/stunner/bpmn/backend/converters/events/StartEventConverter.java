@@ -27,18 +27,17 @@ import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.StartEvent;
 import org.eclipse.bpmn2.TimerEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartSignalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartTimerEvent;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
@@ -66,19 +65,17 @@ public class StartEventConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(StartEvent startEvent) {
+    public NodeResult convert(StartEvent startEvent) {
         List<EventDefinition> eventDefinitions = startEvent.getEventDefinitions();
-        Node<? extends View<? extends BaseStartEvent>, ?> convertedStartEvent = convertStartEvent(startEvent, eventDefinitions);
-
-        return convertedStartEvent;
+        return convertStartEvent(startEvent, eventDefinitions);
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> convertStartEvent(StartEvent event, List<EventDefinition> eventDefinitions) {
+    private NodeResult convertStartEvent(StartEvent event, List<EventDefinition> eventDefinitions) {
         switch (eventDefinitions.size()) {
             case 0:
                 return noneEvent(event);
             case 1:
-                return Match.ofNode(EventDefinition.class, BaseStartEvent.class)
+                return BpmnMatch.ofNode(EventDefinition.class, BPMNViewDefinition.class)
                         .when(SignalEventDefinition.class, e -> signalEvent(event, e))
                         .when(MessageEventDefinition.class, e -> messageEvent(event, e))
                         .when(TimerEventDefinition.class, e -> timerEvent(event, e))
@@ -86,13 +83,13 @@ public class StartEventConverter {
                         .missing(ConditionalEventDefinition.class)
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).asSuccess().value();
+                        .apply(eventDefinitions.get(0));
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for start event");
         }
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> errorEvent(
+    private NodeResult errorEvent(
             StartEvent event,
             ErrorEventDefinition e) {
         Node<View<StartErrorEvent>, Edge> node =
@@ -123,10 +120,10 @@ public class StartEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> timerEvent(
+    private NodeResult timerEvent(
             StartEvent event,
             TimerEventDefinition e) {
         Node<View<StartTimerEvent>, Edge> node =
@@ -153,10 +150,10 @@ public class StartEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> messageEvent(
+    private NodeResult messageEvent(
             StartEvent event,
             MessageEventDefinition e) {
         Node<View<StartMessageEvent>, Edge> node =
@@ -187,10 +184,10 @@ public class StartEventConverter {
         definition.setBackgroundSet(p.getBackgroundSet());
         definition.setDimensionsSet(p.getCircleDimensionSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> signalEvent(
+    private NodeResult signalEvent(
             StartEvent event,
             SignalEventDefinition e) {
         Node<View<StartSignalEvent>, Edge> node =
@@ -217,10 +214,10 @@ public class StartEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseStartEvent>, ?> noneEvent(StartEvent event) {
+    private NodeResult noneEvent(StartEvent event) {
         Node<View<StartNoneEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), StartNoneEvent.class);
         StartNoneEvent definition = node.getContent().getDefinition();
@@ -239,6 +236,6 @@ public class StartEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 }

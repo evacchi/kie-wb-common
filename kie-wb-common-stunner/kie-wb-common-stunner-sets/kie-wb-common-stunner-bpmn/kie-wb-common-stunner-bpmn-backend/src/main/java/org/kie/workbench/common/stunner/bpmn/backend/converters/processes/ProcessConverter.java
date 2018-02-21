@@ -48,7 +48,7 @@ public class ProcessConverter extends AbstractProcessConverter {
         super(typedFactoryManager, propertyReaderFactory, context);
     }
 
-    public NodeResult<BPMNDiagramImpl> convert(String id, Process process) {
+    public NodeResult convert(String id, Process process) {
         Node<View<BPMNDiagramImpl>, Edge> diagramNode =
                 factoryManager.newNode(id, BPMNDiagramImpl.class);
         BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
@@ -75,7 +75,7 @@ public class ProcessConverter extends AbstractProcessConverter {
         definition.setFontSet(e.getFontSet());
         definition.setBackgroundSet(e.getBackgroundSet());
 
-        NodeResult<BPMNDiagramImpl> firstNode = NodeResult.of(diagramNode);
+        NodeResult firstNode = NodeResult.of(diagramNode);
 
         List<FlowElement> flowElements = process.getFlowElements();
         List<LaneSet> laneSets = process.getLaneSets();

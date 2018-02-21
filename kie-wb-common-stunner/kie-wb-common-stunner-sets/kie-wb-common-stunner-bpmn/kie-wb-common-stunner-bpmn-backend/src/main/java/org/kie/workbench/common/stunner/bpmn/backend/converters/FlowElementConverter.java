@@ -40,7 +40,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows.Se
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Edge;
-import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,8 +76,8 @@ public class FlowElementConverter {
         this.subProcessConverter = new SubProcessConverter(factoryManager, propertyReaderFactory, this, context);
     }
 
-    public NodeResult<BPMNViewDefinition> convertNode(FlowElement flowElement) {
-        Result<Node<? extends View<? extends BPMNViewDefinition>, ?>> r = Match.ofNode(FlowElement.class, BPMNViewDefinition.class)
+    public NodeResult convertNode(FlowElement flowElement) {
+        return BpmnMatch.ofNode(FlowElement.class, BPMNViewDefinition.class)
                 .when(StartEvent.class, startEventConverter::convert)
                 .when(EndEvent.class, endEventConverter::convert)
                 .when(BoundaryEvent.class, intermediateCatchEventConverter::convertBoundaryEvent)
@@ -90,11 +89,6 @@ public class FlowElementConverter {
                 .when(CallActivity.class, callActivityConverter::convert)
                 .ignore(SequenceFlow.class)
                 .apply(flowElement);
-
-        if (r.isSuccess())
-            return NodeResult.of(r.value());
-        else if (r.isIgnored()) return NodeResult.ignored(r.asIgnored().reason());
-        else return NodeResult.failure(r.asFailure().reason());
     }
 
     public Result<Edge<? extends View<? extends BPMNViewDefinition>, ?>> convertEdge(FlowElement flowElement) {

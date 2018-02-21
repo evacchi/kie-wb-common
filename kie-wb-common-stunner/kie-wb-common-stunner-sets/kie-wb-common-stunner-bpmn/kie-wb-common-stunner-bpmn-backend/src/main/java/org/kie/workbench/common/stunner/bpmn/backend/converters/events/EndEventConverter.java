@@ -27,11 +27,11 @@ import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.TerminateEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
@@ -63,13 +63,13 @@ public class EndEventConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(EndEvent event) {
+    public NodeResult convert(EndEvent event) {
         List<EventDefinition> eventDefinitions = event.getEventDefinitions();
         switch (eventDefinitions.size()) {
             case 0:
                 return endNoneEvent(event);
             case 1:
-                return Match.ofNode(EventDefinition.class, BaseEndEvent.class)
+                return BpmnMatch.ofNode(EventDefinition.class, BaseEndEvent.class)
                         .when(TerminateEventDefinition.class, e -> terminateEndEvent(event, e))
                         .when(SignalEventDefinition.class, e -> signalEventDefinition(event, e))
                         .when(MessageEventDefinition.class, e -> messageEventDefinition(event, e))
@@ -77,13 +77,13 @@ public class EndEventConverter {
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
                         .missing(CancelEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).asSuccess().value();
+                        .apply(eventDefinitions.get(0));
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for end event");
         }
     }
 
-    private Node<? extends View<? extends BaseEndEvent>, ?> messageEventDefinition(EndEvent event, MessageEventDefinition e) {
+    private NodeResult messageEventDefinition(EndEvent event, MessageEventDefinition e) {
         Node<View<EndMessageEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), EndMessageEvent.class);
 
@@ -109,10 +109,10 @@ public class EndEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseEndEvent>, ?> signalEventDefinition(EndEvent event, SignalEventDefinition nodeId) {
+    private NodeResult signalEventDefinition(EndEvent event, SignalEventDefinition nodeId) {
         Node<View<EndSignalEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), EndSignalEvent.class);
 
@@ -139,10 +139,10 @@ public class EndEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseEndEvent>, ?> terminateEndEvent(EndEvent event, TerminateEventDefinition e) {
+    private NodeResult terminateEndEvent(EndEvent event, TerminateEventDefinition e) {
         Node<View<EndTerminateEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), EndTerminateEvent.class);
 
@@ -160,10 +160,10 @@ public class EndEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BPMNViewDefinition>, ?> endNoneEvent(EndEvent event) {
+    private NodeResult endNoneEvent(EndEvent event) {
         Node<View<EndNoneEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), EndNoneEvent.class);
         EndNoneEvent definition = node.getContent().getDefinition();
@@ -180,10 +180,10 @@ public class EndEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<? extends View<? extends BaseEndEvent>, ?> errorEventDefinition(EndEvent event, ErrorEventDefinition e) {
+    private NodeResult errorEventDefinition(EndEvent event, ErrorEventDefinition e) {
         Node<View<EndErrorEvent>, Edge> node =
                 factoryManager.newNode(event.getId(), EndErrorEvent.class);
 
@@ -209,6 +209,6 @@ public class EndEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 }

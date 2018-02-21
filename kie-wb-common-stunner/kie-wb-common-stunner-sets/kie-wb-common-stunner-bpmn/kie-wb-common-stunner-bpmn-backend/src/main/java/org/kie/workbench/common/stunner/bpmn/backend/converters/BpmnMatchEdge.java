@@ -20,50 +20,49 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class BpmnMatch<In> {
+public class BpmnMatchEdge<In, Out> {
 
-    LinkedList<BpmnMatch.Case<?, BPMNViewDefinition>> cases = new LinkedList<>();
-    Function<? super In, ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> orElse;
+    private final Class<?> outputType;
+    LinkedList<BpmnMatchEdge.Case<?, Out>> cases = new LinkedList<>();
+    Function<In, Edge<? extends View<Out>, ?>> orElse;
 
-    public BpmnMatch() {
+    public BpmnMatchEdge(Class<?> outputType) {
+        this.outputType = outputType;
     }
 
-    public static <In, Out> BpmnMatch<In> of(Class<In> inputType) {
-        return new BpmnMatch<>();
+    public static <In, Out> BpmnMatchEdge<In, Out> ofEdge(Class<In> inputType, Class<Out> outputType) {
+        return new BpmnMatchEdge<>(outputType);
     }
 
-    public static <In, Out> BpmnMatch<In> ofNode(Class<In> inputType, Class<Out> outputType) {
-        return new BpmnMatch<>();
-    }
-
-    public static <In, Out> BpmnMatch<In> ofEdge(Class<In> inputType, Class<Out> outputType) {
-        return new BpmnMatch<>();
-    }
-
-    static <T, U> Function<T, NodeResult> reportMissing(Class<?> expectedClass) {
+    static <T, U> Function<T, EdgeResult<U>> reportMissing(Class<?> expectedClass) {
         return t ->
-                NodeResult.failure(
+                EdgeResult.failure(
                         "Not yet implemented: " +
                                 Optional.ofNullable(t)
                                         .map(o -> o.getClass().getCanonicalName())
                                         .orElse("null -- expected " + expectedClass.getCanonicalName()));
     }
 
-    static <T, U> Function<T, NodeResult> ignored(Class<?> expectedClass) {
+    static <T, U> Function<T, EdgeResult<U>> ignored(Class<?> expectedClass) {
         return t ->
-                NodeResult.ignored(
+                EdgeResult.ignored(
                         "Ignored: " +
                                 Optional.ofNullable(t)
                                         .map(o -> o.getClass().getCanonicalName())
                                         .orElse("null -- expected " + expectedClass.getCanonicalName()));
     }
 
-    public <Sub> BpmnMatch<In> when(Class<Sub> type, Function<Sub, NodeResult> then) {
-        cases.add(new BpmnMatch.Case<>(type, then));
+    public <Sub> BpmnMatchEdge<In, Out> when(Class<Sub> type, Function<Sub, Edge<? extends View<Out>, ?>> then) {
+        Function<Sub, EdgeResult<Out>> thenWrapped = sub -> EdgeResult.of(then.apply(sub));
+        return when_(type, thenWrapped);
+    }
+
+    public <Sub> BpmnMatchEdge<In, Out> when_(Class<Sub> type, Function<Sub, EdgeResult<Out>> then) {
+        cases.add(new BpmnMatchEdge.Case<>(type, then));
         return this;
     }
 
@@ -71,48 +70,48 @@ public class BpmnMatch<In> {
      * handle a type by throwing an error.
      * Use when the implementation is still missing, but expected to exist
      */
-    public <Sub> BpmnMatch<In> missing(Class<Sub> type) {
-        return when(type, reportMissing(type));
+    public <Sub> BpmnMatchEdge<In, Out> missing(Class<Sub> type) {
+        return when_(type, reportMissing(type));
     }
 
-    public <Sub> BpmnMatch<In> ignore(Class<Sub> type) {
-        return when(type, ignored(type));
+    public <Sub> BpmnMatchEdge<In, Out> ignore(Class<Sub> type) {
+        return when_(type, ignored(type));
     }
 
-    public BpmnMatch<In> orElse(Function<In, Node<? extends View<? extends BPMNViewDefinition>, ?>> then) {
+    public BpmnMatchEdge<In, Out> orElse(Function<In, Edge<? extends View<Out>, ?>> then) {
         this.orElse = then;
         return this;
     }
 
-    public NodeResult apply(In value) {
+    public EdgeResult<Out> apply(In value) {
         return cases.stream()
                 .map(c -> c.match(value))
-                .filter(NodeResult::nonFailure)
+                .filter(EdgeResult::nonFailure)
                 .findFirst()
                 .orElse(applyFallback(value));
     }
 
-    private NodeResult applyFallback(In value) {
+    private EdgeResult<Out> applyFallback(In value) {
         if (orElse == null) {
-            return NodeResult.failure(value == null ? "Null" : value.getClass().getName());
+            return EdgeResult.failure(value == null ? "Null" : value.getClass().getName());
         } else {
-            return NodeResult.of(orElse.apply(value));
+            return EdgeResult.of(orElse.apply(value));
         }
     }
 
     private static class Case<T, R> {
 
         public final Class<T> when;
-        public final Function<T, NodeResult> then;
+        public final Function<T, EdgeResult<R>> then;
 
-        public Case(Class<T> when, Function<T, NodeResult> then) {
+        public Case(Class<T> when, Function<T, EdgeResult<R>> then) {
             this.when = when;
             this.then = then;
         }
 
-        public NodeResult match(Object value) {
+        public EdgeResult<R> match(Object value) {
             return when.isAssignableFrom(value.getClass()) ?
-                    then.apply((T) value) : NodeResult.failure(value.getClass().getName());
+                    then.apply((T) value) : EdgeResult.failure(value.getClass().getName());
         }
     }
 }

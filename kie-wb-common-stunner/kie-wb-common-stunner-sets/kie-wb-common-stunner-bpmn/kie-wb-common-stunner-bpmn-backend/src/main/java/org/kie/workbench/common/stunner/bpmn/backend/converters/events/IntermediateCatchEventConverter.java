@@ -29,11 +29,11 @@ import org.eclipse.bpmn2.IntermediateCatchEvent;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.TimerEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
@@ -66,14 +66,14 @@ public class IntermediateCatchEventConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convertIntermediateCatchEvent(IntermediateCatchEvent event) {
+    public NodeResult convertIntermediateCatchEvent(IntermediateCatchEvent event) {
         List<EventDefinition> eventDefinitions = event.getEventDefinitions();
         String nodeId = event.getId();
         switch (eventDefinitions.size()) {
             case 0:
                 throw new UnsupportedOperationException("An intermediate catch event should contain exactly one definition");
             case 1:
-                return Match.ofNode(EventDefinition.class, BaseCatchingIntermediateEvent.class)
+                return BpmnMatch.ofNode(EventDefinition.class, BaseCatchingIntermediateEvent.class)
                         .when(TimerEventDefinition.class, e -> timerEvent(event, e))
                         .when(SignalEventDefinition.class, e -> signalEvent(event, e))
                         .when(MessageEventDefinition.class, e -> messageEvent(event, e))
@@ -81,13 +81,34 @@ public class IntermediateCatchEventConverter {
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
                         .missing(ConditionalEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).asSuccess().value();
+                        .apply(eventDefinitions.get(0));
             default:
                 throw new UnsupportedOperationException("Multiple definitions not supported for intermediate catch event");
         }
     }
 
-    private Node<View<IntermediateErrorEventCatching>, Edge> errorEvent(CatchEvent event, ErrorEventDefinition e) {
+    public NodeResult convertBoundaryEvent(BoundaryEvent event) {
+        List<EventDefinition> eventDefinitions = event.getEventDefinitions();
+        switch (eventDefinitions.size()) {
+            case 0:
+                throw new UnsupportedOperationException("A boundary event should contain exactly one definition");
+            case 1:
+
+                return BpmnMatch.ofNode(EventDefinition.class, BaseCatchingIntermediateEvent.class)
+                        .when(SignalEventDefinition.class, e -> signalEvent(event, e))
+                        .when(TimerEventDefinition.class, e -> timerEvent(event, e))
+                        .when(MessageEventDefinition.class, e -> messageEvent(event, e))
+                        .when(ErrorEventDefinition.class, e -> errorEvent(event, e))
+                        .missing(EscalationEventDefinition.class)
+                        .missing(CompensateEventDefinition.class)
+                        .missing(ConditionalEventDefinition.class)
+                        .apply(eventDefinitions.get(0));
+            default:
+                throw new UnsupportedOperationException("Multiple definitions not supported for boundary event");
+        }
+    }
+
+    private NodeResult errorEvent(CatchEvent event, ErrorEventDefinition e) {
         String nodeId = event.getId();
         Node<View<IntermediateErrorEventCatching>, Edge> node = factoryManager.newNode(nodeId, IntermediateErrorEventCatching.class);
 
@@ -114,31 +135,10 @@ public class IntermediateCatchEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convertBoundaryEvent(BoundaryEvent event) {
-        List<EventDefinition> eventDefinitions = event.getEventDefinitions();
-        switch (eventDefinitions.size()) {
-            case 0:
-                throw new UnsupportedOperationException("A boundary event should contain exactly one definition");
-            case 1:
-
-                return Match.ofNode(EventDefinition.class, BaseCatchingIntermediateEvent.class)
-                        .when(SignalEventDefinition.class, e -> signalEvent(event, e))
-                        .when(TimerEventDefinition.class, e -> timerEvent(event, e))
-                        .when(MessageEventDefinition.class, e -> messageEvent(event, e))
-                        .when(ErrorEventDefinition.class, e -> errorEvent(event, e))
-                        .missing(EscalationEventDefinition.class)
-                        .missing(CompensateEventDefinition.class)
-                        .missing(ConditionalEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).asSuccess().value();
-            default:
-                throw new UnsupportedOperationException("Multiple definitions not supported for boundary event");
-        }
-    }
-
-    private Node<View<IntermediateSignalEventCatching>, Edge> signalEvent(CatchEvent event, SignalEventDefinition e) {
+    private NodeResult signalEvent(CatchEvent event, SignalEventDefinition e) {
         String nodeId = event.getId();
         Node<View<IntermediateSignalEventCatching>, Edge> node = factoryManager.newNode(nodeId, IntermediateSignalEventCatching.class);
 
@@ -165,10 +165,10 @@ public class IntermediateCatchEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<View<IntermediateTimerEvent>, Edge> timerEvent(CatchEvent event, TimerEventDefinition e) {
+    private NodeResult timerEvent(CatchEvent event, TimerEventDefinition e) {
         String nodeId = event.getId();
         Node<View<IntermediateTimerEvent>, Edge> node = factoryManager.newNode(nodeId, IntermediateTimerEvent.class);
 
@@ -191,10 +191,10 @@ public class IntermediateCatchEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 
-    private Node<View<IntermediateMessageEventCatching>, Edge> messageEvent(CatchEvent event, MessageEventDefinition e) {
+    private NodeResult messageEvent(CatchEvent event, MessageEventDefinition e) {
         String nodeId = event.getId();
         Node<View<IntermediateMessageEventCatching>, Edge> node = factoryManager.newNode(nodeId, IntermediateMessageEventCatching.class);
 
@@ -221,6 +221,6 @@ public class IntermediateCatchEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 }

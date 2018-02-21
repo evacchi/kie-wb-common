@@ -36,7 +36,7 @@ public class LaneConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public NodeResult<Lane> convert(org.eclipse.bpmn2.Lane lane) {
+    public NodeResult convert(org.eclipse.bpmn2.Lane lane) {
         Node<View<Lane>, Edge> node = typedFactoryManager.newNode(lane.getId(), Lane.class);
         Lane definition = node.getContent().getDefinition();
 

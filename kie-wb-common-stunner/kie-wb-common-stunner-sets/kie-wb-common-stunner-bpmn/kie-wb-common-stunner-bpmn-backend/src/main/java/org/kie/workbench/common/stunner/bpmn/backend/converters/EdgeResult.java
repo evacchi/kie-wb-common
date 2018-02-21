@@ -6,29 +6,30 @@ import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
+import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public interface NodeResult {
+public interface EdgeResult<T> {
 
-    static NodeResult of(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
-        return new Success(value);
+    static <R> EdgeResult<R> of(Edge<? extends View<R>, ?> value) {
+        return new Success<>(value);
     }
 
-    static NodeResult success(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
-        return new Success(value);
+    static <R> EdgeResult<R> success(Edge<? extends View<R>, ?> value) {
+        return new Success<>(value);
     }
 
-    static NodeResult failure(String reason) {
-        return new Failure(reason);
+    static <R> EdgeResult<R> failure(String reason) {
+        return new Failure<>(reason);
     }
 
-    static NodeResult ignored(String reason) {
-        return new Ignored(reason);
+    static <U> EdgeResult<U> ignored(String reason) {
+        return new Ignored<>(reason);
     }
 
-    default Node<? extends View<? extends BPMNViewDefinition>, ?> value() {
+    default Edge<? extends View<T>, ?> value() {
         return asSuccess().value();
     }
 
@@ -36,9 +37,9 @@ public interface NodeResult {
         return value().getUUID();
     }
 
-    public NodeResult map(
-            Function<? super Node<? extends View<? extends BPMNViewDefinition>, ?>,
-                    ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> mapper);
+    <U> EdgeResult<U> map(
+            Function<? super Edge<? extends View<T>, ?>,
+                    ? extends Edge<? extends View<U>, ?>> mapper);
 
     boolean isFailure();
 
@@ -54,7 +55,7 @@ public interface NodeResult {
         return !isIgnored();
     }
 
-    default void ifSuccess(Consumer<Node<? extends View<? extends BPMNViewDefinition>, ?>> consumer) {
+    default void ifSuccess(Consumer<Edge<? extends View<T>, ?>> consumer) {
         if (isSuccess()) {
             consumer.accept(asSuccess().value());
         }
@@ -66,38 +67,38 @@ public interface NodeResult {
         }
     }
 
-    Success asSuccess();
+    Success<T> asSuccess();
 
-    Failure asFailure();
+    Failure<T> asFailure();
 
-    default void setParent(NodeResult firstDiagramNode) {
+    default void setParent(EdgeResult<?> firstDiagramNode) {
         asSuccess().setParent(firstDiagramNode);
     }
 
-    default void addChild(Success child) {
+    default void addChild(Success<?> child) {
         asSuccess().addChild(child);
     }
 
-    default void removeChild(Success child) {
+    default void removeChild(Success<?> child) {
         asSuccess().removeChild(child);
     }
 
-    default List<Success> getChildren() {
+    default List<Success<?>> getChildren() {
         return asSuccess().getChildren();
     }
 
-    class Success implements NodeResult {
+    class Success<T> implements EdgeResult<T> {
 
-        private final Node<? extends View<? extends BPMNViewDefinition>, ?> value;
-        private List<Success> children = new ArrayList<>();
-        private NodeResult parent;
+        private final Edge<? extends View<T>, ?> value;
+        private List<Success<?>> children = new ArrayList<>();
+        private EdgeResult<?> parent;
 
-        Success(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
+        Success(Edge<? extends View<T>, ?> value) {
             this.value = value;
         }
 
         @Override
-        public void setParent(NodeResult parent) {
+        public void setParent(EdgeResult<?> parent) {
             if (this.parent != null) {
                 this.parent.removeChild(this);
             }
@@ -105,44 +106,44 @@ public interface NodeResult {
             parent.addChild(this);
         }
 
-        public NodeResult getParent() {
+        public EdgeResult<?> getParent() {
             return parent;
         }
 
         @Override
-        public void addChild(Success child) {
+        public void addChild(Success<?> child) {
             this.children.add(child);
         }
 
         @Override
-        public void removeChild(Success child) {
+        public void removeChild(Success<?> child) {
             this.children.remove(child);
         }
 
         @Override
-        public List<Success> getChildren() {
+        public List<Success<?>> getChildren() {
             return children;
         }
 
-        public Node<? extends View<? extends BPMNViewDefinition>, ?> value() {
+        public Edge<? extends View<T>, ?> value() {
             return value;
         }
 
-        public NodeResult map(
-                Function<? super Node<? extends View<? extends BPMNViewDefinition>, ?>,
-                        ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> mapper) {
-            return NodeResult.of(mapper.apply(this.value()));
+        public <U> EdgeResult<U> map(
+                Function<? super Edge<? extends View<T>, ?>,
+                        ? extends Edge<? extends View<U>, ?>> mapper) {
+            return EdgeResult.of(mapper.apply(this.value()));
         }
 
-        public Success asSuccess() {
+        public Success<T> asSuccess() {
             return this;
         }
 
-        public Ignored asIgnored() {
+        public Ignored<T> asIgnored() {
             throw new ClassCastException("Could not convert Success to Ignored");
         }
 
-        public Failure asFailure() {
+        public Failure<T> asFailure() {
             throw new ClassCastException("Could not convert Success to Failure");
         }
 
@@ -160,7 +161,7 @@ public interface NodeResult {
         }
     }
 
-    class Ignored implements NodeResult {
+    class Ignored<T> implements EdgeResult<T> {
 
         private final String reason;
 
@@ -172,21 +173,21 @@ public interface NodeResult {
             return reason;
         }
 
-        public NodeResult map(
-                Function<? super Node<? extends View<? extends BPMNViewDefinition>, ?>,
-                        ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> mapper) {
-            return this;
+        public <U> EdgeResult<U> map(
+                Function<? super Edge<? extends View<T>, ?>,
+                        ? extends Edge<? extends View<U>, ?>> mapper) {
+            return (Ignored<U>) this;
         }
 
-        public Success asSuccess() {
+        public Success<T> asSuccess() {
             throw new NoSuchElementException(reason);
         }
 
-        public Ignored asIgnored() {
+        public Ignored<T> asIgnored() {
             return this;
         }
 
-        public Failure asFailure() {
+        public Failure<T> asFailure() {
             throw new ClassCastException("Could not convert Ignored to Success");
         }
 
@@ -204,7 +205,7 @@ public interface NodeResult {
         }
     }
 
-    class Failure implements NodeResult {
+    class Failure<T> implements EdgeResult<T> {
 
         private final String reason;
 
@@ -216,21 +217,21 @@ public interface NodeResult {
             return reason;
         }
 
-        public NodeResult map(
-                Function<? super Node<? extends View<? extends BPMNViewDefinition>, ?>,
-                        ? extends Node<? extends View<? extends BPMNViewDefinition>, ?>> mapper) {
-            return this;
+        public <U> EdgeResult<U> map(
+                Function<? super Edge<? extends View<T>, ?>,
+                        ? extends Edge<? extends View<U>, ?>> mapper) {
+            return (Failure<U>) this;
         }
 
-        public Success asSuccess() {
+        public Success<T> asSuccess() {
             throw new NoSuchElementException(reason);
         }
 
-        public Ignored asIgnored() {
+        public Ignored<T> asIgnored() {
             throw new ClassCastException("Could not convert Failure to Ignored");
         }
 
-        public Failure asFailure() {
+        public Failure<T> asFailure() {
             return this;
         }
 

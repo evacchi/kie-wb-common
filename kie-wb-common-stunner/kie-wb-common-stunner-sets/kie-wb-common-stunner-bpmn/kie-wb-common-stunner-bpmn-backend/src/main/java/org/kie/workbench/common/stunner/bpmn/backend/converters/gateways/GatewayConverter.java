@@ -16,7 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.gateways;
 
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.eclipse.bpmn2.Gateway;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.GatewayPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
@@ -43,72 +45,78 @@ public class GatewayConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BaseGateway>, ?> convert(org.eclipse.bpmn2.Gateway gateway) {
-        return Match.ofNode(org.eclipse.bpmn2.Gateway.class, BaseGateway.class)
-                .when(org.eclipse.bpmn2.ParallelGateway.class, e -> {
-                    Node<View<ParallelGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ParallelGateway.class);
-                    GatewayPropertyReader p = propertyReaderFactory.of(gateway);
+    public NodeResult convert(org.eclipse.bpmn2.Gateway gateway) {
+        return BpmnMatch.ofNode(org.eclipse.bpmn2.Gateway.class, BaseGateway.class)
+                .when(org.eclipse.bpmn2.ParallelGateway.class, this::parallelGateway)
+                .when(org.eclipse.bpmn2.ExclusiveGateway.class, this::exclusiveGateway)
+                .when(org.eclipse.bpmn2.InclusiveGateway.class, this::inclusiveGateway)
+                .apply(gateway);
+    }
 
-                    node.getContent().setBounds(p.getBounds());
-                    ParallelGateway definition = node.getContent().getDefinition();
+    private NodeResult inclusiveGateway(Gateway gateway) {
+        Node<View<InclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), InclusiveGateway.class);
 
-                    definition.setGeneral(new BPMNGeneralSet(
-                            new Name(p.getName()),
-                            new Documentation(p.getDocumentation())
-                    ));
+        InclusiveGateway definition = node.getContent().getDefinition();
+        GatewayPropertyReader p = propertyReaderFactory.of(gateway);
 
-                    definition.setDimensionsSet(p.getCircleDimensionSet());
-                    definition.setFontSet(p.getFontSet());
-                    definition.setBackgroundSet(p.getBackgroundSet());
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
 
-                    return node;
-                })
-                .when(org.eclipse.bpmn2.ExclusiveGateway.class, e -> {
-                    Node<View<ExclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ExclusiveGateway.class);
+        definition.setExecutionSet(new GatewayExecutionSet(
+                new DefaultRoute(p.getDefaultRoute())
+        ));
 
-                    ExclusiveGateway definition = node.getContent().getDefinition();
-                    GatewayPropertyReader p = propertyReaderFactory.of(gateway);
+        node.getContent().setBounds(p.getBounds());
 
-                    definition.setGeneral(new BPMNGeneralSet(
-                            new Name(p.getName()),
-                            new Documentation(p.getDocumentation())
-                    ));
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
 
-                    definition.setExecutionSet(new GatewayExecutionSet(
-                            new DefaultRoute(p.getDefaultRoute())
-                    ));
+        return NodeResult.of(node);
+    }
 
-                    node.getContent().setBounds(p.getBounds());
+    private NodeResult exclusiveGateway(Gateway gateway) {
+        Node<View<ExclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ExclusiveGateway.class);
 
-                    definition.setDimensionsSet(p.getCircleDimensionSet());
-                    definition.setFontSet(p.getFontSet());
-                    definition.setBackgroundSet(p.getBackgroundSet());
+        ExclusiveGateway definition = node.getContent().getDefinition();
+        GatewayPropertyReader p = propertyReaderFactory.of(gateway);
 
-                    return node;
-                })
-                .when(org.eclipse.bpmn2.InclusiveGateway.class, e -> {
-                    Node<View<InclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), InclusiveGateway.class);
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
 
-                    InclusiveGateway definition = node.getContent().getDefinition();
-                    GatewayPropertyReader p = propertyReaderFactory.of(gateway);
+        definition.setExecutionSet(new GatewayExecutionSet(
+                new DefaultRoute(p.getDefaultRoute())
+        ));
 
-                    definition.setGeneral(new BPMNGeneralSet(
-                            new Name(p.getName()),
-                            new Documentation(p.getDocumentation())
-                    ));
+        node.getContent().setBounds(p.getBounds());
 
-                    definition.setExecutionSet(new GatewayExecutionSet(
-                            new DefaultRoute(p.getDefaultRoute())
-                    ));
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
 
-                    node.getContent().setBounds(p.getBounds());
+        return NodeResult.of(node);
+    }
 
-                    definition.setDimensionsSet(p.getCircleDimensionSet());
-                    definition.setFontSet(p.getFontSet());
-                    definition.setBackgroundSet(p.getBackgroundSet());
+    private NodeResult parallelGateway(Gateway gateway) {
+        Node<View<ParallelGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ParallelGateway.class);
+        GatewayPropertyReader p = propertyReaderFactory.of(gateway);
 
-                    return node;
-                })
-                .apply(gateway).asSuccess().value();
+        node.getContent().setBounds(p.getBounds());
+        ParallelGateway definition = node.getContent().getDefinition();
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return NodeResult.of(node);
     }
 }

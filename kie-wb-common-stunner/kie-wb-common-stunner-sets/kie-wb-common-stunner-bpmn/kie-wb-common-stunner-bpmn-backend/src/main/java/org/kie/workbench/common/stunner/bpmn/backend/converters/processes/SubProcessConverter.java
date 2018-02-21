@@ -45,17 +45,15 @@ public class SubProcessConverter extends AbstractProcessConverter {
         super(typedFactoryManager, propertyReaderFactory, flowElementConverter, context);
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(SubProcess subProcess) {
-        NodeResult<BPMNViewDefinition> result = convertSubProcessNode(subProcess);
+    public NodeResult convert(SubProcess subProcess) {
+        NodeResult result = convertSubProcessNode(subProcess);
         List<FlowElement> flowElements = subProcess.getFlowElements();
         List<LaneSet> laneSets = subProcess.getLaneSets();
-
         convertNodes(result, flowElements, laneSets);
-
-        return result.value();
+        return result;
     }
 
-    private NodeResult <BPMNViewDefinition> convertSubProcessNode(SubProcess subProcess) {
+    private NodeResult convertSubProcessNode(SubProcess subProcess) {
         if (subProcess.isTriggeredByEvent()) {
             Node<View<EventSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
 
