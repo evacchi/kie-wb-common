@@ -96,7 +96,12 @@ public class BasePropertyWriter {
 
     }
 
+    public void addChild(BasePropertyWriter child) {
+
+    }
+
     public void setParent(BasePropertyWriter parent) {
+        parent.addChild(this);
         if (parent.getShape() == null) {
             throw new IllegalArgumentException(
                     "Cannot set parent with undefined shape: " +
