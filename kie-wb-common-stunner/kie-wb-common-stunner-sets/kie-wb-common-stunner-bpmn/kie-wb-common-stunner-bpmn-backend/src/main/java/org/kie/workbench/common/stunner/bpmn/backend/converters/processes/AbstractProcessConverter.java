@@ -21,19 +21,16 @@ import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 
 public abstract class AbstractProcessConverter {
 
@@ -60,8 +57,8 @@ public abstract class AbstractProcessConverter {
         this(typedFactoryManager, propertyReaderFactory, new FlowElementConverter(typedFactoryManager, propertyReaderFactory, context), context);
     }
 
-    protected void convertNodes(NodeResult firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
-        Map<String, NodeResult> freeFloatingNodes =
+    protected void convertNodes(BpmnNode firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
+        Map<String, BpmnNode> freeFloatingNodes =
                 convertFlowElements(flowElements);
 
         freeFloatingNodes.values()
@@ -78,21 +75,21 @@ public abstract class AbstractProcessConverter {
                 .forEach(flowElementConverter::convertDockedNodes);
     }
 
-    private void updatePositions(NodeResult firstNode) {
+    private void updatePositions(BpmnNode firstNode) {
         context.addNode(firstNode.value());
-        Deque<NodeResult.Success> workingSet = new ArrayDeque<>(firstNode.getChildren());
+        Deque<BpmnNode> workingSet = new ArrayDeque<>(firstNode.getChildren());
         while (!workingSet.isEmpty()) {
-            NodeResult.Success current = workingSet.pop();
+            BpmnNode current = workingSet.pop();
             context.addChildNode(current.getParent().value(), current.value());
             workingSet.addAll(current.getChildren());
         }
     }
 
-    private void convertLaneSets(List<LaneSet> laneSets, Map<String, NodeResult> freeFloatingNodes, NodeResult firstDiagramNode) {
+    private void convertLaneSets(List<LaneSet> laneSets, Map<String, BpmnNode> freeFloatingNodes, BpmnNode firstDiagramNode) {
         laneSets.stream()
                 .flatMap(laneSet -> laneSet.getLanes().stream())
                 .forEach(lane -> {
-                    NodeResult laneNode = laneConverter.convert(lane);
+                    BpmnNode laneNode = laneConverter.convert(lane);
                     laneNode.setParent(firstDiagramNode);
 
                     lane.getFlowNodeRefs().forEach(node -> {
@@ -101,14 +98,15 @@ public abstract class AbstractProcessConverter {
                 });
     }
 
-    private Map<String, NodeResult> convertFlowElements(List<FlowElement> flowElements) {
-        LinkedHashMap<String, NodeResult> result = new LinkedHashMap<>();
+    private Map<String, BpmnNode> convertFlowElements(List<FlowElement> flowElements) {
+        LinkedHashMap<String, BpmnNode> result = new LinkedHashMap<>();
 
         flowElements
                 .stream()
                 .map(flowElementConverter::convertNode)
-                .filter(NodeResult::notIgnored)
-                .forEach(n -> result.put(n.getId(), n));
+                .filter(Result::isSuccess)
+                .map(Result::value)
+                .forEach(n -> result.put(n.value().getUUID(), n));
 
         return result;
     }

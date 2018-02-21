@@ -17,12 +17,11 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.gateways;
 
 import org.eclipse.bpmn2.Gateway;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.GatewayPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ExclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.InclusiveGateway;
 import org.kie.workbench.common.stunner.bpmn.definition.ParallelGateway;
@@ -45,15 +44,15 @@ public class GatewayConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public NodeResult convert(org.eclipse.bpmn2.Gateway gateway) {
-        return BpmnMatch.ofNode(org.eclipse.bpmn2.Gateway.class, BaseGateway.class)
+    public BpmnNode convert(org.eclipse.bpmn2.Gateway gateway) {
+        return Match.of(org.eclipse.bpmn2.Gateway.class, BpmnNode.class)
                 .when(org.eclipse.bpmn2.ParallelGateway.class, this::parallelGateway)
                 .when(org.eclipse.bpmn2.ExclusiveGateway.class, this::exclusiveGateway)
                 .when(org.eclipse.bpmn2.InclusiveGateway.class, this::inclusiveGateway)
-                .apply(gateway);
+                .apply(gateway).value();
     }
 
-    private NodeResult inclusiveGateway(Gateway gateway) {
+    private BpmnNode inclusiveGateway(Gateway gateway) {
         Node<View<InclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), InclusiveGateway.class);
 
         InclusiveGateway definition = node.getContent().getDefinition();
@@ -74,10 +73,10 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult exclusiveGateway(Gateway gateway) {
+    private BpmnNode exclusiveGateway(Gateway gateway) {
         Node<View<ExclusiveGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ExclusiveGateway.class);
 
         ExclusiveGateway definition = node.getContent().getDefinition();
@@ -98,10 +97,10 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult parallelGateway(Gateway gateway) {
+    private BpmnNode parallelGateway(Gateway gateway) {
         Node<View<ParallelGateway>, Edge> node = factoryManager.newNode(gateway.getId(), ParallelGateway.class);
         GatewayPropertyReader p = propertyReaderFactory.of(gateway);
 
@@ -117,6 +116,6 @@ public class GatewayConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 }

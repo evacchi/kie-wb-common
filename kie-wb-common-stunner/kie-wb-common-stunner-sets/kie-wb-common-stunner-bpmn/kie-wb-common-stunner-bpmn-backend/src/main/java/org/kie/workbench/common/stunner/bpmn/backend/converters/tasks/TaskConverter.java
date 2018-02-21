@@ -17,15 +17,14 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tasks;
 
 import org.eclipse.bpmn2.Task;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.BusinessRuleTaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.NoneTaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ScriptTaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.UserTaskPropertyReader;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
 import org.kie.workbench.common.stunner.bpmn.definition.ScriptTask;
@@ -66,18 +65,18 @@ public class TaskConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public NodeResult convert(org.eclipse.bpmn2.Task task) {
-        return BpmnMatch.ofNode(Task.class, BPMNViewDefinition.class)
+    public BpmnNode convert(org.eclipse.bpmn2.Task task) {
+        return Match.of(Task.class, BpmnNode.class)
                 .when(org.eclipse.bpmn2.BusinessRuleTask.class, this::businessRuleTask)
                 .when(org.eclipse.bpmn2.ScriptTask.class, this::scriptTask)
                 .when(org.eclipse.bpmn2.UserTask.class, this::userTask)
                 .missing(org.eclipse.bpmn2.ServiceTask.class)
                 .missing(org.eclipse.bpmn2.ManualTask.class)
-                .orElse(t -> noneTask(t).value())
-                .apply(task);
+                .orElse(t -> noneTask(t))
+                .apply(task).value();
     }
 
-    private NodeResult businessRuleTask(org.eclipse.bpmn2.BusinessRuleTask task) {
+    private BpmnNode businessRuleTask(org.eclipse.bpmn2.BusinessRuleTask task) {
         Node<View<BusinessRuleTask>, Edge> node = factoryManager.newNode(task.getId(), BusinessRuleTask.class);
 
         BusinessRuleTask definition = node.getContent().getDefinition();
@@ -108,10 +107,10 @@ public class TaskConverter {
         definition.setBackgroundSet(p.getBackgroundSet());
         definition.setFontSet(p.getFontSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult scriptTask(org.eclipse.bpmn2.ScriptTask task) {
+    private BpmnNode scriptTask(org.eclipse.bpmn2.ScriptTask task) {
         Node<View<ScriptTask>, Edge> node = factoryManager.newNode(task.getId(), ScriptTask.class);
 
         ScriptTask definition = node.getContent().getDefinition();
@@ -135,10 +134,10 @@ public class TaskConverter {
 
         definition.setSimulationSet(p.getSimulationSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult userTask(org.eclipse.bpmn2.UserTask task) {
+    private BpmnNode userTask(org.eclipse.bpmn2.UserTask task) {
         Node<View<UserTask>, Edge> node = factoryManager.newNode(task.getId(), UserTask.class);
 
         UserTask definition = node.getContent().getDefinition();
@@ -175,10 +174,10 @@ public class TaskConverter {
         definition.setBackgroundSet(p.getBackgroundSet());
         definition.setFontSet(p.getFontSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult noneTask(Task task) {
+    private BpmnNode noneTask(Task task) {
         Node<View<NoneTask>, Edge> node = factoryManager.newNode(task.getId(), NoneTask.class);
         NoneTaskPropertyReader p = propertyReaderFactory.of(task);
 
@@ -201,6 +200,6 @@ public class TaskConverter {
         definition.setBackgroundSet(p.getBackgroundSet());
         definition.setFontSet(p.getFontSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 }

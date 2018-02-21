@@ -76,8 +76,8 @@ public class FlowElementConverter {
         this.subProcessConverter = new SubProcessConverter(factoryManager, propertyReaderFactory, this, context);
     }
 
-    public NodeResult convertNode(FlowElement flowElement) {
-        return BpmnMatch.ofNode(FlowElement.class, BPMNViewDefinition.class)
+    public Result<BpmnNode> convertNode(FlowElement flowElement) {
+        return Match.of(FlowElement.class, BpmnNode.class)
                 .when(StartEvent.class, startEventConverter::convert)
                 .when(EndEvent.class, endEventConverter::convert)
                 .when(BoundaryEvent.class, intermediateCatchEventConverter::convertBoundaryEvent)

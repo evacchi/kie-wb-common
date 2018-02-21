@@ -21,8 +21,8 @@ import java.util.List;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
@@ -48,7 +48,7 @@ public class ProcessConverter extends AbstractProcessConverter {
         super(typedFactoryManager, propertyReaderFactory, context);
     }
 
-    public NodeResult convert(String id, Process process) {
+    public BpmnNode convert(String id, Process process) {
         Node<View<BPMNDiagramImpl>, Edge> diagramNode =
                 factoryManager.newNode(id, BPMNDiagramImpl.class);
         BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
@@ -75,7 +75,7 @@ public class ProcessConverter extends AbstractProcessConverter {
         definition.setFontSet(e.getFontSet());
         definition.setBackgroundSet(e.getBackgroundSet());
 
-        NodeResult firstNode = NodeResult.of(diagramNode);
+        BpmnNode firstNode = BpmnNode.of(diagramNode);
 
         List<FlowElement> flowElements = process.getFlowElements();
         List<LaneSet> laneSets = process.getLaneSets();
@@ -84,5 +84,4 @@ public class ProcessConverter extends AbstractProcessConverter {
 
         return firstNode;
     }
-
 }

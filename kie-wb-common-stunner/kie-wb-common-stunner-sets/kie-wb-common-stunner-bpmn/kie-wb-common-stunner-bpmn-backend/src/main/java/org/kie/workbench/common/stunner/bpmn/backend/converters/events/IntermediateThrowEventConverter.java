@@ -26,12 +26,11 @@ import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.IntermediateThrowEvent;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateSignalEventThrowing;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
@@ -57,26 +56,26 @@ public class IntermediateThrowEventConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public NodeResult convert(IntermediateThrowEvent event) {
+    public BpmnNode convert(IntermediateThrowEvent event) {
         List<EventDefinition> eventDefinitions = event.getEventDefinitions();
         switch (eventDefinitions.size()) {
             case 0:
                 throw new UnsupportedOperationException("An intermediate throw event should contain exactly one definition");
             case 1:
-                return BpmnMatch.ofNode(EventDefinition.class, BaseThrowingIntermediateEvent.class)
+                return Match.of(EventDefinition.class, BpmnNode.class)
                         .when(SignalEventDefinition.class, e -> signalEvent(event, e))
                         .when(MessageEventDefinition.class, e -> messageEvent(event, e))
                         .missing(ErrorEventDefinition.class)
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
                         .missing(ConditionalEventDefinition.class)
-                        .apply(eventDefinitions.get(0));
+                        .apply(eventDefinitions.get(0)).value();
             default:
                 throw new UnsupportedOperationException("Multiple definitions not supported for intermediate throw event");
         }
     }
 
-    private NodeResult messageEvent(
+    private BpmnNode messageEvent(
             IntermediateThrowEvent event, MessageEventDefinition eventDefinition) {
         Node<View<IntermediateMessageEventThrowing>, Edge> node =
                 factoryManager.newNode(event.getId(), IntermediateMessageEventThrowing.class);
@@ -103,10 +102,10 @@ public class IntermediateThrowEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 
-    private NodeResult signalEvent(
+    private BpmnNode signalEvent(
             IntermediateThrowEvent event,
             SignalEventDefinition eventDefinition) {
 
@@ -136,6 +135,6 @@ public class IntermediateThrowEventConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return NodeResult.of(node);
+        return BpmnNode.of(node);
     }
 }

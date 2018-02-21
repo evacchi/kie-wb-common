@@ -23,7 +23,7 @@ import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.SubProcess;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SubProcessPropertyReader;
@@ -45,15 +45,15 @@ public class SubProcessConverter extends AbstractProcessConverter {
         super(typedFactoryManager, propertyReaderFactory, flowElementConverter, context);
     }
 
-    public NodeResult convert(SubProcess subProcess) {
-        NodeResult result = convertSubProcessNode(subProcess);
+    public BpmnNode convert(SubProcess subProcess) {
+        BpmnNode result = convertSubProcessNode(subProcess);
         List<FlowElement> flowElements = subProcess.getFlowElements();
         List<LaneSet> laneSets = subProcess.getLaneSets();
         convertNodes(result, flowElements, laneSets);
         return result;
     }
 
-    private NodeResult convertSubProcessNode(SubProcess subProcess) {
+    private BpmnNode convertSubProcessNode(SubProcess subProcess) {
         if (subProcess.isTriggeredByEvent()) {
             Node<View<EventSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
 
@@ -78,7 +78,7 @@ public class SubProcessConverter extends AbstractProcessConverter {
 
             node.getContent().setBounds(p.getBounds());
 
-            return NodeResult.of(node);
+            return BpmnNode.of(node);
         } else {
             Node<View<EmbeddedSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
 
@@ -104,7 +104,7 @@ public class SubProcessConverter extends AbstractProcessConverter {
             definition.setBackgroundSet(p.getBackgroundSet());
 
             node.getContent().setBounds(p.getBounds());
-            return NodeResult.of(node);
+            return BpmnNode.of(node);
         }
     }
 }
