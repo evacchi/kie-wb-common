@@ -22,6 +22,7 @@ public class BpmnNode {
     }
 
     public void setParent(BpmnNode parent) {
+        System.out.println(parent.value().getUUID() + " -> " + this.value.getUUID());
         if (this.parent != null) {
             this.parent.removeChild(this);
         }

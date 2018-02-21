@@ -91,8 +91,8 @@ public class FlowElementConverter {
                 .apply(flowElement);
     }
 
-    public Result<Edge<? extends View<? extends BPMNViewDefinition>, ?>> convertEdge(FlowElement flowElement) {
-        return Match.ofEdge(FlowElement.class, BPMNViewDefinition.class)
+    public Result<BpmnEdge> convertEdge(FlowElement flowElement) {
+        return Match.of(FlowElement.class, BpmnEdge.class)
                 .when(SequenceFlow.class, sequenceFlowConverter::convert)
                 .apply(flowElement);
     }

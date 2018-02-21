@@ -17,10 +17,12 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
@@ -80,8 +82,18 @@ public class ProcessConverter extends AbstractProcessConverter {
         List<FlowElement> flowElements = process.getFlowElements();
         List<LaneSet> laneSets = process.getLaneSets();
 
-        convertNodes(firstNode, flowElements, laneSets);
+        Map<String, BpmnNode> nodes = convertNodes(firstNode, flowElements, laneSets);
 
+        updatePositions(firstNode);
+
+        List<BpmnEdge> bpmnEdges = convertEdges(flowElements);
+        bpmnEdges.forEach(edge -> context.addEdge(
+                edge.getEdge(),
+                nodes.get(edge.getSourceId()).value(),
+                edge.getSourceConnection(),
+                nodes.get(edge.getTargetId()).value(),
+                edge.getTargetConnection()
+        ));
         return firstNode;
     }
 }

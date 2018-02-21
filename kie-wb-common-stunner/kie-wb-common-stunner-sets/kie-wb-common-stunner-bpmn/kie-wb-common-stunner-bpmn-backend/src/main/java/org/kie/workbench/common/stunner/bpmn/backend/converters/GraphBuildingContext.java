@@ -87,7 +87,7 @@ public class GraphBuildingContext {
 
     public void translate(Node<? extends View, ?> node, Bounds constraints) {
 
-        logger.info("Translating {} into constraints {}", node.getContent().getBounds(), constraints);
+        logger.debug("Translating {} into constraints {}", node.getContent().getBounds(), constraints);
 
         Bounds childBounds = node.getContent().getBounds();
         double constrainedX = childBounds.getUpperLeft().getX() - constraints.getUpperLeft().getX();
@@ -154,5 +154,9 @@ public class GraphBuildingContext {
 
     public CommandResult<RuleViolation> clearGraph() {
         return commandManager.execute(executionContext, commandFactory.clearGraph());
+    }
+
+    public void addEdge(BpmnEdge e) {
+        addEdge(e.getEdge(), e.getSourceId(), e.getSourceConnection(), e.getTargetId(), e.getTargetConnection());
     }
 }

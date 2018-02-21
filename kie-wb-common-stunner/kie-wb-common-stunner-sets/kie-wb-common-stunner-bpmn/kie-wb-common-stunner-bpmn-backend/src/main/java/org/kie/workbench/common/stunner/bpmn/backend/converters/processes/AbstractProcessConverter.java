@@ -18,12 +18,16 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
@@ -57,7 +61,7 @@ public abstract class AbstractProcessConverter {
         this(typedFactoryManager, propertyReaderFactory, new FlowElementConverter(typedFactoryManager, propertyReaderFactory, context), context);
     }
 
-    protected void convertNodes(BpmnNode firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
+    protected Map<String, BpmnNode> convertNodes(BpmnNode firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
         Map<String, BpmnNode> freeFloatingNodes =
                 convertFlowElements(flowElements);
 
@@ -66,22 +70,32 @@ public abstract class AbstractProcessConverter {
 
         convertLaneSets(laneSets, freeFloatingNodes, firstNode);
 
-        updatePositions(firstNode);
+        return freeFloatingNodes;
+    }
 
-        flowElements
-                .forEach(flowElementConverter::convertEdge);
+    protected List<BpmnEdge> convertEdges(List<FlowElement> flowElements) {
+        List<BpmnEdge> collect = flowElements.stream()
+                .map(flowElementConverter::convertEdge)
+                .filter(Result::isSuccess)
+                .map(Result::value)
+                .collect(Collectors.toList());
 
         flowElements
                 .forEach(flowElementConverter::convertDockedNodes);
+        return collect;
     }
 
-    private void updatePositions(BpmnNode firstNode) {
+    protected void updatePositions(BpmnNode firstNode) {
         context.addNode(firstNode.value());
         Deque<BpmnNode> workingSet = new ArrayDeque<>(firstNode.getChildren());
+        Set<BpmnNode> workedOff = new HashSet<>();
         while (!workingSet.isEmpty()) {
             BpmnNode current = workingSet.pop();
-            context.addChildNode(current.getParent().value(), current.value());
+            if (workedOff.contains(current)) continue;
+            workedOff.add(current);
             workingSet.addAll(current.getChildren());
+            System.out.println(current.getParent().value().getUUID()+" :: " +current.value().getUUID());
+            context.addChildNode(current.getParent().value(), current.value());
         }
     }
 
