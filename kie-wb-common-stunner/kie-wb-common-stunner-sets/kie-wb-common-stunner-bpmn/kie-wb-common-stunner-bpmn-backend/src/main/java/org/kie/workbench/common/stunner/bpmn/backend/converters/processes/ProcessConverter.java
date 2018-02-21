@@ -16,14 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.bpmn2.FlowElement;
+import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
@@ -71,15 +75,23 @@ public class ProcessConverter {
 
         context.addNode(firstDiagramNode);
 
-        Map<String, Node<? extends View<? extends BPMNViewDefinition>, ?>> freeFloatingNodes =
-                process.getFlowElements()
-                        .stream()
-                        .map(flowElementConverter::convertNode)
-                        .filter(Result::notIgnored)
-                        .map(Result::value)
-                        .collect(Collectors.toMap(Node::getUUID, Function.identity()));
+        Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes =
+                convertFlowElements(process.getFlowElements());
 
-        process.getLaneSets()
+        convertLaneSets(process.getLaneSets(), freeFloatingNodes, firstDiagramNode);
+
+        freeFloatingNodes.values()
+                .forEach(n -> context.addChildNode(firstDiagramNode, n.value()));
+
+        process.getFlowElements()
+                .forEach(flowElementConverter::convertEdge);
+
+        process.getFlowElements()
+                .forEach(flowElementConverter::convertDockedNodes);
+    }
+
+    private void convertLaneSets(List<LaneSet> laneSets, Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes, Node<View<BPMNDiagramImpl>, ?> firstDiagramNode) {
+        laneSets
                 .stream()
                 .flatMap(laneSet -> laneSet.getLanes().stream())
                 .forEach(lane -> {
@@ -88,19 +100,18 @@ public class ProcessConverter {
                     context.addChildNode(firstDiagramNode, laneNode);
 
                     lane.getFlowNodeRefs().forEach(node -> {
-                        Node<? extends View, ?> child = freeFloatingNodes.remove(node.getId());
-                        context.addChildNode(laneNode, child);
+                        NodeResult<BPMNViewDefinition> child = freeFloatingNodes.remove(node.getId());
+                        context.addChildNode(laneNode, child.value());
                     });
                 });
+    }
 
-        freeFloatingNodes.values()
-                .forEach(n -> context.addChildNode(firstDiagramNode, n));
-
-        process.getFlowElements()
-                .forEach(flowElementConverter::convertEdge);
-
-        process.getFlowElements()
-                .forEach(flowElementConverter::convertDockedNodes);
+    private Map<String, NodeResult<BPMNViewDefinition>> convertFlowElements(List<FlowElement> flowElements) {
+        return flowElements
+                .stream()
+                .map(flowElementConverter::convertNode)
+                .filter(NodeResult::notIgnored)
+                .collect(Collectors.toMap(NodeResult::getId, Function.identity()));
     }
 
     private Node<View<BPMNDiagramImpl>, ?> convertProcessNode(String id, Process process) {

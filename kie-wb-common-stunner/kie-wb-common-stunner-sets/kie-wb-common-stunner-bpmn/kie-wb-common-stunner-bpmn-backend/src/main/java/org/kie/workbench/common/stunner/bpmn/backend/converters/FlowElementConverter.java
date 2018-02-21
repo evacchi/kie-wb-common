@@ -77,8 +77,8 @@ public class FlowElementConverter {
         this.subProcessConverter = new SubProcessConverter(factoryManager, propertyReaderFactory, this, context);
     }
 
-    public Result<Node<? extends View<? extends BPMNViewDefinition>, ?>> convertNode(FlowElement flowElement) {
-        return Match.ofNode(FlowElement.class, BPMNViewDefinition.class)
+    public NodeResult<BPMNViewDefinition> convertNode(FlowElement flowElement) {
+        Result<Node<? extends View<? extends BPMNViewDefinition>, ?>> r = Match.ofNode(FlowElement.class, BPMNViewDefinition.class)
                 .when(StartEvent.class, startEventConverter::convert)
                 .when(EndEvent.class, endEventConverter::convert)
                 .when(BoundaryEvent.class, intermediateCatchEventConverter::convertBoundaryEvent)
@@ -90,6 +90,10 @@ public class FlowElementConverter {
                 .when(CallActivity.class, callActivityConverter::convert)
                 .ignore(SequenceFlow.class)
                 .apply(flowElement);
+
+        if (r.isSuccess())
+            return NodeResult.of(r.value());
+        else return NodeResult.failure(r.asFailure().reason());
     }
 
     public Result<Edge<? extends View<? extends BPMNViewDefinition>, ?>> convertEdge(FlowElement flowElement) {
