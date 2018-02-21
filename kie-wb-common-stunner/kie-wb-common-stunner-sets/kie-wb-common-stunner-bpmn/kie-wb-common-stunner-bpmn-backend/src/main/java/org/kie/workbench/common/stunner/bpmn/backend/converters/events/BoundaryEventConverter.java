@@ -16,23 +16,15 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.events;
 
+import java.util.Map;
+
 import org.eclipse.bpmn2.BoundaryEvent;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 
 public class BoundaryEventConverter {
 
-    private final TypedFactoryManager factoryManager;
-    private final GraphBuildingContext context;
-
-    public BoundaryEventConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory, GraphBuildingContext context) {
-
-        this.factoryManager = factoryManager;
-        this.context = context;
-    }
-
-    public void convertEdge(BoundaryEvent e) {
-        context.addDockedNode(e.getAttachedToRef().getId(), e.getId());
+    public BpmnEdge convertEdge(BoundaryEvent e, Map<String, BpmnNode> nodes) {
+        return BpmnEdge.docked(nodes.get(e.getAttachedToRef().getId()), nodes.get(e.getId()));
     }
 }

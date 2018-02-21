@@ -16,7 +16,10 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows;
 
+import java.util.Map;
+
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
@@ -44,7 +47,7 @@ public class SequenceFlowConverter {
         this.context = context;
     }
 
-    public BpmnEdge convert(org.eclipse.bpmn2.SequenceFlow seq) {
+    public BpmnEdge convert(org.eclipse.bpmn2.SequenceFlow seq, Map<String, BpmnNode> nodes) {
         Edge<View<SequenceFlow>, Node> edge = factoryManager.newEdge(seq.getId(), SequenceFlow.class);
 
         SequenceFlow definition = edge.getContent().getDefinition();
@@ -62,9 +65,9 @@ public class SequenceFlowConverter {
 
         return BpmnEdge.of(
                edge,
-               p.getSourceId(),
+               nodes.get(p.getSourceId()),
                p.getSourceConnection(),
-               p.getTargetId(),
+               nodes.get(p.getTargetId()),
                p.getTargetConnection());
     }
 }

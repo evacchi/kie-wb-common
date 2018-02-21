@@ -62,6 +62,10 @@ public class GraphBuildingContext {
         Node parent = executionContext.getGraphIndex().getNode(parentId);
         Node candidate = executionContext.getGraphIndex().getNode(candidateId);
 
+        addDockedNode(parent, candidate);
+    }
+
+    private void addDockedNode(Node parent, Node candidate) {
         AddDockedNodeCommand addNodeCommand = commandFactory.addDockedNode(parent, candidate);
         execute(addNodeCommand);
     }
@@ -156,7 +160,18 @@ public class GraphBuildingContext {
         return commandManager.execute(executionContext, commandFactory.clearGraph());
     }
 
-    public void addEdge(BpmnEdge e) {
-        addEdge(e.getEdge(), e.getSourceId(), e.getSourceConnection(), e.getTargetId(), e.getTargetConnection());
+    public void addEdge(BpmnEdge edge) {
+        VoidMatch.of(BpmnEdge.class)
+                .when(BpmnEdge.Simple.class, e ->
+                        addEdge(e.getEdge(),
+                                e.getSource().value(),
+                                e.getSourceConnection(),
+                                e.getTarget().value(),
+                                e.getTargetConnection())
+                )
+                .when(BpmnEdge.Docked.class, e ->
+                        addDockedNode(e.getSource().value(),
+                                      e.getTarget().value())
+                ).apply(edge);
     }
 }

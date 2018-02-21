@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
+import java.util.Map;
+
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.EndEvent;
@@ -38,9 +40,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.SubPro
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows.SequenceFlowConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.TaskConverter;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.core.graph.Edge;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +70,7 @@ public class FlowElementConverter {
         this.taskConverter = new TaskConverter(factoryManager, propertyReaderFactory);
         this.sequenceFlowConverter = new SequenceFlowConverter(factoryManager, propertyReaderFactory, context);
         this.gatewayConverter = new GatewayConverter(factoryManager, propertyReaderFactory);
-        this.boundaryEventConverter = new BoundaryEventConverter(factoryManager, propertyReaderFactory, context);
+        this.boundaryEventConverter = new BoundaryEventConverter();
         this.callActivityConverter = new CallActivityConverter(factoryManager, propertyReaderFactory);
         this.subProcessConverter = new SubProcessConverter(factoryManager, propertyReaderFactory, this, context);
     }
@@ -91,15 +90,16 @@ public class FlowElementConverter {
                 .apply(flowElement);
     }
 
-    public Result<BpmnEdge> convertEdge(FlowElement flowElement) {
+    public Result<BpmnEdge> convertEdge(FlowElement flowElement, Map<String, BpmnNode> nodes) {
         return Match.of(FlowElement.class, BpmnEdge.class)
-                .when(SequenceFlow.class, sequenceFlowConverter::convert)
+                .when(SequenceFlow.class, e -> sequenceFlowConverter.convert(e, nodes))
+                .when(BoundaryEvent.class, e -> boundaryEventConverter.convertEdge(e, nodes))
                 .apply(flowElement);
     }
 
     public void convertDockedNodes(FlowElement flowElement) {
-        VoidMatch.ofEdge(FlowElement.class)
-                .when(BoundaryEvent.class, boundaryEventConverter::convertEdge)
-                .apply(flowElement);
+//        VoidMatch.ofEdge(FlowElement.class)
+//                .when(BoundaryEvent.class, e -> boundaryEventConverter.convertEdge(e, nodes))
+//                .apply(flowElement);
     }
 }

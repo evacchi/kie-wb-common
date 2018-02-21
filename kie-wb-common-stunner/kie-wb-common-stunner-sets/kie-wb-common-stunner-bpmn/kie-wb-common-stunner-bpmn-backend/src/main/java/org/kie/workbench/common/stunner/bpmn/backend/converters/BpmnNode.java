@@ -1,6 +1,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -13,8 +14,10 @@ public class BpmnNode {
         return new BpmnNode(value);
     }
 
+
     private final Node<? extends View<? extends BPMNViewDefinition>, ?> value;
     private final List<BpmnNode> children = new ArrayList<>();
+    private List<BpmnEdge> edges = new ArrayList<>();
     private BpmnNode parent;
 
     private BpmnNode(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
@@ -48,5 +51,13 @@ public class BpmnNode {
 
     public Node<? extends View<? extends BPMNViewDefinition>, ?> value() {
         return value;
+    }
+
+    public void addAllEdges(Collection<BpmnEdge> bpmnEdges) {
+        this.edges.addAll(bpmnEdges);
+    }
+
+    public List<BpmnEdge> getEdges() {
+        return edges;
     }
 }

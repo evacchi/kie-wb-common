@@ -83,17 +83,10 @@ public class ProcessConverter extends AbstractProcessConverter {
         List<LaneSet> laneSets = process.getLaneSets();
 
         Map<String, BpmnNode> nodes = convertNodes(firstNode, flowElements, laneSets);
+        List<BpmnEdge> bpmnEdges = convertEdges(flowElements, nodes);
+        firstNode.addAllEdges(bpmnEdges);
 
-        updatePositions(firstNode);
-
-        List<BpmnEdge> bpmnEdges = convertEdges(flowElements);
-        bpmnEdges.forEach(edge -> context.addEdge(
-                edge.getEdge(),
-                nodes.get(edge.getSourceId()).value(),
-                edge.getSourceConnection(),
-                nodes.get(edge.getTargetId()).value(),
-                edge.getTargetConnection()
-        ));
+        createEdges(firstNode);
         return firstNode;
     }
 }

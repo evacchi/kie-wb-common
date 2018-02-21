@@ -73,20 +73,21 @@ public abstract class AbstractProcessConverter {
         return freeFloatingNodes;
     }
 
-    protected List<BpmnEdge> convertEdges(List<FlowElement> flowElements) {
+    protected List<BpmnEdge> convertEdges(List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
         List<BpmnEdge> collect = flowElements.stream()
-                .map(flowElementConverter::convertEdge)
+                .map(e -> flowElementConverter.convertEdge(e, nodes))
                 .filter(Result::isSuccess)
                 .map(Result::value)
                 .collect(Collectors.toList());
 
-        flowElements
-                .forEach(flowElementConverter::convertDockedNodes);
+//        flowElements
+//                .forEach(flowElementConverter::convertDockedNodes);
         return collect;
     }
 
-    protected void updatePositions(BpmnNode firstNode) {
+    protected void createEdges(BpmnNode firstNode) {
         context.addNode(firstNode.value());
+        firstNode.getEdges().forEach(context::addEdge);
         Deque<BpmnNode> workingSet = new ArrayDeque<>(firstNode.getChildren());
         Set<BpmnNode> workedOff = new HashSet<>();
         while (!workingSet.isEmpty()) {
@@ -96,6 +97,7 @@ public abstract class AbstractProcessConverter {
             workingSet.addAll(current.getChildren());
             System.out.println(current.getParent().value().getUUID()+" :: " +current.value().getUUID());
             context.addChildNode(current.getParent().value(), current.value());
+            current.getEdges().forEach(context::addEdge);
         }
     }
 

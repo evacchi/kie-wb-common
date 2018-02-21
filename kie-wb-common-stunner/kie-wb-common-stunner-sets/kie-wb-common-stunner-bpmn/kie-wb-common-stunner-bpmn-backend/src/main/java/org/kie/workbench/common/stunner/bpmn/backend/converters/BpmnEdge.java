@@ -6,44 +6,76 @@ import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class BpmnEdge {
+public interface BpmnEdge {
 
-    private final Edge<View<SequenceFlow>, Node> edge;
-    private final String sourceId;
-    private final Connection sourceConnection;
-    private final String targetId;
-    private final Connection targetConnection;
-
-    public BpmnEdge(Edge<View<SequenceFlow>, Node> edge, String sourceId, Connection sourceConnection, String targetId, Connection targetConnection) {
-
-        this.edge = edge;
-        this.sourceId = sourceId;
-        this.sourceConnection = sourceConnection;
-        this.targetId = targetId;
-        this.targetConnection = targetConnection;
+    static BpmnEdge.Simple of(
+            Edge<View<SequenceFlow>, Node> edge,
+            BpmnNode source, Connection sourceConnection, BpmnNode target, Connection targetConnection) {
+        return new BpmnEdge.Simple(edge, source, sourceConnection, target, targetConnection);
     }
 
-    public static BpmnEdge of(Edge<View<SequenceFlow>, Node> edge, String sourceId, Connection sourceConnection, String targetId, Connection targetConnection) {
-        return new BpmnEdge(edge, sourceId, sourceConnection, targetId, targetConnection);
+    static BpmnEdge.Docked docked(BpmnNode source, BpmnNode target) {
+        return new Docked(source, target);
     }
 
-    public Edge<View<SequenceFlow>, Node> getEdge() {
-        return edge;
+
+        BpmnNode getSource();
+    BpmnNode getTarget();
+
+    class Simple implements BpmnEdge {
+
+        private final Edge<View<SequenceFlow>, Node> edge;
+        private final BpmnNode source;
+        private final Connection sourceConnection;
+        private final BpmnNode target;
+        private final Connection targetConnection;
+
+        private Simple(Edge<View<SequenceFlow>, Node> edge, BpmnNode source, Connection sourceConnection, BpmnNode target, Connection targetConnection) {
+            this.edge = edge;
+            this.source = source;
+            this.sourceConnection = sourceConnection;
+            this.target = target;
+            this.targetConnection = targetConnection;
+        }
+
+        public Edge<View<SequenceFlow>, Node> getEdge() {
+            return edge;
+        }
+
+        public BpmnNode getSource() {
+            return source;
+        }
+
+        public Connection getSourceConnection() {
+            return sourceConnection;
+        }
+
+        public BpmnNode getTarget() {
+            return target;
+        }
+
+        public Connection getTargetConnection() {
+            return targetConnection;
+        }
     }
 
-    public String getSourceId() {
-        return sourceId;
-    }
+    class Docked implements BpmnEdge {
+        private final BpmnNode source;
+        private final BpmnNode target;
 
-    public Connection getSourceConnection() {
-        return sourceConnection;
-    }
+        private Docked(BpmnNode source, BpmnNode target) {
+            this.source = source;
+            this.target = target;
+        }
 
-    public String getTargetId() {
-        return targetId;
-    }
+        @Override
+        public BpmnNode getSource() {
+            return source;
+        }
 
-    public Connection getTargetConnection() {
-        return targetConnection;
+        @Override
+        public BpmnNode getTarget() {
+            return target;
+        }
     }
 }

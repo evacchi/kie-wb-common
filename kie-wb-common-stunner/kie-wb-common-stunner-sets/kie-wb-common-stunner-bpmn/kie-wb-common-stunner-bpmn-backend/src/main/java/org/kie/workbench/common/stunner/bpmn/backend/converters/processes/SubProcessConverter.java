@@ -29,7 +29,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SubProcessPropertyReader;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
@@ -52,15 +51,8 @@ public class SubProcessConverter extends AbstractProcessConverter {
         List<FlowElement> flowElements = subProcess.getFlowElements();
         List<LaneSet> laneSets = subProcess.getLaneSets();
         Map<String, BpmnNode> nodes = convertNodes(result, flowElements, laneSets);
-        List<BpmnEdge> bpmnEdges = convertEdges(flowElements);
-        bpmnEdges.forEach(e -> context.addEdge(
-                e.getEdge(),
-                nodes.get(e.getSourceId()).value(),
-                e.getSourceConnection(),
-                nodes.get(e.getTargetId()).value(),
-                e.getTargetConnection()
-        ));
-
+        List<BpmnEdge> bpmnEdges = convertEdges(flowElements, nodes);
+        result.addAllEdges(bpmnEdges);
         return result;
     }
 
