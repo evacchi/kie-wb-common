@@ -27,7 +27,6 @@ import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.TerminateEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.EventPropertyReader;
@@ -39,7 +38,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.EndMessageEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndNoneEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndSignalEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndTerminateEvent;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DataIOSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorEventExecutionSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.error.ErrorRef;
@@ -67,135 +65,15 @@ public class EndEventConverter {
 
     public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(EndEvent event) {
         List<EventDefinition> eventDefinitions = event.getEventDefinitions();
-        String nodeId = event.getId();
-
         switch (eventDefinitions.size()) {
-            case 0: {
-                Node<View<EndNoneEvent>, Edge> node =
-                        factoryManager.newNode(nodeId, EndNoneEvent.class);
-                EndNoneEvent definition = node.getContent().getDefinition();
-                EventPropertyReader p = propertyReaderFactory.of(event);
-
-                definition.setGeneral(new BPMNGeneralSet(
-                        new Name(p.getName()),
-                        new Documentation(p.getDocumentation())
-                ));
-
-                node.getContent().setBounds(p.getBounds());
-
-                definition.setDimensionsSet(p.getCircleDimensionSet());
-                definition.setFontSet(p.getFontSet());
-                definition.setBackgroundSet(p.getBackgroundSet());
-
-                return node;
-            }
+            case 0:
+                return endNoneEvent(event);
             case 1:
                 return Match.ofNode(EventDefinition.class, BaseEndEvent.class)
-                        .when(TerminateEventDefinition.class, e -> {
-                            Node<View<EndTerminateEvent>, Edge> node =
-                                    factoryManager.newNode(nodeId, EndTerminateEvent.class);
-
-                            EndTerminateEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
-                        .when(SignalEventDefinition.class, e -> {
-                            Node<View<EndSignalEvent>, Edge> node =
-                                    factoryManager.newNode(nodeId, EndSignalEvent.class);
-
-                            EndSignalEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setDataIOSet(new DataIOSet(
-                                    p.getAssignmentsInfo()
-                            ));
-
-                            definition.setExecutionSet(new ScopedSignalEventExecutionSet(
-                                    new SignalRef(p.getSignalRef()),
-                                    new SignalScope(p.getSignalScope())
-                            ));
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
-                        .when(MessageEventDefinition.class, e -> {
-                            Node<View<EndMessageEvent>, Edge> node =
-                                    factoryManager.newNode(nodeId, EndMessageEvent.class);
-
-                            EndMessageEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setDataIOSet(new DataIOSet(
-                                    p.getAssignmentsInfo()
-                            ));
-
-                            definition.setExecutionSet(new MessageEventExecutionSet(
-                                    new MessageRef(e.getMessageRef().getName())
-                            ));
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
-                        .when(ErrorEventDefinition.class, e -> {
-                            Node<View<EndErrorEvent>, Edge> node =
-                                    factoryManager.newNode(nodeId, EndErrorEvent.class);
-
-                            EndErrorEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setDataIOSet(new DataIOSet(
-                                    p.getAssignmentsInfo()
-                            ));
-
-                            definition.setExecutionSet(new ErrorEventExecutionSet(
-                                    new ErrorRef(e.getErrorRef().getErrorCode())
-                            ));
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
+                        .when(TerminateEventDefinition.class, e -> terminateEndEvent(event, e))
+                        .when(SignalEventDefinition.class, e -> signalEventDefinition(event, e))
+                        .when(MessageEventDefinition.class, e -> messageEventDefinition(event, e))
+                        .when(ErrorEventDefinition.class, e -> errorEventDefinition(event, e))
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
                         .missing(CancelEventDefinition.class)
@@ -203,5 +81,134 @@ public class EndEventConverter {
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for end event");
         }
+    }
+
+    private Node<? extends View<? extends BaseEndEvent>, ?> messageEventDefinition(EndEvent event, MessageEventDefinition e) {
+        Node<View<EndMessageEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), EndMessageEvent.class);
+
+        EndMessageEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDataIOSet(new DataIOSet(
+                p.getAssignmentsInfo()
+        ));
+
+        definition.setExecutionSet(new MessageEventExecutionSet(
+                new MessageRef(e.getMessageRef().getName())
+        ));
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseEndEvent>, ?> signalEventDefinition(EndEvent event, SignalEventDefinition nodeId) {
+        Node<View<EndSignalEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), EndSignalEvent.class);
+
+        EndSignalEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDataIOSet(new DataIOSet(
+                p.getAssignmentsInfo()
+        ));
+
+        definition.setExecutionSet(new ScopedSignalEventExecutionSet(
+                new SignalRef(p.getSignalRef()),
+                new SignalScope(p.getSignalScope())
+        ));
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseEndEvent>, ?> terminateEndEvent(EndEvent event, TerminateEventDefinition e) {
+        Node<View<EndTerminateEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), EndTerminateEvent.class);
+
+        EndTerminateEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BPMNViewDefinition>, ?> endNoneEvent(EndEvent event) {
+        Node<View<EndNoneEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), EndNoneEvent.class);
+        EndNoneEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseEndEvent>, ?> errorEventDefinition(EndEvent event, ErrorEventDefinition e) {
+        Node<View<EndErrorEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), EndErrorEvent.class);
+
+        EndErrorEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDataIOSet(new DataIOSet(
+                p.getAssignmentsInfo()
+        ));
+
+        definition.setExecutionSet(new ErrorEventExecutionSet(
+                new ErrorRef(e.getErrorRef().getErrorCode())
+        ));
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
     }
 }

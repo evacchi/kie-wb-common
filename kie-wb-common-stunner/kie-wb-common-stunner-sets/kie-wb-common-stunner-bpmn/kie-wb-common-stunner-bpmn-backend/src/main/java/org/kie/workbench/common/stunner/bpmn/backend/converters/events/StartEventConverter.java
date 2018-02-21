@@ -74,142 +74,15 @@ public class StartEventConverter {
     }
 
     private Node<? extends View<? extends BaseStartEvent>, ?> convertStartEvent(StartEvent event, List<EventDefinition> eventDefinitions) {
-        String nodeId = event.getId();
         switch (eventDefinitions.size()) {
-            case 0: {
-                Node<View<StartNoneEvent>, Edge> node = factoryManager.newNode(nodeId, StartNoneEvent.class);
-                StartNoneEvent definition = node.getContent().getDefinition();
-                EventPropertyReader p = propertyReaderFactory.of(event);
-
-                definition.setGeneral(new BPMNGeneralSet(
-                        new Name(p.getName()),
-                        new Documentation(p.getDocumentation())
-                ));
-
-                definition.setSimulationSet(p.getSimulationSet());
-
-                node.getContent().setBounds(p.getBounds());
-
-                definition.setDimensionsSet(p.getCircleDimensionSet());
-                definition.setFontSet(p.getFontSet());
-                definition.setBackgroundSet(p.getBackgroundSet());
-
-                return node;
-            }
+            case 0:
+                return noneEvent(event);
             case 1:
                 return Match.ofNode(EventDefinition.class, BaseStartEvent.class)
-                        .when(SignalEventDefinition.class, e -> {
-                            Node<View<StartSignalEvent>, Edge> node = factoryManager.newNode(nodeId, StartSignalEvent.class);
-
-                            StartSignalEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setExecutionSet(new InterruptingSignalEventExecutionSet(
-                                    new IsInterrupting(event.isIsInterrupting()),
-                                    new SignalRef(p.getSignalRef())
-                            ));
-
-                            definition.setSimulationSet(p.getSimulationSet());
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
-                        .when(MessageEventDefinition.class, e -> {
-                            Node<View<StartMessageEvent>, Edge> node = factoryManager.newNode(nodeId, StartMessageEvent.class);
-
-                            StartMessageEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setDataIOSet(new DataIOSet(
-                                    p.getAssignmentsInfo()
-                            ));
-
-                            definition.setExecutionSet(new InterruptingMessageEventExecutionSet(
-                                    new IsInterrupting(event.isIsInterrupting()),
-                                    new MessageRef(e.getMessageRef().getName())
-                            ));
-
-                            definition.setSimulationSet(p.getSimulationSet());
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-
-                            return node;
-                        })
-                        .when(TimerEventDefinition.class, e -> {
-                            Node<View<StartTimerEvent>, Edge> node = factoryManager.newNode(nodeId, StartTimerEvent.class);
-
-                            StartTimerEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setExecutionSet(new InterruptingTimerEventExecutionSet(
-                                    new IsInterrupting(event.isIsInterrupting()),
-                                    new TimerSettings(p.getTimerSettings(e))
-                            ));
-
-                            definition.setSimulationSet(p.getSimulationSet());
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
-                        .when(ErrorEventDefinition.class, e -> {
-                            Node<View<StartErrorEvent>, Edge> node = factoryManager.newNode(nodeId, StartErrorEvent.class);
-
-                            StartErrorEvent definition = node.getContent().getDefinition();
-                            EventPropertyReader p = propertyReaderFactory.of(event);
-
-                            definition.setGeneral(new BPMNGeneralSet(
-                                    new Name(p.getName()),
-                                    new Documentation(p.getDocumentation())
-                            ));
-
-                            definition.setDataIOSet(new DataIOSet(
-                                    p.getAssignmentsInfo()
-                            ));
-
-                            definition.setExecutionSet(new InterruptingErrorEventExecutionSet(
-                                    new IsInterrupting(event.isIsInterrupting()),
-                                    new ErrorRef(e.getErrorRef().getErrorCode())
-                            ));
-
-                            definition.setSimulationSet(p.getSimulationSet());
-
-                            node.getContent().setBounds(p.getBounds());
-
-                            definition.setDimensionsSet(p.getCircleDimensionSet());
-                            definition.setFontSet(p.getFontSet());
-                            definition.setBackgroundSet(p.getBackgroundSet());
-
-                            return node;
-                        })
+                        .when(SignalEventDefinition.class, e -> signalEvent(event, e))
+                        .when(MessageEventDefinition.class, e -> messageEvent(event, e))
+                        .when(TimerEventDefinition.class, e -> timerEvent(event, e))
+                        .when(ErrorEventDefinition.class, e -> errorEvent(event, e))
                         .missing(ConditionalEventDefinition.class)
                         .missing(EscalationEventDefinition.class)
                         .missing(CompensateEventDefinition.class)
@@ -217,5 +90,155 @@ public class StartEventConverter {
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for start event");
         }
+    }
+
+    private Node<? extends View<? extends BaseStartEvent>, ?> errorEvent(
+            StartEvent event,
+            ErrorEventDefinition e) {
+        Node<View<StartErrorEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), StartErrorEvent.class);
+
+        StartErrorEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDataIOSet(new DataIOSet(
+                p.getAssignmentsInfo()
+        ));
+
+        definition.setExecutionSet(new InterruptingErrorEventExecutionSet(
+                new IsInterrupting(event.isIsInterrupting()),
+                new ErrorRef(e.getErrorRef().getErrorCode())
+        ));
+
+        definition.setSimulationSet(p.getSimulationSet());
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseStartEvent>, ?> timerEvent(
+            StartEvent event,
+            TimerEventDefinition e) {
+        Node<View<StartTimerEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), StartTimerEvent.class);
+
+        StartTimerEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setExecutionSet(new InterruptingTimerEventExecutionSet(
+                new IsInterrupting(event.isIsInterrupting()),
+                new TimerSettings(p.getTimerSettings(e))
+        ));
+
+        definition.setSimulationSet(p.getSimulationSet());
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseStartEvent>, ?> messageEvent(
+            StartEvent event,
+            MessageEventDefinition e) {
+        Node<View<StartMessageEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), StartMessageEvent.class);
+
+        StartMessageEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setDataIOSet(new DataIOSet(
+                p.getAssignmentsInfo()
+        ));
+
+        definition.setExecutionSet(new InterruptingMessageEventExecutionSet(
+                new IsInterrupting(event.isIsInterrupting()),
+                new MessageRef(e.getMessageRef().getName())
+        ));
+
+        definition.setSimulationSet(p.getSimulationSet());
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseStartEvent>, ?> signalEvent(
+            StartEvent event,
+            SignalEventDefinition e) {
+        Node<View<StartSignalEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), StartSignalEvent.class);
+
+        StartSignalEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setExecutionSet(new InterruptingSignalEventExecutionSet(
+                new IsInterrupting(event.isIsInterrupting()),
+                new SignalRef(p.getSignalRef())
+        ));
+
+        definition.setSimulationSet(p.getSimulationSet());
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
+    }
+
+    private Node<? extends View<? extends BaseStartEvent>, ?> noneEvent(StartEvent event) {
+        Node<View<StartNoneEvent>, Edge> node =
+                factoryManager.newNode(event.getId(), StartNoneEvent.class);
+        StartNoneEvent definition = node.getContent().getDefinition();
+        EventPropertyReader p = propertyReaderFactory.of(event);
+
+        definition.setGeneral(new BPMNGeneralSet(
+                new Name(p.getName()),
+                new Documentation(p.getDocumentation())
+        ));
+
+        definition.setSimulationSet(p.getSimulationSet());
+
+        node.getContent().setBounds(p.getBounds());
+
+        definition.setDimensionsSet(p.getCircleDimensionSet());
+        definition.setFontSet(p.getFontSet());
+        definition.setBackgroundSet(p.getBackgroundSet());
+
+        return node;
     }
 }
