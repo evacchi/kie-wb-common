@@ -90,6 +90,7 @@ public interface NodeResult<T> {
 
         @Override
         public void setParent(NodeResult<?> parent) {
+            System.out.println("SET PARENT "+parent.getId() + " -> "+this.getId());
             this.parent = parent;
             parent.addChild(this);
         }

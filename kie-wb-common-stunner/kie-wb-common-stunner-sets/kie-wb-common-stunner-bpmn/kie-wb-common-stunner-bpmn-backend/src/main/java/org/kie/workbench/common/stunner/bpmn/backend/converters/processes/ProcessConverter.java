@@ -16,26 +16,17 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
-import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.AdHoc;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Executable;
@@ -51,80 +42,13 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class ProcessConverter {
+public class ProcessConverter extends AbstractProcessConverter {
 
-    private final PropertyReaderFactory propertyReaderFactory;
-    private final GraphBuildingContext context;
-    private final FlowElementConverter flowElementConverter;
-    private final LaneConverter laneConverter;
-    private final TypedFactoryManager factoryManager;
-
-    public ProcessConverter(
-            TypedFactoryManager typedFactoryManager,
-            PropertyReaderFactory propertyReaderFactory,
-            GraphBuildingContext context) {
-
-        this.factoryManager = typedFactoryManager;
-        this.propertyReaderFactory = propertyReaderFactory;
-        this.context = context;
-        this.flowElementConverter = new FlowElementConverter(typedFactoryManager, propertyReaderFactory, context);
-        this.laneConverter = new LaneConverter(typedFactoryManager, propertyReaderFactory);
+    public ProcessConverter(TypedFactoryManager typedFactoryManager, PropertyReaderFactory propertyReaderFactory, GraphBuildingContext context) {
+        super(typedFactoryManager, propertyReaderFactory, context);
     }
 
-    public void convert(String definitionsId, Process process) {
-        NodeResult<?> firstNode = convertProcessNode(definitionsId, process);
-
-        Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes =
-                convertFlowElements(process.getFlowElements());
-
-        freeFloatingNodes.values()
-                .forEach(n -> n.setParent(firstNode));
-
-
-        updatePositions(firstNode);
-
-        convertLaneSets(process.getLaneSets(), freeFloatingNodes, firstNode);
-
-        process.getFlowElements()
-                .forEach(flowElementConverter::convertEdge);
-
-        process.getFlowElements()
-                .forEach(flowElementConverter::convertDockedNodes);
-    }
-
-    private void updatePositions(NodeResult<?> firstNode) {
-        context.addNode(firstNode.value());
-        Deque<NodeResult.Success<?>> workingSet = new ArrayDeque<>(firstNode.getChildren());
-        while (!workingSet.isEmpty()) {
-            NodeResult.Success<?> current = workingSet.pop();
-            context.addChildNode(current.getParent().value(), current.value());
-            workingSet.addAll(current.getChildren());
-        }
-
-    }
-
-    private void convertLaneSets(List<LaneSet> laneSets, Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes, NodeResult<?> firstDiagramNode) {
-        laneSets.stream()
-                .flatMap(laneSet -> laneSet.getLanes().stream())
-                .forEach(lane -> {
-                    NodeResult<Lane> laneNode = laneConverter.convert(lane);
-                    laneNode.setParent(firstDiagramNode);
-
-                    lane.getFlowNodeRefs().forEach(node -> {
-                        freeFloatingNodes.get(node.getId()).setParent(laneNode);
-                    });
-                });
-    }
-
-    private Map<String, NodeResult<BPMNViewDefinition>> convertFlowElements(List<FlowElement> flowElements) {
-        return flowElements
-                .stream()
-                .map(flowElementConverter::convertNode)
-                .filter(NodeResult::notIgnored)
-                .collect(Collectors.toMap(NodeResult::getId, Function.identity()));
-    }
-
-    private NodeResult<BPMNDiagramImpl> convertProcessNode(String id, Process process) {
+    public NodeResult<BPMNDiagramImpl> convert(String id, Process process) {
         Node<View<BPMNDiagramImpl>, Edge> diagramNode =
                 factoryManager.newNode(id, BPMNDiagramImpl.class);
         BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
@@ -151,6 +75,14 @@ public class ProcessConverter {
         definition.setFontSet(e.getFontSet());
         definition.setBackgroundSet(e.getBackgroundSet());
 
-        return NodeResult.of(diagramNode);
+        NodeResult<BPMNDiagramImpl> firstNode = NodeResult.of(diagramNode);
+
+        List<FlowElement> flowElements = process.getFlowElements();
+        List<LaneSet> laneSets = process.getLaneSets();
+
+        convertNodes(firstNode, flowElements, laneSets);
+
+        return firstNode;
     }
+
 }

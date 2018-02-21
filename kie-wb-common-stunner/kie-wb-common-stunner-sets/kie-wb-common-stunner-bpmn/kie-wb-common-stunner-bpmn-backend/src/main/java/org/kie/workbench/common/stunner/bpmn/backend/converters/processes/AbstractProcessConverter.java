@@ -18,6 +18,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,33 +26,16 @@ import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
-import org.eclipse.bpmn2.Process;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeResult;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.AdHoc;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Executable;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Id;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Package;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.ProcessInstanceDescription;
-import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Version;
-import org.kie.workbench.common.stunner.bpmn.definition.property.general.Documentation;
-import org.kie.workbench.common.stunner.bpmn.definition.property.general.Name;
-import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
-import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
-import org.kie.workbench.common.stunner.core.graph.Edge;
-import org.kie.workbench.common.stunner.core.graph.Node;
-import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class AbstractProcessConverter {
+public abstract class AbstractProcessConverter {
 
     protected final PropertyReaderFactory propertyReaderFactory;
     protected final GraphBuildingContext context;
@@ -62,33 +46,35 @@ public class AbstractProcessConverter {
     public AbstractProcessConverter(
             TypedFactoryManager typedFactoryManager,
             PropertyReaderFactory propertyReaderFactory,
+            FlowElementConverter flowElementConverter,
             GraphBuildingContext context) {
 
         this.factoryManager = typedFactoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
         this.context = context;
-        this.flowElementConverter = new FlowElementConverter(typedFactoryManager, propertyReaderFactory, context);
+        this.flowElementConverter = flowElementConverter;
         this.laneConverter = new LaneConverter(typedFactoryManager, propertyReaderFactory);
     }
 
-    public void convert(String definitionsId, Process process) {
-        NodeResult<?> firstNode = convertProcessNode(definitionsId, process);
+    public AbstractProcessConverter(TypedFactoryManager typedFactoryManager, PropertyReaderFactory propertyReaderFactory, GraphBuildingContext context) {
+        this(typedFactoryManager, propertyReaderFactory, new FlowElementConverter(typedFactoryManager, propertyReaderFactory, context), context);
+    }
 
+    protected void convertNodes(NodeResult<?> firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
         Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes =
-                convertFlowElements(process.getFlowElements());
+                convertFlowElements(flowElements);
 
         freeFloatingNodes.values()
                 .forEach(n -> n.setParent(firstNode));
 
+        convertLaneSets(laneSets, freeFloatingNodes, firstNode);
 
         updatePositions(firstNode);
 
-        convertLaneSets(process.getLaneSets(), freeFloatingNodes, firstNode);
-
-        process.getFlowElements()
+        flowElements
                 .forEach(flowElementConverter::convertEdge);
 
-        process.getFlowElements()
+        flowElements
                 .forEach(flowElementConverter::convertDockedNodes);
     }
 
@@ -100,7 +86,6 @@ public class AbstractProcessConverter {
             context.addChildNode(current.getParent().value(), current.value());
             workingSet.addAll(current.getChildren());
         }
-
     }
 
     private void convertLaneSets(List<LaneSet> laneSets, Map<String, NodeResult<BPMNViewDefinition>> freeFloatingNodes, NodeResult<?> firstDiagramNode) {
@@ -117,40 +102,14 @@ public class AbstractProcessConverter {
     }
 
     private Map<String, NodeResult<BPMNViewDefinition>> convertFlowElements(List<FlowElement> flowElements) {
-        return flowElements
+        LinkedHashMap<String, NodeResult<BPMNViewDefinition>> result = new LinkedHashMap<>();
+
+        flowElements
                 .stream()
                 .map(flowElementConverter::convertNode)
                 .filter(NodeResult::notIgnored)
-                .collect(Collectors.toMap(NodeResult::getId, Function.identity()));
-    }
+                .forEach(n -> result.put(n.getId(), n));
 
-    private NodeResult<BPMNDiagramImpl> convertProcessNode(String id, Process process) {
-        Node<View<BPMNDiagramImpl>, Edge> diagramNode =
-                factoryManager.newNode(id, BPMNDiagramImpl.class);
-        BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
-
-        ProcessPropertyReader e = propertyReaderFactory.of(process);
-
-        definition.setDiagramSet(new DiagramSet(
-                new Name(process.getName()),
-                new Documentation(e.getDocumentation()),
-                new Id(process.getId()),
-                new Package(e.getPackageName()),
-                new Version(e.getVersion()),
-                new AdHoc(e.isAdHoc()),
-                new ProcessInstanceDescription(e.getDescription()),
-                new Executable(process.isIsExecutable())
-        ));
-
-        definition.setProcessData(new ProcessData(
-                new ProcessVariables(e.getProcessVariables())
-        ));
-
-        diagramNode.getContent().setBounds(e.getBounds());
-
-        definition.setFontSet(e.getFontSet());
-        definition.setBackgroundSet(e.getBackgroundSet());
-
-        return NodeResult.of(diagramNode);
+        return result;
     }
 }
