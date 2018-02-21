@@ -93,6 +93,7 @@ public class FlowElementConverter {
 
         if (r.isSuccess())
             return NodeResult.of(r.value());
+        else if (r.isIgnored()) return NodeResult.ignored(r.asIgnored().reason());
         else return NodeResult.failure(r.asFailure().reason());
     }
 

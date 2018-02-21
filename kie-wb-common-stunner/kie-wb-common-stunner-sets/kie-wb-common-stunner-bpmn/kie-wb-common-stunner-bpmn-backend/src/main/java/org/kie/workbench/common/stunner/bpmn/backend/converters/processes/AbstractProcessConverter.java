@@ -51,15 +51,15 @@ import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-public class ProcessConverter {
+public class AbstractProcessConverter {
 
-    private final PropertyReaderFactory propertyReaderFactory;
-    private final GraphBuildingContext context;
-    private final FlowElementConverter flowElementConverter;
-    private final LaneConverter laneConverter;
-    private final TypedFactoryManager factoryManager;
+    protected final PropertyReaderFactory propertyReaderFactory;
+    protected final GraphBuildingContext context;
+    protected final FlowElementConverter flowElementConverter;
+    protected final LaneConverter laneConverter;
+    protected final TypedFactoryManager factoryManager;
 
-    public ProcessConverter(
+    public AbstractProcessConverter(
             TypedFactoryManager typedFactoryManager,
             PropertyReaderFactory propertyReaderFactory,
             GraphBuildingContext context) {

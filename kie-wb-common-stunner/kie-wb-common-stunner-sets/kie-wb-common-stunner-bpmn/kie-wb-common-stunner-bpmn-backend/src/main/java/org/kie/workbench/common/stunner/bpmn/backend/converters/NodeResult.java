@@ -1,8 +1,12 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
+import com.sun.org.apache.regexp.internal.RE;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
@@ -62,12 +66,46 @@ public interface NodeResult<T> {
 
     Failure<T> asFailure();
 
+    default void setParent(NodeResult<?> firstDiagramNode) {
+        asSuccess().setParent(firstDiagramNode);
+    }
+
+    default void addChild(Success<?> child) {
+        asSuccess().addChild(child);
+    }
+
+    default List<Success<?>> getChildren() {
+        return asSuccess().getChildren();
+    }
+
     class Success<T> implements NodeResult<T> {
 
         private final Node<? extends View<? extends T>, ?> value;
+        private List<Success<?>> children = new ArrayList<>();
+        private NodeResult<?> parent;
 
         Success(Node<? extends View<? extends T>, ?> value) {
             this.value = value;
+        }
+
+        @Override
+        public void setParent(NodeResult<?> parent) {
+            this.parent = parent;
+            parent.addChild(this);
+        }
+
+        public NodeResult<?> getParent() {
+            return parent;
+        }
+
+        @Override
+        public void addChild(Success<?> child) {
+            this.children.add(child);
+        }
+
+        @Override
+        public List<Success<?>> getChildren() {
+            return children;
         }
 
         public Node<? extends View<? extends T>, ?> value() {
@@ -98,6 +136,7 @@ public interface NodeResult<T> {
         public boolean isFailure() {
             return false;
         }
+
     }
 
     class Ignored<T> implements NodeResult<T> {

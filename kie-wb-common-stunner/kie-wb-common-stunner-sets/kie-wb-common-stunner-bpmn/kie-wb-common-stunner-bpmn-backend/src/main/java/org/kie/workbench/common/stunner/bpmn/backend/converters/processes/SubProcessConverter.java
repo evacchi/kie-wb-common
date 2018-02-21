@@ -65,37 +65,37 @@ public class SubProcessConverter {
     public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(SubProcess subProcess) {
         Node<? extends View<? extends BPMNViewDefinition>, ?> subProcessNode = convertSubProcessNode(subProcess);
 
-        Map<String, Node<? extends View<? extends BPMNViewDefinition>, ?>> freeFloatingNodes =
-                subProcess.getFlowElements()
-                        .stream()
-                        .map(flowElementConverter::convertNode)
-                        .filter(Result::notIgnored)
-                        .map(Result::value)
-                        .collect(Collectors.toMap(Node::getUUID, Function.identity()));
-
-        subProcess.getLaneSets()
-                .stream()
-                .flatMap(laneSet -> laneSet.getLanes().stream())
-
-                .forEach(lane -> {
-                    Node<? extends View<? extends BPMNViewDefinition>, ?> laneNode =
-                            laneConverter.convert(lane);
-                    context.addChildNode(subProcessNode, laneNode);
-
-                    lane.getFlowNodeRefs().forEach(node -> {
-                        Node child = freeFloatingNodes.remove(node.getId());
-                        context.addChildNode(laneNode, child);
-                    });
-                });
-
-        freeFloatingNodes.values()
-                .forEach(n -> context.addChildNode(subProcessNode, n));
-
-        subProcess.getFlowElements()
-                .forEach(flowElementConverter::convertEdge);
-
-        subProcess.getFlowElements()
-                .forEach(flowElementConverter::convertDockedNodes);
+//        Map<String, Node<? extends View<? extends BPMNViewDefinition>, ?>> freeFloatingNodes =
+//                subProcess.getFlowElements()
+//                        .stream()
+//                        .map(flowElementConverter::convertNode)
+//                        .filter(Result::notIgnored)
+//                        .map(Result::value)
+//                        .collect(Collectors.toMap(Node::getUUID, Function.identity()));
+//
+//        subProcess.getLaneSets()
+//                .stream()
+//                .flatMap(laneSet -> laneSet.getLanes().stream())
+//
+//                .forEach(lane -> {
+//                    Node<? extends View<? extends BPMNViewDefinition>, ?> laneNode =
+//                            laneConverter.convert(lane);
+//                    context.addChildNode(subProcessNode, laneNode);
+//
+//                    lane.getFlowNodeRefs().forEach(node -> {
+//                        Node child = freeFloatingNodes.remove(node.getId());
+//                        context.addChildNode(laneNode, child);
+//                    });
+//                });
+//
+//        freeFloatingNodes.values()
+//                .forEach(n -> context.addChildNode(subProcessNode, n));
+//
+//        subProcess.getFlowElements()
+//                .forEach(flowElementConverter::convertEdge);
+//
+//        subProcess.getFlowElements()
+//                .forEach(flowElementConverter::convertDockedNodes);
 
         return subProcessNode;
     }

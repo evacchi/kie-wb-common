@@ -18,7 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.LanePropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Documentation;
@@ -37,7 +36,7 @@ public class LaneConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public Node<? extends View<? extends BPMNViewDefinition>, ?> convert(org.eclipse.bpmn2.Lane lane) {
+    public NodeResult<Lane> convert(org.eclipse.bpmn2.Lane lane) {
         Node<View<Lane>, Edge> node = typedFactoryManager.newNode(lane.getId(), Lane.class);
         Lane definition = node.getContent().getDefinition();
 
@@ -54,6 +53,6 @@ public class LaneConverter {
         definition.setFontSet(p.getFontSet());
         definition.setBackgroundSet(p.getBackgroundSet());
 
-        return node;
+        return NodeResult.of(node);
     }
 }
