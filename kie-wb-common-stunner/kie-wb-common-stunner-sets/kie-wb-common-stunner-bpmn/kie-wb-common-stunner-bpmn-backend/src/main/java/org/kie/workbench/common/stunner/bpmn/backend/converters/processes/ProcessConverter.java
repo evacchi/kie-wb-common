@@ -86,7 +86,6 @@ public class ProcessConverter extends AbstractProcessConverter {
         List<BpmnEdge> bpmnEdges = convertEdges(flowElements, nodes);
         firstNode.addAllEdges(bpmnEdges);
 
-        createEdges(firstNode);
         return firstNode;
     }
 }

@@ -43,6 +43,7 @@ import org.jboss.drools.impl.DroolsFactoryImpl;
 import org.jboss.drools.impl.DroolsPackageImpl;
 import org.kie.workbench.common.stunner.backend.service.XMLEncoderDiagramMetadataMarshaller;
 import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
@@ -183,7 +184,8 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
                         propertyReaderFactory,
                         context);
 
-        processConverter.convert(definitionsId, process);
+        BpmnNode root = processConverter.convert(definitionsId, process);
+        context.buildGraph(root);
 
         LOG.debug("Diagram unmarshalling finished successfully.");
         return graph;

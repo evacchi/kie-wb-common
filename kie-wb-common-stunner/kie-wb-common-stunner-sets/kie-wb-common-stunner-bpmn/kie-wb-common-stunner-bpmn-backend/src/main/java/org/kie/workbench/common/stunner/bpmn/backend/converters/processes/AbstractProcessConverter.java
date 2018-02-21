@@ -85,22 +85,6 @@ public abstract class AbstractProcessConverter {
         return collect;
     }
 
-    protected void createEdges(BpmnNode firstNode) {
-        context.addNode(firstNode.value());
-        firstNode.getEdges().forEach(context::addEdge);
-        Deque<BpmnNode> workingSet = new ArrayDeque<>(firstNode.getChildren());
-        Set<BpmnNode> workedOff = new HashSet<>();
-        while (!workingSet.isEmpty()) {
-            BpmnNode current = workingSet.pop();
-            if (workedOff.contains(current)) continue;
-            workedOff.add(current);
-            workingSet.addAll(current.getChildren());
-            System.out.println(current.getParent().value().getUUID()+" :: " +current.value().getUUID());
-            context.addChildNode(current.getParent().value(), current.value());
-            current.getEdges().forEach(context::addEdge);
-        }
-    }
-
     private void convertLaneSets(List<LaneSet> laneSets, Map<String, BpmnNode> freeFloatingNodes, BpmnNode firstDiagramNode) {
         laneSets.stream()
                 .flatMap(laneSet -> laneSet.getLanes().stream())

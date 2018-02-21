@@ -16,7 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.kie.workbench.common.stunner.core.command.Command;
 import org.kie.workbench.common.stunner.core.command.CommandResult;
@@ -56,6 +60,24 @@ public class GraphBuildingContext {
         this.executionContext = executionContext;
         this.commandFactory = commandFactory;
         this.commandManager = commandManager;
+    }
+
+    public void buildGraph(BpmnNode firstNode) {
+        this.addNode(firstNode.value());
+        firstNode.getEdges().forEach(this::addEdge);
+        Deque<BpmnNode> workingSet = new ArrayDeque<>(firstNode.getChildren());
+        Set<BpmnNode> workedOff = new HashSet<>();
+        while (!workingSet.isEmpty()) {
+            BpmnNode current = workingSet.pop();
+            if (workedOff.contains(current)) {
+                continue;
+            }
+            workedOff.add(current);
+            workingSet.addAll(current.getChildren());
+            logger.debug("{} :: {}", current.getParent().value().getUUID(), current.value().getUUID());
+            this.addChildNode(current.getParent().value(), current.value());
+            current.getEdges().forEach(this::addEdge);
+        }
     }
 
     public void addDockedNode(String parentId, String candidateId) {
