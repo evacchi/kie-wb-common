@@ -74,6 +74,10 @@ public interface NodeResult<T> {
         asSuccess().addChild(child);
     }
 
+    default void removeChild(Success<?> child) {
+        asSuccess().removeChild(child);
+    }
+
     default List<Success<?>> getChildren() {
         return asSuccess().getChildren();
     }
@@ -90,7 +94,9 @@ public interface NodeResult<T> {
 
         @Override
         public void setParent(NodeResult<?> parent) {
-            System.out.println("SET PARENT "+parent.getId() + " -> "+this.getId());
+            if (this.parent != null) {
+                this.parent.removeChild(this);
+            }
             this.parent = parent;
             parent.addChild(this);
         }
@@ -102,6 +108,11 @@ public interface NodeResult<T> {
         @Override
         public void addChild(Success<?> child) {
             this.children.add(child);
+        }
+
+        @Override
+        public void removeChild(Success<?> child) {
+            this.children.remove(child);
         }
 
         @Override
@@ -137,7 +148,6 @@ public interface NodeResult<T> {
         public boolean isFailure() {
             return false;
         }
-
     }
 
     class Ignored<T> implements NodeResult<T> {
