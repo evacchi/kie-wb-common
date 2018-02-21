@@ -181,10 +181,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         ProcessConverter processConverter =
                 new ProcessConverter(
                         typedFactoryManager,
-                        propertyReaderFactory,
-                        context);
+                        propertyReaderFactory);
 
-        BpmnNode root = processConverter.convert(definitionsId, process);
+        BpmnNode root = processConverter.convertProcess(definitionsId, process);
         context.buildGraph(root);
 
         LOG.debug("Diagram unmarshalling finished successfully.");

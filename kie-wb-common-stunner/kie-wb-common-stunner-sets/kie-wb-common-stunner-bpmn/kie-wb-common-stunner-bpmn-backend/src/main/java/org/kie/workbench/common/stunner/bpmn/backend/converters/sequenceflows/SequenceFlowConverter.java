@@ -39,12 +39,10 @@ public class SequenceFlowConverter {
 
     private TypedFactoryManager factoryManager;
     private final PropertyReaderFactory propertyReaderFactory;
-    private final GraphBuildingContext context;
 
-    public SequenceFlowConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory, GraphBuildingContext context) {
+    public SequenceFlowConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory) {
         this.factoryManager = factoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
-        this.context = context;
     }
 
     public BpmnEdge convert(org.eclipse.bpmn2.SequenceFlow seq, Map<String, BpmnNode> nodes) {

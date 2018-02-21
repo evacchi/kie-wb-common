@@ -36,7 +36,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.events.Intermedi
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.gateways.GatewayConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.SubProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows.SequenceFlowConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.TaskConverter;
@@ -48,7 +48,6 @@ public class FlowElementConverter {
     private static final Logger LOG = LoggerFactory.getLogger(FlowElementConverter.class);
 
     private final TypedFactoryManager factoryManager;
-    private final GraphBuildingContext context;
     private final StartEventConverter startEventConverter;
     private final TaskConverter taskConverter;
     private final SequenceFlowConverter sequenceFlowConverter;
@@ -58,21 +57,20 @@ public class FlowElementConverter {
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
     private final CallActivityConverter callActivityConverter;
-    private final SubProcessConverter subProcessConverter;
+    private final ProcessConverter subProcessConverter;
 
-    public FlowElementConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory, GraphBuildingContext context) {
+    public FlowElementConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory, ProcessConverter processConverter) {
         this.factoryManager = factoryManager;
-        this.context = context;
         this.startEventConverter = new StartEventConverter(factoryManager, propertyReaderFactory);
         this.endEventConverter = new EndEventConverter(factoryManager, propertyReaderFactory);
         this.intermediateThrowEventConverter = new IntermediateThrowEventConverter(factoryManager, propertyReaderFactory);
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter(factoryManager, propertyReaderFactory);
         this.taskConverter = new TaskConverter(factoryManager, propertyReaderFactory);
-        this.sequenceFlowConverter = new SequenceFlowConverter(factoryManager, propertyReaderFactory, context);
+        this.sequenceFlowConverter = new SequenceFlowConverter(factoryManager, propertyReaderFactory);
         this.gatewayConverter = new GatewayConverter(factoryManager, propertyReaderFactory);
         this.boundaryEventConverter = new BoundaryEventConverter();
         this.callActivityConverter = new CallActivityConverter(factoryManager, propertyReaderFactory);
-        this.subProcessConverter = new SubProcessConverter(factoryManager, propertyReaderFactory, this, context);
+        this.subProcessConverter = processConverter;
     }
 
     public Result<BpmnNode> convertNode(FlowElement flowElement) {
@@ -84,7 +82,7 @@ public class FlowElementConverter {
                 .when(IntermediateThrowEvent.class, intermediateThrowEventConverter::convert)
                 .when(Task.class, taskConverter::convert)
                 .when(Gateway.class, gatewayConverter::convert)
-                .when(SubProcess.class, subProcessConverter::convert)
+                .when(SubProcess.class, subProcessConverter::convertSubProcess)
                 .when(CallActivity.class, callActivityConverter::convert)
                 .ignore(SequenceFlow.class)
                 .apply(flowElement);
@@ -97,9 +95,4 @@ public class FlowElementConverter {
                 .apply(flowElement);
     }
 
-    public void convertDockedNodes(FlowElement flowElement) {
-//        VoidMatch.ofEdge(FlowElement.class)
-//                .when(BoundaryEvent.class, e -> boundaryEventConverter.convertEdge(e, nodes))
-//                .apply(flowElement);
-    }
 }
