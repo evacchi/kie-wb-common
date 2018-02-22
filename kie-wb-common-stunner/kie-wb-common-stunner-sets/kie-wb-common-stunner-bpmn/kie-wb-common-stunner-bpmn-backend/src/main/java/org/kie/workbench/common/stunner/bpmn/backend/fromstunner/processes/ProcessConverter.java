@@ -75,8 +75,8 @@ public class ProcessConverter {
 
     }
 
-    public ProcessPropertyWriter convertProcess(Node<Definition<BPMNDiagramImpl>, ?> node) {
-        ProcessPropertyWriter processRoot = convertProcessNode(node);
+    public ProcessPropertyWriter convertProcess() {
+        ProcessPropertyWriter processRoot = convertProcessNode(context.firstNode());
 
         convertChildNodes(processRoot, context.nodes(), context.lanes());
         convertEdges(processRoot, context);

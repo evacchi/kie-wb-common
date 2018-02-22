@@ -26,6 +26,7 @@ import bpsim.BpsimPackage;
 import bpsim.ElementParameters;
 import bpsim.Scenario;
 import org.eclipse.bpmn2.Definitions;
+import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.Task;
@@ -72,6 +73,13 @@ public class DefinitionResolver {
         }
     }
 
+
+    public Process findProcess() {
+        return (Process) definitions.getRootElements().stream()
+                .filter(el -> el instanceof Process)
+                .findFirst().get();
+    }
+
     public Optional<Signal> resolveSignal(String id) {
         return Optional.ofNullable(signals.get(id));
     }
@@ -92,5 +100,9 @@ public class DefinitionResolver {
 
     public BPMNPlane findPlane() {
         return definitions.getDiagrams().get(0).getPlane();
+    }
+
+    public Definitions getDefinitions() {
+        return definitions;
     }
 }

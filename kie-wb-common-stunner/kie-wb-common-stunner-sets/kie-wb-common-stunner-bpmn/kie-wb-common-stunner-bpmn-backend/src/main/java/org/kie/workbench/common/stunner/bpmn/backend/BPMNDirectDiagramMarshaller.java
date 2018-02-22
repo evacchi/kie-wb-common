@@ -47,10 +47,13 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.DefinitionsPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceImpl;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
@@ -69,6 +72,8 @@ import org.kie.workbench.common.stunner.core.graph.processing.index.map.MapIndex
 import org.kie.workbench.common.stunner.core.rule.RuleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 /*
  * Direct as in "skipping json encoding"
@@ -138,13 +143,15 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         resource.getContents().add(definitions);
 
+        LOG.debug("Diagram marshalling completed successfully.");
+        return renderToString(resource);
+    }
+
+    private String renderToString(Bpmn2Resource resource) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         resource.save(outputStream, new HashMap<>());
-        String result = StringEscapeUtils.unescapeHtml4(
+        return StringEscapeUtils.unescapeHtml4(
                 outputStream.toString("UTF-8"));
-
-        LOG.debug("Diagram marshalling completed successfully.");
-        return result;
     }
 
     @Override
@@ -153,7 +160,6 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         LOG.debug("Starting diagram unmarshalling...");
 
         Definitions definitions = parseDefinitions(inputStream);
-        String definitionsId = definitions.getId();
 
         // the stunner model aggregates in a node different aspects:
         // - type (e.g., Task)
@@ -169,18 +175,16 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         ProcessConverterFactory processConverterFactory =
                 new ProcessConverterFactory(
                         typedFactoryManager,
-                        new PropertyReaderFactory(definitionResolver));
+                        definitionResolver);
 
-        ProcessConverter processConverter =
-                processConverterFactory.processConverter();
-
-        Process process = findProcess(definitions);
 
         BpmnNode root =
-                processConverter.convertProcess(definitionsId, process);
+                processConverterFactory
+                        .processConverter()
+                        .convertProcess();
 
-        metadata.setCanvasRootUUID(definitionsId);
-        metadata.setTitle(process.getName());
+        metadata.setCanvasRootUUID(definitionResolver.getDefinitions().getId());
+        metadata.setTitle(definitionResolver.findProcess().getName());
 
         LOG.debug("Diagram unmarshalling completed successfully.");
 
@@ -188,9 +192,8 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         // needed to build the entire graph (including parent/child relationships)
         // thus, we can simply walk the graph to issue all the commands
         // to draw it on our canvas
-        return renderGraph(definitionsId, root);
+        return renderGraph(definitionResolver.getDefinitions().getId(), root);
     }
-
 
     private Bpmn2Resource createBpmn2Resource() {
         DroolsFactoryImpl.init();
@@ -225,12 +228,6 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
 
         LOG.debug("Diagram drawing completed successfully.");
         return graph;
-    }
-
-    public Process findProcess(Definitions definitions) {
-        return (Process) definitions.getRootElements().stream()
-                .filter(el -> el instanceof Process)
-                .findFirst().get();
     }
 
     private GraphBuildingContext emptyGraphContext(Graph<DefinitionSet, Node> graph) {

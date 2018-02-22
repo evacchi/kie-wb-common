@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.LaneSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.EdgeConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
@@ -21,13 +22,16 @@ public class ProcessConverterFactory {
     private final FlowElementConverter flowElementConverter;
     private final LaneConverter laneConverter;
     private final EdgeConverter edgeConverter;
+    private final DefinitionResolver definitionResolver;
 
     public ProcessConverterFactory(
             TypedFactoryManager typedFactoryManager,
-            PropertyReaderFactory propertyReaderFactory) {
+            DefinitionResolver definitionResolver) {
 
         this.factoryManager = typedFactoryManager;
-        this.propertyReaderFactory = propertyReaderFactory;
+        this.definitionResolver = definitionResolver;
+        this.propertyReaderFactory =
+                new PropertyReaderFactory(definitionResolver);
 
         this.flowElementConverter =
                 new FlowElementConverter(
@@ -57,6 +61,7 @@ public class ProcessConverterFactory {
         return new ProcessConverter(
                 factoryManager,
                 propertyReaderFactory,
+                definitionResolver,
                 this);
     }
 
@@ -109,5 +114,4 @@ public class ProcessConverterFactory {
                     });
                 });
     }
-
 }

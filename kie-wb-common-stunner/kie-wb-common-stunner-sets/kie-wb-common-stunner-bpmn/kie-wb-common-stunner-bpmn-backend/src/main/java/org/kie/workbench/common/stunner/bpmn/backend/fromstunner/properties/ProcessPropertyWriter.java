@@ -5,24 +5,36 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import bpsim.BPSimDataType;
+import bpsim.BpsimPackage;
 import bpsim.ElementParameters;
+import bpsim.Scenario;
+import bpsim.ScenarioParameters;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
+import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
+import org.eclipse.bpmn2.Relationship;
+import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BPMNShape;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
+import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
 public class ProcessPropertyWriter extends BasePropertyWriter implements ElementContainer {
@@ -165,5 +177,35 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
 
     public Collection<ElementParameters> getSimulationParameters() {
         return simulationParameters;
+    }
+
+    private static final String defaultRelationshipType = "BPSimData";
+
+    public Relationship getRelationship() {
+        Relationship relationship = bpmn2.createRelationship();
+        relationship.setType(defaultRelationshipType);
+        BPSimDataType simDataType = bpsim.createBPSimDataType();
+        // currently support single scenario
+        Scenario defaultScenario = bpsim.createScenario();
+        ScenarioParameters scenarioParameters = bpsim.createScenarioParameters();
+        defaultScenario.setId("default"); // single scenario suppoert
+        defaultScenario.setName("Simulationscenario"); // single scenario support
+        defaultScenario.setScenarioParameters(scenarioParameters);
+        simDataType.getScenario().add(defaultScenario);
+        ExtensionAttributeValue extensionElement = bpmn2.createExtensionAttributeValue();
+        relationship.getExtensionValues().add(extensionElement);
+        FeatureMap.Entry extensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
+                (EStructuralFeature.Internal) BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA,
+                simDataType);
+        relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
+        defaultScenario.getElementParameters().addAll(simulationParameters);
+
+        return relationship;
+    }
+
+    public Collection<RootElement> getRootElements() {
+        return baseElements.values().stream().filter(e -> e instanceof RootElement)
+                .map(e -> (RootElement) e)
+                .collect(Collectors.toList());
     }
 }

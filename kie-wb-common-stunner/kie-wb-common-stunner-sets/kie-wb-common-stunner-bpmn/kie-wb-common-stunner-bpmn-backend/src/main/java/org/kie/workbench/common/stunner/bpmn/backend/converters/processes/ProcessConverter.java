@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.eclipse.bpmn2.Process;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
@@ -43,21 +44,27 @@ public class ProcessConverter {
 
     protected final TypedFactoryManager factoryManager;
     protected final PropertyReaderFactory propertyReaderFactory;
+    private final DefinitionResolver definitionResolver;
 
     private final ProcessConverterFactory processConverterFactory;
 
     public ProcessConverter(
             TypedFactoryManager typedFactoryManager,
             PropertyReaderFactory propertyReaderFactory,
+            DefinitionResolver definitionResolver,
             ProcessConverterFactory processConverterFactory) {
 
         this.factoryManager = typedFactoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
+        this.definitionResolver = definitionResolver;
         this.processConverterFactory = processConverterFactory;
     }
 
-    public BpmnNode convertProcess(String id, Process process) {
-        BpmnNode processRoot = convertProcessNode(id, process);
+    public BpmnNode convertProcess() {
+        Process process = definitionResolver.findProcess();
+        BpmnNode processRoot = convertProcessNode(
+                definitionResolver.getDefinitions().getId(),
+                process);
 
         Map<String, BpmnNode> nodes =
                 processConverterFactory.convertChildNodes(

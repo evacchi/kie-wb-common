@@ -34,6 +34,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.DefinitionsPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 
@@ -56,53 +57,21 @@ public class DefinitionsConverter {
 
     public Definitions toDefinitions() {
         Definitions definitions = bpmn2.createDefinitions();
+        DefinitionsPropertyWriter p =
+                new DefinitionsPropertyWriter(definitions);
 
-        ProcessPropertyWriter p =
-                processConverter.convertProcess(context.firstNode());
-        Process process = p.getProcess();
+        ProcessPropertyWriter pp =
+                processConverter.convertProcess();
 
-        definitions.getRootElements().add(process);
-
-        BPMNDiagram bpmnDiagram = p.getBpmnDiagram();
-        definitions.getDiagrams().add(bpmnDiagram);
-
-        Relationship relationship = toRelationship(p.getSimulationParameters());
-        relationship.getSources().add(definitions);
-        relationship.getTargets().add(definitions);
-        definitions.getRelationships().add(relationship);
-
-        for (BaseElement baseElement : p.getBaseElements()) {
-            if (baseElement instanceof RootElement) {
-                definitions.getRootElements().add((RootElement)baseElement);
-            }
-        }
+        p.setProcess(pp.getProcess());
+        p.setDiagram(pp.getBpmnDiagram());
+        p.setRelationship(pp.getRelationship());
+        p.addAllRootElements(pp.getRootElements());
 
         return definitions;
     }
 
 
-    private static final String defaultRelationshipType = "BPSimData";
-    private Relationship toRelationship(Collection<ElementParameters> parameters) {
-        Relationship relationship = bpmn2.createRelationship();
-        relationship.setType(defaultRelationshipType);
-        BPSimDataType simDataType = bpsim.createBPSimDataType();
-        // currently support single scenario
-        Scenario defaultScenario = bpsim.createScenario();
-        ScenarioParameters scenarioParameters = bpsim.createScenarioParameters();
-        defaultScenario.setId("default"); // single scenario suppoert
-        defaultScenario.setName("Simulationscenario"); // single scenario support
-        defaultScenario.setScenarioParameters(scenarioParameters);
-        simDataType.getScenario().add(defaultScenario);
-        ExtensionAttributeValue extensionElement = bpmn2.createExtensionAttributeValue();
-        relationship.getExtensionValues().add(extensionElement);
-        FeatureMap.Entry extensionElementEntry = new EStructuralFeatureImpl.SimpleFeatureMapEntry(
-                (EStructuralFeature.Internal) BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA,
-                simDataType);
-        relationship.getExtensionValues().get(0).getValue().add(extensionElementEntry);
-        defaultScenario.getElementParameters().addAll(parameters);
 
-        return relationship;
-
-    }
 
 }
