@@ -170,27 +170,30 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         metadata.setCanvasRootUUID(definitionsId);
         metadata.setTitle(process.getName());
 
-        Graph<DefinitionSet, Node> graph =
-                typedFactoryManager.newGraph(
-                        process.getId(), BPMNDefinitionSet.class);
-
-        GraphBuildingContext context = emptyGraphContext(graph);
-
-        PropertyReaderFactory propertyReaderFactory =
-                new PropertyReaderFactory(definitions);
-
         ProcessConverterFactory processConverterFactory =
                 new ProcessConverterFactory(
                         typedFactoryManager,
-                        propertyReaderFactory);
+                        new PropertyReaderFactory(definitions));
 
         ProcessConverter processConverter =
                 processConverterFactory.processConverter();
 
-        BpmnNode root = processConverter.convertProcess(definitionsId, process);
-        context.buildGraph(root);
+        BpmnNode root =
+                processConverter.convertProcess(definitionsId, process);
 
-        LOG.debug("Diagram unmarshalling finished successfully.");
+        LOG.debug("Diagram unmarshalling completed successfully.");
+        return renderGraph(definitionsId, root);
+    }
+
+    private Graph<DefinitionSet, Node> renderGraph(String definitionsId, BpmnNode root) {
+        Graph<DefinitionSet, Node> graph =
+                typedFactoryManager.newGraph(
+                        definitionsId, BPMNDefinitionSet.class);
+
+        emptyGraphContext(graph)
+                .buildGraph(root);
+
+        LOG.debug("Diagram drawing completed successfully.");
         return graph;
     }
 
