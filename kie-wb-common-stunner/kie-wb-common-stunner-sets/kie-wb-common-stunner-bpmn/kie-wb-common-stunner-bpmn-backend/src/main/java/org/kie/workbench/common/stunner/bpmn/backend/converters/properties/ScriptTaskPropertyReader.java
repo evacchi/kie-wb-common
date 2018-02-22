@@ -44,7 +44,4 @@ public class ScriptTaskPropertyReader extends TaskPropertyReader {
         return Boolean.parseBoolean(metaData("customAsync"));
     }
 
-    public SimulationSet getSimulationSet() {
-        return definitionResolver.extractSimulationSet(task);
-    }
 }

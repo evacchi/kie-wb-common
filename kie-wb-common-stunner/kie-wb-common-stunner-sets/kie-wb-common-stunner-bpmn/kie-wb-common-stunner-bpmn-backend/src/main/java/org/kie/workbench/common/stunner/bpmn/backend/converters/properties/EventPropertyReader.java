@@ -29,6 +29,7 @@ import org.eclipse.bpmn2.ThrowEvent;
 import org.eclipse.bpmn2.TimerEventDefinition;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettings;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettingsValue;
@@ -105,7 +106,9 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     }
 
     public SimulationAttributeSet getSimulationSet() {
-        return definitionResolver.extractSimulationAttributeSet(element.getId());
+        return definitionResolver.resolveSimulationParameters(element.getId())
+                .map(Simulations::simulationAttributeSet)
+                .orElse(new SimulationAttributeSet());
     }
 
 //    @Override

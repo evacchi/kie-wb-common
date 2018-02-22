@@ -29,6 +29,7 @@ import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.Signal;
 import org.eclipse.bpmn2.Task;
+import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
@@ -37,20 +38,37 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Simu
 public class DefinitionResolver {
 
     private final Map<String, Signal> signals = new HashMap<>();
-    private final Map<String, ElementParameters> elementParameters = new HashMap<>();
+    private final Map<String, ElementParameters> simulationparameters = new HashMap<>();
+    private final Definitions definitions;
 
     public DefinitionResolver(Definitions definitions) {
+        this.definitions = definitions;
+        initSignals(definitions);
+        initSimulationParameters(definitions);
+    }
+
+    private void initSignals(Definitions definitions) {
         for (RootElement el : definitions.getRootElements()) {
             if (el instanceof Signal) {
                 signals.put(el.getId(), (Signal) el);
             }
         }
-        FeatureMap value = definitions.getRelationships().get(0).getExtensionValues().get(0).getValue();
-        List<BPSimDataType> bpsimExtensions = (List<BPSimDataType>)
-                value.get(BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA, true);
+    }
+
+    private void initSimulationParameters(Definitions definitions) {
+        FeatureMap value =
+                definitions.getRelationships().get(0)
+                        .getExtensionValues().get(0)
+                        .getValue();
+
+        List<BPSimDataType> bpsimExtensions =
+                (List<BPSimDataType>)
+                        value.get(BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA, true);
+
         Scenario scenario = bpsimExtensions.get(0).getScenario().get(0);
+
         for (ElementParameters parameters : scenario.getElementParameters()) {
-            elementParameters.put(parameters.getElementRef(), parameters);
+            simulationparameters.put(parameters.getElementRef(), parameters);
         }
     }
 
@@ -63,7 +81,7 @@ public class DefinitionResolver {
     }
 
     public Optional<ElementParameters> resolveSimulationParameters(String id) {
-        return Optional.ofNullable(elementParameters.get(id));
+        return Optional.ofNullable(simulationparameters.get(id));
     }
 
     public SimulationSet extractSimulationSet(String id) {
@@ -72,13 +90,7 @@ public class DefinitionResolver {
                 .orElse(new SimulationSet());
     }
 
-    public SimulationSet extractSimulationSet(Task task) {
-        return extractSimulationSet(task.getId());
-    }
-
-    public SimulationAttributeSet extractSimulationAttributeSet(String id) {
-        return this.resolveSimulationParameters(id)
-                .map(Simulations::simulationAttributeSet)
-                .orElse(new SimulationAttributeSet());
+    public BPMNPlane findPlane() {
+        return definitions.getDiagrams().get(0).getPlane();
     }
 }

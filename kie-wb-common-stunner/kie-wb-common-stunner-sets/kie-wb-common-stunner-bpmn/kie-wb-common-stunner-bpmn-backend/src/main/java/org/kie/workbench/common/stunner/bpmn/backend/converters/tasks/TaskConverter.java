@@ -21,9 +21,9 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.BusinessRuleTaskPropertyReader;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.NoneTaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ScriptTaskPropertyReader;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.TaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.UserTaskPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.definition.NoneTask;
@@ -179,7 +179,7 @@ public class TaskConverter {
 
     private BpmnNode noneTask(Task task) {
         Node<View<NoneTask>, Edge> node = factoryManager.newNode(task.getId(), NoneTask.class);
-        NoneTaskPropertyReader p = propertyReaderFactory.of(task);
+        TaskPropertyReader p = propertyReaderFactory.of(task);
 
         NoneTask definition = node.getContent().getDefinition();
 

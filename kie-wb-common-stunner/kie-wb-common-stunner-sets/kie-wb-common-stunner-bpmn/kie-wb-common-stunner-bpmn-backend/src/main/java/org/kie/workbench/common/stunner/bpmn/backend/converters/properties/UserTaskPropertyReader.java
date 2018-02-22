@@ -33,7 +33,6 @@ import org.eclipse.bpmn2.UserTask;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 public class UserTaskPropertyReader extends TaskPropertyReader {
 
@@ -133,9 +132,5 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
 
     private static Object evaluate(Assignment assignment) {
         return ((FormalExpression) assignment.getFrom()).getBody();
-    }
-
-    public SimulationSet getSimulationSet() {
-        return definitionResolver.extractSimulationSet(task);
     }
 }

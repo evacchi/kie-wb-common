@@ -37,13 +37,9 @@ public class PropertyReaderFactory {
     private final BPMNPlane plane;
     private final DefinitionResolver definitionResolver;
 
-    public PropertyReaderFactory(Definitions definitions) {
-        this.plane = findPlane(definitions);
-        this.definitionResolver = new DefinitionResolver(definitions);
-    }
-
-    private BPMNPlane findPlane(Definitions definitions) {
-        return definitions.getDiagrams().get(0).getPlane();
+    public PropertyReaderFactory(DefinitionResolver definitionResolver) {
+        this.plane = definitionResolver.findPlane();
+        this.definitionResolver = definitionResolver;
     }
 
     public FlowElementPropertyReader of(FlowElement el) {
@@ -62,8 +58,8 @@ public class PropertyReaderFactory {
         return new GatewayPropertyReader(el, plane);
     }
 
-    public NoneTaskPropertyReader of(Task el) {
-        return new NoneTaskPropertyReader(el, plane, definitionResolver);
+    public TaskPropertyReader of(Task el) {
+        return new TaskPropertyReader(el, plane, definitionResolver);
     }
 
     public UserTaskPropertyReader of(UserTask el) {

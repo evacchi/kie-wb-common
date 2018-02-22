@@ -44,6 +44,7 @@ import org.jboss.drools.impl.DroolsPackageImpl;
 import org.kie.workbench.common.stunner.backend.service.XMLEncoderDiagramMetadataMarshaller;
 import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
@@ -124,6 +125,67 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
     @Override
     @SuppressWarnings("unchecked")
     public String marshall(final Diagram<Graph, Metadata> diagram) throws IOException {
+        LOG.debug("Starting diagram marshalling...");
+
+        Bpmn2Resource resource = createBpmn2Resource();
+
+        // we start converting from the root, then pull out the result
+        DefinitionsConverter definitionsConverter =
+                new DefinitionsConverter(diagram.getGraph());
+
+        Definitions definitions =
+                definitionsConverter.toDefinitions();
+
+        resource.getContents().add(definitions);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        resource.save(outputStream, new HashMap<>());
+        String result = StringEscapeUtils.unescapeHtml4(
+                outputStream.toString("UTF-8"));
+
+        LOG.debug("Diagram marshalling completed successfully.");
+        return result;
+    }
+
+    @Override
+    public Graph<DefinitionSet, Node> unmarshall(final Metadata metadata,
+                                                 final InputStream inputStream) throws IOException {
+        LOG.debug("Starting diagram unmarshalling...");
+
+        Definitions definitions = parseDefinitions(inputStream);
+        String definitionsId = definitions.getId();
+
+        // the stunner model aggregates in a node different aspects:
+        // - type (e.g., Task)
+        // - format (e.g., colors)
+        // - layout (position)
+        // thus, we need a mechanism to resolve these different concerns
+        // as we convert FlowElements
+        DefinitionResolver definitionResolver =
+                new DefinitionResolver(definitions);
+
+        ProcessConverterFactory processConverterFactory =
+                new ProcessConverterFactory(
+                        typedFactoryManager,
+                        new PropertyReaderFactory(definitionResolver));
+
+        ProcessConverter processConverter =
+                processConverterFactory.processConverter();
+
+        Process process = findProcess(definitions);
+
+        BpmnNode root =
+                processConverter.convertProcess(definitionsId, process);
+
+        metadata.setCanvasRootUUID(definitionsId);
+        metadata.setTitle(process.getName());
+
+        LOG.debug("Diagram unmarshalling completed successfully.");
+        return renderGraph(definitionsId, root);
+    }
+
+
+    private Bpmn2Resource createBpmn2Resource() {
         DroolsFactoryImpl.init();
         BpsimFactoryImpl.init();
 
@@ -139,51 +201,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
                         URI.createURI("virtual.bpmn2"));
 
         rSet.getResources().add(resource);
-
-        DefinitionsConverter definitionsConverter =
-                new DefinitionsConverter(diagram.getGraph());
-
-        Definitions definitions =
-                definitionsConverter.toDefinitions();
-
-        resource.getContents().add(definitions);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        resource.save(outputStream, new HashMap<>());
-        String result = StringEscapeUtils.unescapeHtml4(
-                outputStream.toString("UTF-8"));
-
-        System.out.println(result);
-        return result;
+        return resource;
     }
 
-    @Override
-    public Graph<DefinitionSet, Node> unmarshall(final Metadata metadata,
-                                                 final InputStream inputStream) throws IOException {
-        LOG.debug("Starting diagram unmarshalling...");
-
-        Definitions definitions = parseDefinitions(inputStream);
-        String definitionsId = definitions.getId();
-
-        Process process = findProcess(definitions);
-
-        metadata.setCanvasRootUUID(definitionsId);
-        metadata.setTitle(process.getName());
-
-        ProcessConverterFactory processConverterFactory =
-                new ProcessConverterFactory(
-                        typedFactoryManager,
-                        new PropertyReaderFactory(definitions));
-
-        ProcessConverter processConverter =
-                processConverterFactory.processConverter();
-
-        BpmnNode root =
-                processConverter.convertProcess(definitionsId, process);
-
-        LOG.debug("Diagram unmarshalling completed successfully.");
-        return renderGraph(definitionsId, root);
-    }
 
     private Graph<DefinitionSet, Node> renderGraph(String definitionsId, BpmnNode root) {
         Graph<DefinitionSet, Node> graph =
