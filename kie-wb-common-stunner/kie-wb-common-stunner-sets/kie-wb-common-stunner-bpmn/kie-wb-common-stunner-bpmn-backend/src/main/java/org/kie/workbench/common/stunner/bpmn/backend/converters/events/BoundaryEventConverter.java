@@ -22,6 +22,11 @@ import org.eclipse.bpmn2.BoundaryEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 
+/**
+ * A boundary event is also a sort-of-edge.
+ * This converter generates the "edge" part of a boundary event.
+ * The node part is converted by the {@link IntermediateCatchEventConverter}
+ */
 public class BoundaryEventConverter {
 
     public BpmnEdge convertEdge(BoundaryEvent e, Map<String, BpmnNode> nodes) {

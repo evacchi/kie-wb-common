@@ -34,6 +34,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.events.Intermedi
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.gateways.GatewayConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.SubProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows.SequenceFlowConverter;
@@ -44,9 +45,7 @@ public class FlowElementConverter {
     private final TypedFactoryManager factoryManager;
     private final StartEventConverter startEventConverter;
     private final TaskConverter taskConverter;
-    private final SequenceFlowConverter sequenceFlowConverter;
     private final GatewayConverter gatewayConverter;
-    private final BoundaryEventConverter boundaryEventConverter;
     private final EndEventConverter endEventConverter;
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
@@ -56,7 +55,7 @@ public class FlowElementConverter {
     public FlowElementConverter(
             TypedFactoryManager factoryManager,
             PropertyReaderFactory propertyReaderFactory,
-            SubProcessConverter subProcessConverter) {
+            ProcessConverterFactory processConverterFactory) {
 
         this.factoryManager = factoryManager;
         this.startEventConverter = new StartEventConverter(factoryManager, propertyReaderFactory);
@@ -64,11 +63,9 @@ public class FlowElementConverter {
         this.intermediateThrowEventConverter = new IntermediateThrowEventConverter(factoryManager, propertyReaderFactory);
         this.intermediateCatchEventConverter = new IntermediateCatchEventConverter(factoryManager, propertyReaderFactory);
         this.taskConverter = new TaskConverter(factoryManager, propertyReaderFactory);
-        this.sequenceFlowConverter = new SequenceFlowConverter(factoryManager, propertyReaderFactory);
         this.gatewayConverter = new GatewayConverter(factoryManager, propertyReaderFactory);
-        this.boundaryEventConverter = new BoundaryEventConverter();
         this.callActivityConverter = new CallActivityConverter(factoryManager, propertyReaderFactory);
-        this.subProcessConverter = subProcessConverter;
+        this.subProcessConverter = processConverterFactory.subProcessConverter();
     }
 
     public Result<BpmnNode> convertNode(FlowElement flowElement) {

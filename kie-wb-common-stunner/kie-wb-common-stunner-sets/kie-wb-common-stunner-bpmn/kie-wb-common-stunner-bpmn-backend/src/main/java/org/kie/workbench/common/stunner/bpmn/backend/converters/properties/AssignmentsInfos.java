@@ -20,22 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
 import org.eclipse.bpmn2.ItemAwareElement;
-import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
-
-import static org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Utils.extractDtype;
 
 public class AssignmentsInfos {
 
@@ -122,49 +118,17 @@ public class AssignmentsInfos {
 
         return result;
     }
-}
 
-class Utils {
-
-    static String extractDtype(BaseElement el) {
+    private static String extractDtype(BaseElement el) {
         return getAnyAttributeValue(el, "dtype");
     }
 
-    static String getAnyAttributeValue(BaseElement el, String attrName) {
+    private static String getAnyAttributeValue(BaseElement el, String attrName) {
         for (FeatureMap.Entry entry : el.getAnyAttribute()) {
             if (attrName.equals(entry.getEStructuralFeature().getName())) {
                 return entry.getValue().toString();
             }
         }
         return "";
-    }
-
-    @Deprecated
-    private void marshallItemAwareElements(Activity activity,
-                                           List<? extends ItemAwareElement> elements,
-                                           StringBuilder buffer,
-                                           List<String> disallowedNames) {
-        for (ItemAwareElement element : elements) {
-            String name = null;
-            if (element instanceof DataInput) {
-                name = ((DataInput) element).getName();
-            }
-            if (element instanceof DataOutput) {
-                name = ((DataOutput) element).getName();
-            }
-            if (name != null && !name.isEmpty() && !disallowedNames.contains(name)) {
-                buffer.append(name);
-                if (element.getItemSubjectRef() != null && element.getItemSubjectRef().getStructureRef() != null && !element.getItemSubjectRef().getStructureRef().isEmpty()) {
-                    buffer.append(":").append(element.getItemSubjectRef().getStructureRef());
-                } else if (activity.eContainer() instanceof SubProcess) {
-                    // BZ1247105: for Outputs on Tasks inside sub-processes
-                    String dtype = extractDtype(element);
-                    if (dtype != null && !dtype.isEmpty()) {
-                        buffer.append(":").append(dtype);
-                    }
-                }
-                buffer.append(",");
-            }
-        }
     }
 }

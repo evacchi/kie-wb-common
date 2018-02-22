@@ -47,6 +47,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.GraphBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.legacy.resource.JBPMBpmn2ResourceFactoryImpl;
@@ -178,10 +179,13 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         PropertyReaderFactory propertyReaderFactory =
                 new PropertyReaderFactory(definitions);
 
-        ProcessConverter processConverter =
-                new ProcessConverter(
+        ProcessConverterFactory processConverterFactory =
+                new ProcessConverterFactory(
                         typedFactoryManager,
                         propertyReaderFactory);
+
+        ProcessConverter processConverter =
+                processConverterFactory.processConverter();
 
         BpmnNode root = processConverter.convertProcess(definitionsId, process);
         context.buildGraph(root);

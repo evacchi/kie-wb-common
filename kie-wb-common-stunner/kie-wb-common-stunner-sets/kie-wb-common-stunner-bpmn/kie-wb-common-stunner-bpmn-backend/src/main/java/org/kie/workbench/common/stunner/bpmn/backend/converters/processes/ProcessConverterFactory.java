@@ -14,7 +14,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 
-class ProcessConverterCommon {
+public class ProcessConverterFactory {
 
     private final TypedFactoryManager factoryManager;
     private final PropertyReaderFactory propertyReaderFactory;
@@ -22,7 +22,7 @@ class ProcessConverterCommon {
     private final LaneConverter laneConverter;
     private final EdgeConverter edgeConverter;
 
-    public ProcessConverterCommon(
+    public ProcessConverterFactory(
             TypedFactoryManager typedFactoryManager,
             PropertyReaderFactory propertyReaderFactory) {
 
@@ -33,10 +33,8 @@ class ProcessConverterCommon {
                 new FlowElementConverter(
                         factoryManager,
                         propertyReaderFactory,
-                        new SubProcessConverter(
-                                typedFactoryManager,
-                                propertyReaderFactory,
-                                this));
+                        this);
+
         this.laneConverter =
                 new LaneConverter(
                         typedFactoryManager,
@@ -48,7 +46,21 @@ class ProcessConverterCommon {
                         propertyReaderFactory);
     }
 
-    public Map<String, BpmnNode> convertChildNodes(
+    public SubProcessConverter subProcessConverter() {
+        return new SubProcessConverter(
+                factoryManager,
+                propertyReaderFactory,
+                this);
+    }
+
+    public ProcessConverter processConverter() {
+        return new ProcessConverter(
+                factoryManager,
+                propertyReaderFactory,
+                this);
+    }
+
+    Map<String, BpmnNode> convertChildNodes(
             BpmnNode firstNode,
             List<FlowElement> flowElements,
             List<LaneSet> laneSets) {
@@ -62,6 +74,14 @@ class ProcessConverterCommon {
         convertLaneSets(laneSets, freeFloatingNodes, firstNode);
 
         return freeFloatingNodes;
+    }
+
+    void convertEdges(BpmnNode processRoot, List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
+        flowElements.stream()
+                .map(e -> edgeConverter.convertEdge(e, nodes))
+                .filter(Result::isSuccess)
+                .map(Result::value)
+                .forEach(processRoot::addEdge);
     }
 
     private Map<String, BpmnNode> convertFlowElements(List<FlowElement> flowElements) {
@@ -90,11 +110,4 @@ class ProcessConverterCommon {
                 });
     }
 
-    public void convertEdges(BpmnNode processRoot, List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
-        flowElements.stream()
-                .map(e -> edgeConverter.convertEdge(e, nodes))
-                .filter(Result::isSuccess)
-                .map(Result::value)
-                .forEach(processRoot::addEdge);
-    }
 }

@@ -44,28 +44,28 @@ public class ProcessConverter {
     protected final TypedFactoryManager factoryManager;
     protected final PropertyReaderFactory propertyReaderFactory;
 
-    private final ProcessConverterCommon processConverterCommon;
+    private final ProcessConverterFactory processConverterFactory;
 
     public ProcessConverter(
             TypedFactoryManager typedFactoryManager,
-            PropertyReaderFactory propertyReaderFactory) {
+            PropertyReaderFactory propertyReaderFactory,
+            ProcessConverterFactory processConverterFactory) {
 
         this.factoryManager = typedFactoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
-        this.processConverterCommon =
-                new ProcessConverterCommon(typedFactoryManager, propertyReaderFactory);
+        this.processConverterFactory = processConverterFactory;
     }
 
     public BpmnNode convertProcess(String id, Process process) {
         BpmnNode processRoot = convertProcessNode(id, process);
 
         Map<String, BpmnNode> nodes =
-                processConverterCommon.convertChildNodes(
+                processConverterFactory.convertChildNodes(
                         processRoot,
                         process.getFlowElements(),
                         process.getLaneSets());
 
-        processConverterCommon.convertEdges(
+        processConverterFactory.convertEdges(
                 processRoot,
                 process.getFlowElements(),
                 nodes);
