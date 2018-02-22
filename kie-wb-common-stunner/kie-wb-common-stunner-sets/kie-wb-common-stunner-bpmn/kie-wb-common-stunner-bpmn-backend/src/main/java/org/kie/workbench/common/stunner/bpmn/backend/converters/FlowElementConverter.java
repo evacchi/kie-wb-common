@@ -16,8 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
-import java.util.Map;
-
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.bpmn2.EndEvent;
@@ -36,16 +34,12 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.events.Intermedi
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.gateways.GatewayConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.ProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.processes.SubProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.sequenceflows.SequenceFlowConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.TaskConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FlowElementConverter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FlowElementConverter.class);
 
     private final TypedFactoryManager factoryManager;
     private final StartEventConverter startEventConverter;
@@ -57,9 +51,13 @@ public class FlowElementConverter {
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
     private final CallActivityConverter callActivityConverter;
-    private final ProcessConverter subProcessConverter;
+    private final SubProcessConverter subProcessConverter;
 
-    public FlowElementConverter(TypedFactoryManager factoryManager, PropertyReaderFactory propertyReaderFactory, ProcessConverter processConverter) {
+    public FlowElementConverter(
+            TypedFactoryManager factoryManager,
+            PropertyReaderFactory propertyReaderFactory,
+            SubProcessConverter subProcessConverter) {
+
         this.factoryManager = factoryManager;
         this.startEventConverter = new StartEventConverter(factoryManager, propertyReaderFactory);
         this.endEventConverter = new EndEventConverter(factoryManager, propertyReaderFactory);
@@ -70,7 +68,7 @@ public class FlowElementConverter {
         this.gatewayConverter = new GatewayConverter(factoryManager, propertyReaderFactory);
         this.boundaryEventConverter = new BoundaryEventConverter();
         this.callActivityConverter = new CallActivityConverter(factoryManager, propertyReaderFactory);
-        this.subProcessConverter = processConverter;
+        this.subProcessConverter = subProcessConverter;
     }
 
     public Result<BpmnNode> convertNode(FlowElement flowElement) {
@@ -87,12 +85,4 @@ public class FlowElementConverter {
                 .ignore(SequenceFlow.class)
                 .apply(flowElement);
     }
-
-    public Result<BpmnEdge> convertEdge(FlowElement flowElement, Map<String, BpmnNode> nodes) {
-        return Match.of(FlowElement.class, BpmnEdge.class)
-                .when(SequenceFlow.class, e -> sequenceFlowConverter.convert(e, nodes))
-                .when(BoundaryEvent.class, e -> boundaryEventConverter.convertEdge(e, nodes))
-                .apply(flowElement);
-    }
-
 }

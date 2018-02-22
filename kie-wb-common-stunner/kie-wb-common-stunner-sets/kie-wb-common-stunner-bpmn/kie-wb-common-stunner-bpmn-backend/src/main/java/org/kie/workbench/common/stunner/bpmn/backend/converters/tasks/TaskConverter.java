@@ -72,7 +72,7 @@ public class TaskConverter {
                 .when(org.eclipse.bpmn2.UserTask.class, this::userTask)
                 .missing(org.eclipse.bpmn2.ServiceTask.class)
                 .missing(org.eclipse.bpmn2.ManualTask.class)
-                .orElse(t -> noneTask(t))
+                .orElse(this::noneTask)
                 .apply(task).value();
     }
 

@@ -54,15 +54,25 @@ public class ProcessConverter {
 
     private final DefinitionsBuildingContext context;
 
-    private final SequenceFlowConverter sequenceFlowConverter;
     private final ViewDefinitionConverter viewDefinitionConverter;
     private final LaneConverter laneConverter;
 
+    private final SequenceFlowConverter sequenceFlowConverter;
+
     public ProcessConverter(DefinitionsBuildingContext context) {
         this.context = context;
-        this.sequenceFlowConverter = new SequenceFlowConverter();
-        this.viewDefinitionConverter = new ViewDefinitionConverter(context, this);
-        this.laneConverter = new LaneConverter();
+
+        this.viewDefinitionConverter =
+                new ViewDefinitionConverter(
+                        context,
+                        this);
+
+        this.laneConverter =
+                new LaneConverter();
+
+        this.sequenceFlowConverter =
+                new SequenceFlowConverter();
+
     }
 
     public ProcessPropertyWriter convertProcess(Node<Definition<BPMNDiagramImpl>, ?> node) {
@@ -158,6 +168,31 @@ public class ProcessConverter {
         return p;
     }
 
+    private void convertChildNodes(
+            ElementContainer p,
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> nodes,
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes) {
+        nodes.map(viewDefinitionConverter::toFlowElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .forEach(p::addChildElement);
+
+        convertLanes(lanes, p);
+    }
+
+    private void convertLanes(
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes,
+            ElementContainer p) {
+        List<LanePropertyWriter> collect = lanes
+                .map(laneConverter::toElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .collect(Collectors.toList());
+
+        p.addLaneSet(collect);
+        collect.forEach(p::addChildElement);
+    }
+
     private void convertEdges(ElementContainer p, DefinitionsBuildingContext context) {
         context.childEdges()
                 .forEach(e -> {
@@ -182,30 +217,5 @@ public class ProcessConverter {
         context.edges()
                 .map(e -> sequenceFlowConverter.toFlowElement(e, p))
                 .forEach(p::addChildElement);
-    }
-
-    private void convertChildNodes(
-            ElementContainer p,
-            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> nodes,
-            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes) {
-        nodes.map(viewDefinitionConverter::toFlowElement)
-                .filter(Result::notIgnored)
-                .map(Result::value)
-                .forEach(p::addChildElement);
-
-        convertLanes(lanes, p);
-    }
-
-    private void convertLanes(
-            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes,
-            ElementContainer p) {
-        List<LanePropertyWriter> collect = lanes
-                .map(laneConverter::toElement)
-                .filter(Result::notIgnored)
-                .map(Result::value)
-                .collect(Collectors.toList());
-
-        p.addLaneSet(collect);
-        collect.forEach(p::addChildElement);
     }
 }

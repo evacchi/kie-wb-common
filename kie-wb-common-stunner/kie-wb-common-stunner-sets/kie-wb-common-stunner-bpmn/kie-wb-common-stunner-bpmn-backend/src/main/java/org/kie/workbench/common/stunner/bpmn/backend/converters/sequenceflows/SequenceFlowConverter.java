@@ -45,7 +45,7 @@ public class SequenceFlowConverter {
         this.propertyReaderFactory = propertyReaderFactory;
     }
 
-    public BpmnEdge convert(org.eclipse.bpmn2.SequenceFlow seq, Map<String, BpmnNode> nodes) {
+    public BpmnEdge convertEdge(org.eclipse.bpmn2.SequenceFlow seq, Map<String, BpmnNode> nodes) {
         Edge<View<SequenceFlow>, Node> edge = factoryManager.newEdge(seq.getId(), SequenceFlow.class);
 
         SequenceFlow definition = edge.getContent().getDefinition();

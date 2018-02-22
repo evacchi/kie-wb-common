@@ -16,27 +16,14 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.processes;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
-import org.eclipse.bpmn2.SubProcess;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnEdge;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.LaneConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.ProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SubProcessPropertyReader;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
-import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.AdHoc;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Executable;
@@ -44,7 +31,6 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Id;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Package;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.ProcessInstanceDescription;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Version;
-import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Documentation;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.Name;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
@@ -55,10 +41,10 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 public class ProcessConverter {
 
-    protected final PropertyReaderFactory propertyReaderFactory;
-    protected final FlowElementConverter flowElementConverter;
-    protected final LaneConverter laneConverter;
     protected final TypedFactoryManager factoryManager;
+    protected final PropertyReaderFactory propertyReaderFactory;
+
+    private final ProcessConverterCommon processConverterCommon;
 
     public ProcessConverter(
             TypedFactoryManager typedFactoryManager,
@@ -66,45 +52,25 @@ public class ProcessConverter {
 
         this.factoryManager = typedFactoryManager;
         this.propertyReaderFactory = propertyReaderFactory;
-        this.flowElementConverter = new FlowElementConverter(factoryManager, propertyReaderFactory, this);
-        this.laneConverter = new LaneConverter(typedFactoryManager, propertyReaderFactory);
+        this.processConverterCommon =
+                new ProcessConverterCommon(typedFactoryManager, propertyReaderFactory);
     }
 
     public BpmnNode convertProcess(String id, Process process) {
         BpmnNode processRoot = convertProcessNode(id, process);
 
         Map<String, BpmnNode> nodes =
-                convertChildNodes(
+                processConverterCommon.convertChildNodes(
                         processRoot,
                         process.getFlowElements(),
                         process.getLaneSets());
 
-                convertEdges(
-                        processRoot,
-                        process.getFlowElements(),
-                        nodes);
+        processConverterCommon.convertEdges(
+                processRoot,
+                process.getFlowElements(),
+                nodes);
 
         return processRoot;
-    }
-
-    public BpmnNode convertSubProcess(SubProcess subProcess) {
-        BpmnNode subProcessRoot =
-                subProcess.isTriggeredByEvent() ?
-                        convertEventSubprocessNode(subProcess)
-                        : convertEmbeddedSubprocessNode(subProcess);
-
-        Map<String, BpmnNode> nodes =
-                convertChildNodes(
-                        subProcessRoot,
-                        subProcess.getFlowElements(),
-                        subProcess.getLaneSets());
-
-                convertEdges(
-                        subProcessRoot,
-                        subProcess.getFlowElements(),
-                        nodes);
-
-        return subProcessRoot;
     }
 
     private BpmnNode convertProcessNode(String id, Process process) {
@@ -135,112 +101,5 @@ public class ProcessConverter {
         definition.setBackgroundSet(e.getBackgroundSet());
 
         return BpmnNode.of(diagramNode);
-    }
-
-    private BpmnNode convertEmbeddedSubprocessNode(SubProcess subProcess) {
-        Node<View<EmbeddedSubprocess>, Edge> node =
-                factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
-
-        EmbeddedSubprocess definition = node.getContent().getDefinition();
-        SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
-
-        definition.setGeneral(new BPMNGeneralSet(
-                new Name(subProcess.getName()),
-                new Documentation(p.getDocumentation())
-        ));
-
-        definition.getOnEntryAction().setValue(p.getOnEntryAction());
-        definition.getOnExitAction().setValue(p.getOnExitAction());
-        definition.getIsAsync().setValue(p.isAsync());
-
-        definition.setProcessData(new ProcessData(
-                new ProcessVariables(p.getProcessVariables())));
-
-        definition.setSimulationSet(p.getSimulationSet());
-
-        definition.setDimensionsSet(p.getRectangleDimensionsSet());
-        definition.setFontSet(p.getFontSet());
-        definition.setBackgroundSet(p.getBackgroundSet());
-
-        node.getContent().setBounds(p.getBounds());
-        return BpmnNode.of(node);
-    }
-
-    private BpmnNode convertEventSubprocessNode(SubProcess subProcess) {
-        Node<View<EventSubprocess>, Edge> node =
-                factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
-
-        EventSubprocess definition = node.getContent().getDefinition();
-        SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
-
-        definition.setGeneral(new BPMNGeneralSet(
-                new Name(subProcess.getName()),
-                new Documentation(p.getDocumentation())
-        ));
-
-        definition.getIsAsync().setValue(p.isAsync());
-
-        definition.setProcessData(new ProcessData(
-                new ProcessVariables(p.getProcessVariables())));
-
-        definition.setSimulationSet(p.getSimulationSet());
-
-        definition.setDimensionsSet(p.getRectangleDimensionsSet());
-        definition.setFontSet(p.getFontSet());
-        definition.setBackgroundSet(p.getBackgroundSet());
-
-        node.getContent().setBounds(p.getBounds());
-
-        return BpmnNode.of(node);
-    }
-
-    protected Map<String, BpmnNode> convertChildNodes(
-            BpmnNode firstNode,
-            List<FlowElement> flowElements,
-            List<LaneSet> laneSets) {
-
-        Map<String, BpmnNode> freeFloatingNodes =
-                convertFlowElements(flowElements);
-
-        freeFloatingNodes.values()
-                .forEach(n -> n.setParent(firstNode));
-
-        convertLaneSets(laneSets, freeFloatingNodes, firstNode);
-
-        return freeFloatingNodes;
-    }
-
-    protected void convertEdges(BpmnNode processRoot, List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
-        flowElements.stream()
-                .map(e -> flowElementConverter.convertEdge(e, nodes))
-                .filter(Result::isSuccess)
-                .map(Result::value)
-                .forEach(processRoot::addEdge);
-    }
-
-    private void convertLaneSets(List<LaneSet> laneSets, Map<String, BpmnNode> freeFloatingNodes, BpmnNode firstDiagramNode) {
-        laneSets.stream()
-                .flatMap(laneSet -> laneSet.getLanes().stream())
-                .forEach(lane -> {
-                    BpmnNode laneNode = laneConverter.convert(lane);
-                    laneNode.setParent(firstDiagramNode);
-
-                    lane.getFlowNodeRefs().forEach(node -> {
-                        freeFloatingNodes.get(node.getId()).setParent(laneNode);
-                    });
-                });
-    }
-
-    private Map<String, BpmnNode> convertFlowElements(List<FlowElement> flowElements) {
-        LinkedHashMap<String, BpmnNode> result = new LinkedHashMap<>();
-
-        flowElements
-                .stream()
-                .map(flowElementConverter::convertNode)
-                .filter(Result::isSuccess)
-                .map(Result::value)
-                .forEach(n -> result.put(n.value().getUUID(), n));
-
-        return result;
     }
 }
