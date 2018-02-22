@@ -71,6 +71,43 @@ public class ProcessConverter {
     }
 
     public BpmnNode convertProcess(String id, Process process) {
+        BpmnNode processRoot = convertProcessNode(id, process);
+
+        Map<String, BpmnNode> nodes =
+                convertChildNodes(
+                        processRoot,
+                        process.getFlowElements(),
+                        process.getLaneSets());
+
+                convertEdges(
+                        processRoot,
+                        process.getFlowElements(),
+                        nodes);
+
+        return processRoot;
+    }
+
+    public BpmnNode convertSubProcess(SubProcess subProcess) {
+        BpmnNode subProcessRoot =
+                subProcess.isTriggeredByEvent() ?
+                        convertEventSubprocessNode(subProcess)
+                        : convertEmbeddedSubprocessNode(subProcess);
+
+        Map<String, BpmnNode> nodes =
+                convertChildNodes(
+                        subProcessRoot,
+                        subProcess.getFlowElements(),
+                        subProcess.getLaneSets());
+
+                convertEdges(
+                        subProcessRoot,
+                        subProcess.getFlowElements(),
+                        nodes);
+
+        return subProcessRoot;
+    }
+
+    private BpmnNode convertProcessNode(String id, Process process) {
         Node<View<BPMNDiagramImpl>, Edge> diagramNode =
                 factoryManager.newNode(id, BPMNDiagramImpl.class);
         BPMNDiagramImpl definition = diagramNode.getContent().getDefinition();
@@ -97,42 +134,12 @@ public class ProcessConverter {
         definition.setFontSet(e.getFontSet());
         definition.setBackgroundSet(e.getBackgroundSet());
 
-        BpmnNode firstNode = BpmnNode.of(diagramNode);
-
-        List<FlowElement> flowElements = process.getFlowElements();
-        List<LaneSet> laneSets = process.getLaneSets();
-
-        Map<String, BpmnNode> nodes = convertNodes(firstNode, flowElements, laneSets);
-        List<BpmnEdge> bpmnEdges = convertEdges(flowElements, nodes);
-        firstNode.addAllEdges(bpmnEdges);
-
-        return firstNode;
+        return BpmnNode.of(diagramNode);
     }
 
-    public BpmnNode convertSubProcess(SubProcess subProcess) {
-        BpmnNode result =
-                subProcess.isTriggeredByEvent() ?
-                        convertEventSubprocess(subProcess)
-                        : convertEmbeddedSubprocess(subProcess);
-
-        List<FlowElement> flowElements = subProcess.getFlowElements();
-        List<LaneSet> laneSets = subProcess.getLaneSets();
-        Map<String, BpmnNode> nodes = convertNodes(result, flowElements, laneSets);
-        List<BpmnEdge> bpmnEdges = convertEdges(flowElements, nodes);
-        result.addAllEdges(bpmnEdges);
-        return result;
-    }
-
-    private BpmnNode convertSubProcessNode(SubProcess subProcess) {
-        if (subProcess.isTriggeredByEvent()) {
-            return convertEventSubprocess(subProcess);
-        } else {
-            return convertEmbeddedSubprocess(subProcess);
-        }
-    }
-
-    private BpmnNode convertEmbeddedSubprocess(SubProcess subProcess) {
-        Node<View<EmbeddedSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
+    private BpmnNode convertEmbeddedSubprocessNode(SubProcess subProcess) {
+        Node<View<EmbeddedSubprocess>, Edge> node =
+                factoryManager.newNode(subProcess.getId(), EmbeddedSubprocess.class);
 
         EmbeddedSubprocess definition = node.getContent().getDefinition();
         SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
@@ -159,8 +166,9 @@ public class ProcessConverter {
         return BpmnNode.of(node);
     }
 
-    private BpmnNode convertEventSubprocess(SubProcess subProcess) {
-        Node<View<EventSubprocess>, Edge> node = factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
+    private BpmnNode convertEventSubprocessNode(SubProcess subProcess) {
+        Node<View<EventSubprocess>, Edge> node =
+                factoryManager.newNode(subProcess.getId(), EventSubprocess.class);
 
         EventSubprocess definition = node.getContent().getDefinition();
         SubProcessPropertyReader p = propertyReaderFactory.of(subProcess);
@@ -186,7 +194,11 @@ public class ProcessConverter {
         return BpmnNode.of(node);
     }
 
-    protected Map<String, BpmnNode> convertNodes(BpmnNode firstNode, List<FlowElement> flowElements, List<LaneSet> laneSets) {
+    protected Map<String, BpmnNode> convertChildNodes(
+            BpmnNode firstNode,
+            List<FlowElement> flowElements,
+            List<LaneSet> laneSets) {
+
         Map<String, BpmnNode> freeFloatingNodes =
                 convertFlowElements(flowElements);
 
@@ -198,13 +210,13 @@ public class ProcessConverter {
         return freeFloatingNodes;
     }
 
-    protected List<BpmnEdge> convertEdges(List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
-        return flowElements.stream()
+    protected void convertEdges(BpmnNode processRoot, List<FlowElement> flowElements, Map<String, BpmnNode> nodes) {
+        flowElements.stream()
                 .map(e -> flowElementConverter.convertEdge(e, nodes))
                 .filter(Result::isSuccess)
                 .map(Result::value)
-                .collect(Collectors.toList());
-        }
+                .forEach(processRoot::addEdge);
+    }
 
     private void convertLaneSets(List<LaneSet> laneSets, Map<String, BpmnNode> freeFloatingNodes, BpmnNode firstDiagramNode) {
         laneSets.stream()

@@ -31,9 +31,6 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class SequenceFlowConverter {
 
-    public SequenceFlowConverter() {
-    }
-
     public SequenceFlowPropertyWriter toFlowElement(Edge<?, ?> edge, ElementContainer process) {
         ViewConnector<SequenceFlow> content = (ViewConnector<SequenceFlow>) edge.getContent();
         SequenceFlow definition = content.getDefinition();

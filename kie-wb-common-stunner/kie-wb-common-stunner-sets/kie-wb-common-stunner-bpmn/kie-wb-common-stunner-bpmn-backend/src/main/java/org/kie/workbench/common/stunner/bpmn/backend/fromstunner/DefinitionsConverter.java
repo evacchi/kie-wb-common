@@ -58,7 +58,7 @@ public class DefinitionsConverter {
         Definitions definitions = bpmn2.createDefinitions();
 
         ProcessPropertyWriter p =
-                processConverter.toFlowElement(context.firstNode());
+                processConverter.convertProcess(context.firstNode());
         Process process = p.getProcess();
 
         definitions.getRootElements().add(process);

@@ -60,4 +60,8 @@ public class BpmnNode {
     public List<BpmnEdge> getEdges() {
         return edges;
     }
+
+    public void addEdge(BpmnEdge bpmnEdge) {
+        edges.add(bpmnEdge);
+    }
 }

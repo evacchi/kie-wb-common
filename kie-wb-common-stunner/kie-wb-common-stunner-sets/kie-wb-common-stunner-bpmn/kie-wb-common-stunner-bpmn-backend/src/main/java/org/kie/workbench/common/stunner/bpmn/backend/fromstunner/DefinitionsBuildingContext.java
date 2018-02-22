@@ -25,6 +25,7 @@ import java.util.stream.StreamSupport;
 
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
+import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
@@ -166,5 +167,13 @@ abstract class DefinitionsContextHelper<
 
     private boolean isViewConnector(EdgeT e) {
         return e.getContent() instanceof ViewConnector;
+    }
+
+    public Stream<? extends NodeT> lanes() {
+        return nodes().filter(this::isLane);
+    }
+
+    private boolean isLane(NodeT n) {
+        return n.getContent().getDefinition() instanceof Lane;
     }
 }
