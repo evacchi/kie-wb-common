@@ -8,6 +8,16 @@ import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+/**
+ * The result of a Converter (to Stunner) is always a BpmnNode.
+ * It wraps the underlying Stunner node into a data structure
+ * that also encodes
+ *
+ * 1) parent/child relationships
+ * 2) other edges (and therefore, implicitly, other nodes)
+ *    that may be contained inside the node (e.g. in the case of a (Sub)Process)
+ *
+ */
 public class BpmnNode {
 
     public static BpmnNode of(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {

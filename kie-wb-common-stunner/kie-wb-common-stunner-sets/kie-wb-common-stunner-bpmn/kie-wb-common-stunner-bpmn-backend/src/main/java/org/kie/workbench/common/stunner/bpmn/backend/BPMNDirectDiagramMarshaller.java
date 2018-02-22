@@ -164,6 +164,8 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         DefinitionResolver definitionResolver =
                 new DefinitionResolver(definitions);
 
+        // process converters are a bit more involved than other
+        // converters, so we use a factory
         ProcessConverterFactory processConverterFactory =
                 new ProcessConverterFactory(
                         typedFactoryManager,
@@ -181,6 +183,11 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         metadata.setTitle(process.getName());
 
         LOG.debug("Diagram unmarshalling completed successfully.");
+
+        // the root node contains all of the information
+        // needed to build the entire graph (including parent/child relationships)
+        // thus, we can simply walk the graph to issue all the commands
+        // to draw it on our canvas
         return renderGraph(definitionsId, root);
     }
 
@@ -204,7 +211,10 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         return resource;
     }
 
-
+    /**
+     * Creates a graph context and then walks the graph
+     * to draw it on the canvas
+     */
     private Graph<DefinitionSet, Node> renderGraph(String definitionsId, BpmnNode root) {
         Graph<DefinitionSet, Node> graph =
                 typedFactoryManager.newGraph(
