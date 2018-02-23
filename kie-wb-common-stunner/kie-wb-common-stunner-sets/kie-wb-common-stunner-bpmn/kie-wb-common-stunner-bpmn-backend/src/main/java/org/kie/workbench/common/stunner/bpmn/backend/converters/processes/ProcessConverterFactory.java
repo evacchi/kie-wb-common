@@ -10,9 +10,9 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.EdgeConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.FlowElementConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.lanes.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.lanes.LaneConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 
 public class ProcessConverterFactory {

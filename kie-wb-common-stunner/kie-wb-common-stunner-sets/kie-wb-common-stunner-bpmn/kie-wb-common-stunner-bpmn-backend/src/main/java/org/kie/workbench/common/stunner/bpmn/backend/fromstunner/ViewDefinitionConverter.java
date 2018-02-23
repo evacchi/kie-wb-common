@@ -24,7 +24,8 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.Intermed
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.IntermediateThrowEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events.StartEventConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways.GatewayConverter;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverterFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.SubProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -48,11 +49,11 @@ public class ViewDefinitionConverter {
     private final IntermediateCatchEventConverter intermediateCatchEventConverter;
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private final ReusableSubprocessConverter reusableSubprocessConverter;
-    private final ProcessConverter subProcessConverter;
+    private final SubProcessConverter subProcessConverter;
     private GatewayConverter gatewayConverter;
     private DefinitionsBuildingContext context;
 
-    public ViewDefinitionConverter(DefinitionsBuildingContext context, ProcessConverter subProcessConverter) {
+    public ViewDefinitionConverter(DefinitionsBuildingContext context, ProcessConverterFactory processConverterFactory) {
         this.context = context;
 
         this.startEventConverter = new StartEventConverter();
@@ -61,7 +62,7 @@ public class ViewDefinitionConverter {
         this.intermediateThrowEventConverter = new IntermediateThrowEventConverter();
         this.gatewayConverter = new GatewayConverter();
         this.taskConverter = new TaskConverter();
-        this.subProcessConverter = subProcessConverter;
+        this.subProcessConverter = processConverterFactory.subProcessConverter();
         this.reusableSubprocessConverter = new ReusableSubprocessConverter();
     }
 
