@@ -38,7 +38,7 @@ public class PropertyReaderFactory {
     private final DefinitionResolver definitionResolver;
 
     public PropertyReaderFactory(DefinitionResolver definitionResolver) {
-        this.plane = definitionResolver.findPlane();
+        this.plane = definitionResolver.getPlane();
         this.definitionResolver = definitionResolver;
     }
 

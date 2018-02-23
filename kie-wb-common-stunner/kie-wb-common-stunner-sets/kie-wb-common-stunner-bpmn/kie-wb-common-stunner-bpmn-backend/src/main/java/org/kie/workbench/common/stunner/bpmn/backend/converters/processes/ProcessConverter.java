@@ -61,7 +61,7 @@ public class ProcessConverter {
     }
 
     public BpmnNode convertProcess() {
-        Process process = definitionResolver.findProcess();
+        Process process = definitionResolver.getProcess();
         BpmnNode processRoot = convertProcessNode(
                 definitionResolver.getDefinitions().getId(),
                 process);

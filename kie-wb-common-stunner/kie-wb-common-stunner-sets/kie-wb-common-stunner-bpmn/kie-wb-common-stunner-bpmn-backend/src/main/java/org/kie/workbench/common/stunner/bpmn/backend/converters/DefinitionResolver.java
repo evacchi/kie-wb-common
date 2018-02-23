@@ -36,46 +36,18 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Simu
 
 public class DefinitionResolver {
 
-    private final Map<String, Signal> signals = new HashMap<>();
-    private final Map<String, ElementParameters> simulationparameters = new HashMap<>();
+    private final Map<String, Signal> signals;
+    private final Map<String, ElementParameters> simulationParameters;
     private final Definitions definitions;
+    private final Process process;
+    private final BPMNPlane plane;
 
     public DefinitionResolver(Definitions definitions) {
         this.definitions = definitions;
-        initSignals(definitions);
-        initSimulationParameters(definitions);
-    }
-
-    private void initSignals(Definitions definitions) {
-        for (RootElement el : definitions.getRootElements()) {
-            if (el instanceof Signal) {
-                signals.put(el.getId(), (Signal) el);
-            }
-        }
-    }
-
-    private void initSimulationParameters(Definitions definitions) {
-        FeatureMap value =
-                definitions.getRelationships().get(0)
-                        .getExtensionValues().get(0)
-                        .getValue();
-
-        List<BPSimDataType> bpsimExtensions =
-                (List<BPSimDataType>)
-                        value.get(BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA, true);
-
-        Scenario scenario = bpsimExtensions.get(0).getScenario().get(0);
-
-        for (ElementParameters parameters : scenario.getElementParameters()) {
-            simulationparameters.put(parameters.getElementRef(), parameters);
-        }
-    }
-
-
-    public Process findProcess() {
-        return (Process) definitions.getRootElements().stream()
-                .filter(el -> el instanceof Process)
-                .findFirst().get();
+        this.signals = initSignals(definitions);
+        this.simulationParameters = initSimulationParameters(definitions);
+        this.process = findProcess();
+        this.plane = findPlane();
     }
 
     public Optional<Signal> resolveSignal(String id) {
@@ -87,7 +59,7 @@ public class DefinitionResolver {
     }
 
     public Optional<ElementParameters> resolveSimulationParameters(String id) {
-        return Optional.ofNullable(simulationparameters.get(id));
+        return Optional.ofNullable(simulationParameters.get(id));
     }
 
     public SimulationSet extractSimulationSet(String id) {
@@ -96,11 +68,56 @@ public class DefinitionResolver {
                 .orElse(new SimulationSet());
     }
 
-    public BPMNPlane findPlane() {
-        return definitions.getDiagrams().get(0).getPlane();
+    public BPMNPlane getPlane() {
+        return plane;
     }
 
     public Definitions getDefinitions() {
         return definitions;
     }
+
+    public Process getProcess() {
+        return process;
+    }
+
+    private Map<String, Signal> initSignals(Definitions definitions) {
+        Map<String, Signal> signals = new HashMap<>();
+        for (RootElement el : definitions.getRootElements()) {
+            if (el instanceof Signal) {
+                signals.put(el.getId(), (Signal) el);
+            }
+        }
+        return signals;
+    }
+
+    private Map<String, ElementParameters> initSimulationParameters(Definitions definitions) {
+        Map<String, ElementParameters> simulationParameters = new HashMap<>();
+        FeatureMap value =
+                definitions.getRelationships().get(0)
+                        .getExtensionValues().get(0)
+                        .getValue();
+
+        Object simData =
+                value.get(BpsimPackage.Literals.DOCUMENT_ROOT__BP_SIM_DATA, true);
+        List<BPSimDataType> bpsimExtensions = (List<BPSimDataType>) simData;
+
+        Scenario scenario = bpsimExtensions.get(0).getScenario().get(0);
+
+        for (ElementParameters parameters : scenario.getElementParameters()) {
+            simulationParameters.put(parameters.getElementRef(), parameters);
+        }
+
+        return simulationParameters;
+    }
+
+    private Process findProcess() {
+        return (Process) definitions.getRootElements().stream()
+                .filter(el -> el instanceof Process)
+                .findFirst().get();
+    }
+
+    private BPMNPlane findPlane() {
+        return definitions.getDiagrams().get(0).getPlane();
+    }
+
 }

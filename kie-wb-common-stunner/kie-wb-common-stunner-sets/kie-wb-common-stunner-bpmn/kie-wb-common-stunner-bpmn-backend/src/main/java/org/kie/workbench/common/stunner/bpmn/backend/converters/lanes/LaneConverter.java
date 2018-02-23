@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.converters;
+package org.kie.workbench.common.stunner.bpmn.backend.converters.lanes;
 
+import org.kie.workbench.common.stunner.bpmn.backend.converters.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.LanePropertyReader;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;

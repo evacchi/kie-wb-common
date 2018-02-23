@@ -184,7 +184,7 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
                         .convertProcess();
 
         metadata.setCanvasRootUUID(definitionResolver.getDefinitions().getId());
-        metadata.setTitle(definitionResolver.findProcess().getName());
+        metadata.setTitle(definitionResolver.getProcess().getName());
 
         LOG.debug("Diagram unmarshalling completed successfully.");
 
