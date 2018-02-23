@@ -46,10 +46,10 @@ public abstract class BasePropertyReader {
     protected final BPMNShape shape;
     protected final BPMNPlane plane;
 
-    public BasePropertyReader(BaseElement element, BPMNPlane plane) {
+    public BasePropertyReader(BaseElement element, BPMNPlane plane, BPMNShape shape) {
         this.element = element;
         this.plane = plane;
-        this.shape = getShape(plane, element.getId());
+        this.shape = shape;
     }
 
     public String getDocumentation() {
@@ -144,13 +144,4 @@ public abstract class BasePropertyReader {
         return Optional.ofNullable(Utils.getMetaDataValue(element.getExtensionValues(), name));
     }
 
-    protected static BPMNShape getShape(BPMNPlane plane, String elementId) {
-        return plane.getPlaneElement().stream()
-                .filter(dia -> dia instanceof BPMNShape)
-                .map(shape -> (BPMNShape) shape)
-                .filter(shape ->
-                                shape.getBpmnElement() != null // fixme not sure when this happens
-                                        && shape.getBpmnElement().getId().equals(elementId))
-                .findFirst().orElse(null);
-    }
 }

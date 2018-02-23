@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
@@ -30,7 +31,7 @@ public class SubProcessPropertyReader extends FlowElementPropertyReader {
     private final DefinitionResolver definitionResolver;
 
     public SubProcessPropertyReader(SubProcess element, BPMNPlane plane, DefinitionResolver definitionResolver) {
-        super(element, plane);
+        super(element, plane, definitionResolver.getShape(element.getId()));
         this.process = element;
         this.definitionResolver = definitionResolver;
     }
@@ -60,6 +61,8 @@ public class SubProcessPropertyReader extends FlowElementPropertyReader {
 //    }
 
     public SimulationSet getSimulationSet() {
-        return definitionResolver.extractSimulationSet(process.getId());
+        return definitionResolver.resolveSimulationParameters(element.getId())
+                .map(Simulations::simulationSet)
+                .orElse(new SimulationSet());
     }
 }

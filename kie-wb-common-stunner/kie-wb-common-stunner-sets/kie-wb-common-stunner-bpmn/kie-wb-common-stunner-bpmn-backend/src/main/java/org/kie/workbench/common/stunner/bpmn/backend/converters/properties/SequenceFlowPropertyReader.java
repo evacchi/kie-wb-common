@@ -23,8 +23,10 @@ import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNPlane;
+import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.dd.dc.Bounds;
 import org.eclipse.dd.dc.Point;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.MagnetConnection;
@@ -36,12 +38,14 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
 
     private static final Logger logger = LoggerFactory.getLogger(SequenceFlowPropertyReader.class);
     final FormalExpression conditionExpression;
+    private final DefinitionResolver definitionResolver;
     private final SequenceFlow seq;
 
-    public SequenceFlowPropertyReader(SequenceFlow seq, BPMNPlane plane) {
-        super(seq, plane);
+    public SequenceFlowPropertyReader(SequenceFlow seq, BPMNPlane plane, DefinitionResolver definitionResolver) {
+        super(seq, plane, definitionResolver.getShape(seq.getId()));
         this.seq = seq;
         conditionExpression = (FormalExpression) seq.getConditionExpression();
+        this.definitionResolver = definitionResolver;
     }
 
     public String getPriority() {
@@ -91,8 +95,8 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
     }
 
     private Point2D getSourcePosition(String edgeId, String sourceId) {
-        BPMNEdge bpmnEdge = getBPMNEdgeForElement(edgeId).get();
-        Bounds sourceBounds = getShape(plane, sourceId).getBounds();
+        BPMNEdge bpmnEdge = definitionResolver.getEdge(edgeId).get();
+        Bounds sourceBounds = definitionResolver.getShape(sourceId).getBounds();
         List<Point> waypoint = bpmnEdge.getWaypoint();
         return waypoint.isEmpty() ?
                 sourcePosition(sourceBounds)
@@ -100,8 +104,8 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
     }
 
     private Point2D getTargetPosition(String edgeId, String targetId) {
-        BPMNEdge bpmnEdge = getBPMNEdgeForElement(edgeId).get();
-        Bounds targetBounds = getShape(plane, targetId).getBounds();
+        BPMNEdge bpmnEdge = definitionResolver.getEdge(edgeId).get();
+        Bounds targetBounds = definitionResolver.getShape(targetId).getBounds();
         List<Point> waypoint = bpmnEdge.getWaypoint();
 
         if (waypoint.size() > 2) {
@@ -128,11 +132,4 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
                               targetBounds.getHeight() / 2);
     }
 
-    private Optional<BPMNEdge> getBPMNEdgeForElement(String elementId) {
-        return plane.getPlaneElement().stream()
-                .filter(dia -> dia instanceof BPMNEdge)
-                .map(edge -> (BPMNEdge) edge)
-                .filter(edge -> edge.getBpmnElement().getId().equals(elementId))
-                .findFirst();
-    }
 }

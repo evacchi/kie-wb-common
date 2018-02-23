@@ -28,7 +28,7 @@ public class TaskPropertyReader extends FlowElementPropertyReader {
     protected final DefinitionResolver definitionResolver;
 
     public TaskPropertyReader(Task task, BPMNPlane plane, DefinitionResolver definitionResolver) {
-        super(task, plane);
+        super(task, plane, definitionResolver.getShape(task.getId()));
         this.task = task;
         this.definitionResolver = definitionResolver;
     }

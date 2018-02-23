@@ -18,7 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BusinessRuleTask;
-import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.Gateway;
@@ -43,19 +42,19 @@ public class PropertyReaderFactory {
     }
 
     public FlowElementPropertyReader of(FlowElement el) {
-        return new FlowElementPropertyReader(el, plane);
+        return new FlowElementPropertyReader(el, plane, definitionResolver.getShape(el.getId()));
     }
 
     public LanePropertyReader of(Lane el) {
-        return new LanePropertyReader(el, plane);
+        return new LanePropertyReader(el, plane, definitionResolver.getShape(el.getId()));
     }
 
     public SequenceFlowPropertyReader of(SequenceFlow el) {
-        return new SequenceFlowPropertyReader(el, plane);
+        return new SequenceFlowPropertyReader(el, plane, definitionResolver);
     }
 
     public GatewayPropertyReader of(Gateway el) {
-        return new GatewayPropertyReader(el, plane);
+        return new GatewayPropertyReader(el, plane, definitionResolver.getShape(el.getId()));
     }
 
     public TaskPropertyReader of(Task el) {
@@ -87,6 +86,6 @@ public class PropertyReaderFactory {
     }
 
     public ProcessPropertyReader of(Process el) {
-        return new ProcessPropertyReader(el, plane);
+        return new ProcessPropertyReader(el, plane, definitionResolver.getShape(el.getId()));
     }
 }

@@ -61,7 +61,7 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     }
 
     EventPropertyReader(Event element, BPMNPlane plane, DefinitionResolver definitionResolver, String eventDefinition) {
-        super(element, plane);
+        super(element, plane, definitionResolver.getShape(element.getId()));
         this.definitionResolver = definitionResolver;
         this.signalRefId = eventDefinition;
     }

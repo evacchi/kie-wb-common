@@ -34,7 +34,7 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     private DefinitionResolver definitionResolver;
 
     public ActivityPropertyReader(Activity activity, BPMNPlane plane, DefinitionResolver definitionResolver) {
-        super(activity, plane);
+        super(activity, plane, definitionResolver.getShape(activity.getId()));
         this.activity = activity;
         this.definitionResolver = definitionResolver;
     }
@@ -93,6 +93,8 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public SimulationSet getSimulationSet() {
-        return definitionResolver.extractSimulationSet(activity.getId());
+        return definitionResolver.resolveSimulationParameters(element.getId())
+                .map(Simulations::simulationSet)
+                .orElse(new SimulationSet());
     }
 }
