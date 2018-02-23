@@ -30,7 +30,7 @@ public class FlowElementPropertyReader extends BasePropertyReader {
     }
 
     public String getName() {
-        return optionalMetadata("elementname").orElse(flowElement.getName());
+        return CustomElement.name.of(element).get();
     }
 
 }

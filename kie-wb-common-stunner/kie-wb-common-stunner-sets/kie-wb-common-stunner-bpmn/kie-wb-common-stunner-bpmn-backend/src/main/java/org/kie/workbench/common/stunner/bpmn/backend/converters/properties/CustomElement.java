@@ -1,6 +1,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import org.eclipse.bpmn2.BaseElement;
+import org.eclipse.bpmn2.FlowElement;
 
 public class CustomElement<T> {
 
@@ -10,7 +11,17 @@ public class CustomElement<T> {
     public static final ElementDefinition<Boolean> autoConnectionTarget = new BooleanElement("isAutoConnection.target", false);
     public static final ElementDefinition<String> description = new StringElement("customDescription", "");
     public static final ElementDefinition<String> scope = new StringElement("customScope", "");
+    public static final ElementDefinition<String> name = new StringElement("elementname", "") {
+        @Override
+        public java.lang.String getValue(BaseElement element) {
+            String defaultValue =
+                    element instanceof FlowElement ?
+                            ((FlowElement) element).getName()
+                            : this.defaultValue;
 
+            return getStringValue(element).orElse(defaultValue);
+        }
+    };
 
     private final ElementDefinition<T> elementDefinition;
     private final BaseElement element;
@@ -27,5 +38,4 @@ public class CustomElement<T> {
     public void set(T value) {
         elementDefinition.setValue(element, value);
     }
-
 }
