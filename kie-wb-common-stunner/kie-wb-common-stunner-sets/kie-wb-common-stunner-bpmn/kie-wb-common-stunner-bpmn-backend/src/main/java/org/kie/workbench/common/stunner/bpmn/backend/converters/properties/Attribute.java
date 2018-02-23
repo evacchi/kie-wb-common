@@ -3,22 +3,25 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import java.util.Optional;
 
 import org.eclipse.bpmn2.BaseElement;
+import org.jboss.drools.DroolsPackage;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Package;
 import org.kie.workbench.common.stunner.core.graph.content.view.Point2D;
 
 public class Attribute<T> {
 
-    public static final AttributeDefinition<Boolean> independent = new BooleanAttribute("independent", false);
-    public static final AttributeDefinition<Boolean> adHoc = new BooleanAttribute("adHoc", false);
-    public static final AttributeDefinition<Boolean> waitForCompletion = new BooleanAttribute("waitForCompletion", false);
-    public static final AttributeDefinition<String> ruleFlowGroup = new StringAttribute("ruleFlowGroup", "");
-    public static final AttributeDefinition<String> packageName = new StringAttribute("packageName", Package.DEFAULT_PACKAGE);
-    public static final AttributeDefinition<String> version = new StringAttribute("version", "1.0");
-    public static final AttributeDefinition<Boolean> boundarycaForBoundaryEvent = new BooleanAttribute("boundaryca", true);
-    public static final AttributeDefinition<Boolean> boundarycaForEvent = new BooleanAttribute("boundaryca", false);
-    public static final AttributeDefinition<String> priority = new StringAttribute("priority", null);
-    public static final AttributeDefinition<String> dtype = new StringAttribute("dtype", "");
-    public static final AttributeDefinition<String> dg = new StringAttribute("dg", "") {
+    private static final String droolsns = DroolsPackage.eNS_URI;
+
+    public static final AttributeDefinition<Boolean> independent = new BooleanAttribute(droolsns, "independent", false);
+    public static final AttributeDefinition<Boolean> adHoc = new BooleanAttribute(droolsns, "adHoc", false);
+    public static final AttributeDefinition<Boolean> waitForCompletion = new BooleanAttribute(droolsns, "waitForCompletion", false);
+    public static final AttributeDefinition<String> ruleFlowGroup = new StringAttribute(droolsns, "ruleFlowGroup", "");
+    public static final AttributeDefinition<String> packageName = new StringAttribute(droolsns, "packageName", Package.DEFAULT_PACKAGE);
+    public static final AttributeDefinition<String> version = new StringAttribute(droolsns, "version", "1.0");
+    public static final AttributeDefinition<Boolean> boundarycaForBoundaryEvent = new BooleanAttribute(droolsns, "boundaryca", true);
+    public static final AttributeDefinition<Boolean> boundarycaForEvent = new BooleanAttribute(droolsns, "boundaryca", false);
+    public static final AttributeDefinition<String> priority = new StringAttribute(droolsns, "priority", null);
+    public static final AttributeDefinition<String> dtype = new StringAttribute(droolsns, "dtype", "");
+    public static final AttributeDefinition<String> dg = new StringAttribute(droolsns, "dg", "") {
         @Override
         public String getValue(BaseElement element) {
             // this is for compatibility with legacy marshallers
@@ -28,7 +31,7 @@ public class Attribute<T> {
             return value.isEmpty() ? null : value;
         }
     };
-    public static final AttributeDefinition<Point2D> dockerInfo = new AttributeDefinition<Point2D>("dockerinfo", Point2D.create(0, 0)) {
+    public static final AttributeDefinition<Point2D> dockerInfo = new AttributeDefinition<Point2D>(droolsns, "dockerinfo", Point2D.create(0, 0)) {
         @Override
         public Point2D getValue(BaseElement element) {
             Optional<String> attribute = getStringValue(element);

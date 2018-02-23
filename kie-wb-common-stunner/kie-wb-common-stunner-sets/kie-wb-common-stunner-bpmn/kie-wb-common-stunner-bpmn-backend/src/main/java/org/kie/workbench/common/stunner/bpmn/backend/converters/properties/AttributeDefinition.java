@@ -10,10 +10,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public abstract class AttributeDefinition<T> {
 
+    private final String namespace;
     private final String name;
     protected final T defaultValue;
 
-    public AttributeDefinition(String name, T defaultValue) {
+    public AttributeDefinition(String namespace, String name, T defaultValue) {
+        this.namespace = namespace;
         this.name = name;
         this.defaultValue = defaultValue;
     }
@@ -53,8 +55,8 @@ public abstract class AttributeDefinition<T> {
 
 class BooleanAttribute extends AttributeDefinition<Boolean> {
 
-    BooleanAttribute(String name, java.lang.Boolean defaultValue) {
-        super(name, defaultValue);
+    BooleanAttribute( String namespace, String name, java.lang.Boolean defaultValue) {
+        super(namespace, name, defaultValue);
     }
 
     @Override
@@ -72,8 +74,8 @@ class BooleanAttribute extends AttributeDefinition<Boolean> {
 
 class StringAttribute extends AttributeDefinition<String> {
 
-    StringAttribute(String name, java.lang.String defaultValue) {
-        super(name, defaultValue);
+    StringAttribute(String namespace, String name, String defaultValue) {
+        super(namespace, name, defaultValue);
     }
 
     @Override
