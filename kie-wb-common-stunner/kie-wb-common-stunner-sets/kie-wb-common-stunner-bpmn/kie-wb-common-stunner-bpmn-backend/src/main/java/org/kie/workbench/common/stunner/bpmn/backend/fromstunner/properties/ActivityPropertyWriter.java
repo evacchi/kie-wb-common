@@ -1,10 +1,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import bpsim.ControlParameters;
 import bpsim.ElementParameters;
-import bpsim.PriorityParameters;
-import bpsim.ResourceParameters;
-import bpsim.TimeParameters;
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
@@ -12,12 +8,11 @@ import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.OutputSet;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
 
 public class ActivityPropertyWriter extends IOPropertyWriter {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.kie.workbench.common.stunner.bpmn.backend.converters.tasks;
+package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import bpsim.ControlParameters;
 import bpsim.CostParameters;

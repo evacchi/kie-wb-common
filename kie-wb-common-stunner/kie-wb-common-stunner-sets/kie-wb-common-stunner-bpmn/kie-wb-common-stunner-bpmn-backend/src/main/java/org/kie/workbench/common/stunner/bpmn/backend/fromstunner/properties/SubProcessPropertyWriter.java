@@ -6,42 +6,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import bpsim.BPSimDataType;
-import bpsim.BpsimPackage;
-import bpsim.ControlParameters;
 import bpsim.ElementParameters;
-import bpsim.PriorityParameters;
-import bpsim.ResourceParameters;
-import bpsim.Scenario;
-import bpsim.ScenarioParameters;
-import bpsim.TimeParameters;
-import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
-import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LaneSet;
-import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
-import org.eclipse.bpmn2.Relationship;
 import org.eclipse.bpmn2.SubProcess;
-import org.eclipse.bpmn2.di.BPMNDiagram;
 import org.eclipse.bpmn2.di.BPMNEdge;
-import org.eclipse.bpmn2.di.BPMNPlane;
-import org.eclipse.bpmn2.di.BPMNShape;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
-import org.eclipse.emf.ecore.util.FeatureMap;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpsim;
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 
 public class SubProcessPropertyWriter extends PropertyWriter implements ElementContainer {
 

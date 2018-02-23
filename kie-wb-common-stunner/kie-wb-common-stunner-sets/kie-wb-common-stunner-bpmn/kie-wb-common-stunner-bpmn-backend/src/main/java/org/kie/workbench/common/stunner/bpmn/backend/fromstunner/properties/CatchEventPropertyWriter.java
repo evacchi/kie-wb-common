@@ -21,7 +21,7 @@ import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.OutputSet;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 

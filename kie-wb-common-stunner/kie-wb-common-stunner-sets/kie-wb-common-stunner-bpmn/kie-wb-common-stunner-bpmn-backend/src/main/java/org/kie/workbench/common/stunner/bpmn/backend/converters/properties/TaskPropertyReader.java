@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 

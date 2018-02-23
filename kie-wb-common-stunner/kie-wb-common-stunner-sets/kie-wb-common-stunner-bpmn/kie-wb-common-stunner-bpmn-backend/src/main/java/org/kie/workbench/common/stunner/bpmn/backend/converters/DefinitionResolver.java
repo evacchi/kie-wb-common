@@ -29,11 +29,9 @@ import org.eclipse.bpmn2.Definitions;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.RootElement;
 import org.eclipse.bpmn2.Signal;
-import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.emf.ecore.util.FeatureMap;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.tasks.Simulations;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 public class DefinitionResolver {
