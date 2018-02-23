@@ -43,15 +43,15 @@ public class ProcessPropertyReader extends BasePropertyReader {
     }
 
     public String getPackageName() {
-        return optionalAttribute("packageName").orElse(Package.DEFAULT_PACKAGE);
+        return Attribute.packageName.of(element).get();
     }
 
     public String getVersion() {
-        return optionalAttribute("version").orElse("1.0");
+        return Attribute.version.of(element).get();
     }
 
     public boolean isAdHoc() {
-        return Boolean.parseBoolean(attribute("adHoc"));
+        return Attribute.adHoc.of(element).get();
     }
 
     @Override

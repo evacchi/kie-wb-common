@@ -32,7 +32,7 @@ public class BusinessRuleTaskPropertyReader extends TaskPropertyReader {
     }
 
     public String getRuleFlowGroup() {
-        return attribute("ruleFlowGroup");
+        return Attribute.ruleFlowGroup.of(element).get();
     }
 
     public AssignmentsInfo getAssignmentsInfo() {

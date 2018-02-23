@@ -27,9 +27,7 @@ public class GatewayPropertyReader extends FlowElementPropertyReader {
     }
 
     public String getDefaultRoute() {
-        String result = attribute("dg");
-        // this is for compatibility with legacy marshallers
-        return result.isEmpty() ? null : result;
+        return Attribute.dg.of(element).get();
     }
 
 //    @Override

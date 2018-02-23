@@ -59,10 +59,7 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     public abstract AssignmentsInfo getAssignmentsInfo();
 
     public boolean isCancelActivity() {
-        return optionalAttribute("boundaryca")
-                .filter(s -> !s.isEmpty())
-                .map(Boolean::parseBoolean)
-                .orElse(true);
+        return Attribute.boundarycaForEvent.of(element).get();
     }
 
     public TimerSettingsValue getTimerSettings(TimerEventDefinition eventDefinition) {

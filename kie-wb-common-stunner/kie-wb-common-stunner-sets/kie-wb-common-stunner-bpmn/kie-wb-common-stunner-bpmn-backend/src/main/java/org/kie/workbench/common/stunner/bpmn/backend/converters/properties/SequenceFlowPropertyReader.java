@@ -49,7 +49,7 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
     }
 
     public String getPriority() {
-        return attribute("priority");
+        return Attribute.priority.of(element).get();
     }
 
     public boolean isAutoConnectionSource() {

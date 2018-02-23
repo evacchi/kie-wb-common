@@ -37,11 +37,11 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public boolean isIndependent() {
-        return Boolean.parseBoolean(attribute("independent"));
+        return Attribute.independent.of(element).get();
     }
 
     public boolean isWaitForCompletion() {
-        return Boolean.parseBoolean(attribute("waitForCompletion"));
+        return Attribute.waitforCompletion.of(element).get();
     }
 
     public boolean isAsync() {

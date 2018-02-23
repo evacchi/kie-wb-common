@@ -26,14 +26,14 @@ public abstract class AttributeDefinition<T> {
 
     public abstract void setValue(BaseElement element, T value);
 
-    public Optional<java.lang.String> getStringValue(BaseElement element) {
+    Optional<java.lang.String> getStringValue(BaseElement element) {
         return element.getAnyAttribute().stream()
                 .filter(e -> this.name().equals(e.getEStructuralFeature().getName()))
                 .map(e -> e.getValue().toString())
                 .findFirst();
     }
 
-    public void setStringValue(BaseElement element, String value) {
+    void setStringValue(BaseElement element, String value) {
         EAttributeImpl extensionAttribute = (EAttributeImpl) metaData.demandFeature(
                 "http://www.jboss.org/drools",
                 name,
@@ -53,7 +53,7 @@ public abstract class AttributeDefinition<T> {
 
 class BooleanAttribute extends AttributeDefinition<Boolean> {
 
-    public BooleanAttribute(String name, java.lang.Boolean defaultValue) {
+    BooleanAttribute(String name, java.lang.Boolean defaultValue) {
         super(name, defaultValue);
     }
 
@@ -72,7 +72,7 @@ class BooleanAttribute extends AttributeDefinition<Boolean> {
 
 class StringAttribute extends AttributeDefinition<String> {
 
-    public StringAttribute(String name, java.lang.String defaultValue) {
+    StringAttribute(String name, java.lang.String defaultValue) {
         super(name, defaultValue);
     }
 
