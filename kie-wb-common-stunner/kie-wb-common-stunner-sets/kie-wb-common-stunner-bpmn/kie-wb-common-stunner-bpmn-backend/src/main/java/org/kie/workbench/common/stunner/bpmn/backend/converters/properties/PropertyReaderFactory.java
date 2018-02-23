@@ -80,7 +80,7 @@ public class PropertyReaderFactory {
         return new ActivityPropertyReader(el, plane, definitionResolver);
     }
 
-    public static EventPropertyReader of(Event el, BPMNPlane plane, DefinitionResolver definitionResolver) {
+    public EventPropertyReader of(Event el) {
         if (el instanceof BoundaryEvent) {
             return new BoundaryEventPropertyReader((BoundaryEvent) el, plane, definitionResolver);
         } else if (el instanceof CatchEvent) {
@@ -93,7 +93,7 @@ public class PropertyReaderFactory {
             throw new IllegalArgumentException(el.toString());
         }
     }
-    
+
     public SubProcessPropertyReader of(SubProcess el) {
         return new SubProcessPropertyReader(el, plane, definitionResolver);
     }
