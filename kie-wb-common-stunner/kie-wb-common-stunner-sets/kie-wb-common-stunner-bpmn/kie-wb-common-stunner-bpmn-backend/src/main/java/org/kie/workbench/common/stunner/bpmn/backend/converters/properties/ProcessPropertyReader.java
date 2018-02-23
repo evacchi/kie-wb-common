@@ -54,10 +54,6 @@ public class ProcessPropertyReader extends BasePropertyReader {
         return Boolean.parseBoolean(attribute("adHoc"));
     }
 
-    public boolean isAsync() {
-        return Boolean.parseBoolean(metaData("customAsync"));
-    }
-
     @Override
     public Bounds getBounds() {
         return new BoundsImpl(

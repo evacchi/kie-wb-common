@@ -33,6 +33,7 @@ import org.eclipse.bpmn2.UserTask;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
 public class UserTaskPropertyReader extends TaskPropertyReader {
 
@@ -85,6 +86,14 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
                     task.getDataOutputAssociations(),
                     true);
         }
+    }
+
+    public ScriptTypeListValue getOnEntryAction() {
+        return Scripts.onEntry(element.getExtensionValues());
+    }
+
+    public ScriptTypeListValue getOnExitAction() {
+        return Scripts.onExit(element.getExtensionValues());
     }
 
     public boolean isAsync() {

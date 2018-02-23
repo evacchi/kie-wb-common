@@ -33,14 +33,6 @@ public class TaskPropertyReader extends FlowElementPropertyReader {
         this.definitionResolver = definitionResolver;
     }
 
-    public ScriptTypeListValue getOnEntryAction() {
-        return Scripts.onEntry(element.getExtensionValues());
-    }
-
-    public ScriptTypeListValue getOnExitAction() {
-        return Scripts.onExit(element.getExtensionValues());
-    }
-
     public SimulationSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(task.getId())
                 .map(Simulations::simulationSet)

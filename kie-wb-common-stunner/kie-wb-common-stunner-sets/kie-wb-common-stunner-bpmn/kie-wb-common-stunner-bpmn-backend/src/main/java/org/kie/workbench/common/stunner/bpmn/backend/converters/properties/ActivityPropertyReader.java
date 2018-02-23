@@ -17,11 +17,8 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 import org.eclipse.bpmn2.Activity;
-import org.eclipse.bpmn2.Assignment;
-import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
@@ -76,21 +73,10 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
         }
     }
 
-    public String getProcessVariables() {
-        return activity.getProperties()
-                .stream()
-                .map(p -> p.getId() + ":" + p.getItemSubjectRef().getStructureRef())
-                .collect(Collectors.joining(","));
-    }
-
 //    @Override
 //    protected String colorsDefaultBg() {
 //        return Colors.defaultBgColor_Activities;
 //    }
-
-    private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getBody();
-    }
 
     public SimulationSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(element.getId())

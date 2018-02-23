@@ -39,20 +39,6 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     private final DefinitionResolver definitionResolver;
     private String signalRefId = null;
 
-    public static EventPropertyReader of(Event el, BPMNPlane plane, DefinitionResolver definitionResolver) {
-        if (el instanceof BoundaryEvent) {
-            return new BoundaryEventPropertyReader((BoundaryEvent) el, plane, definitionResolver);
-        } else if (el instanceof CatchEvent) {
-            CatchEvent catchEvent = (CatchEvent) el;
-            return new CatchEventPropertyReader(catchEvent, plane, definitionResolver);
-        } else if (el instanceof ThrowEvent) {
-            ThrowEvent throwEvent = (ThrowEvent) el;
-            return new ThrowEventPropertyReader(throwEvent, plane, definitionResolver);
-        } else {
-            throw new IllegalArgumentException(el.toString());
-        }
-    }
-
     static String getSignalRefId(List<EventDefinition> eventDefinitions) {
         if (eventDefinitions.size() == 1 && eventDefinitions.get(0) instanceof SignalEventDefinition) {
             return ((SignalEventDefinition) eventDefinitions.get(0)).getSignalRef();

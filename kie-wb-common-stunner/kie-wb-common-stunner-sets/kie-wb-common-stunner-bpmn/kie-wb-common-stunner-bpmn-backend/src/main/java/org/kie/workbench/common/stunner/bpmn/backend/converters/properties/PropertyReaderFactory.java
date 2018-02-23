@@ -17,7 +17,9 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import org.eclipse.bpmn2.Activity;
+import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.BusinessRuleTask;
+import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.Event;
 import org.eclipse.bpmn2.FlowElement;
 import org.eclipse.bpmn2.Gateway;
@@ -27,6 +29,7 @@ import org.eclipse.bpmn2.ScriptTask;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.Task;
+import org.eclipse.bpmn2.ThrowEvent;
 import org.eclipse.bpmn2.UserTask;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
@@ -77,10 +80,20 @@ public class PropertyReaderFactory {
         return new ActivityPropertyReader(el, plane, definitionResolver);
     }
 
-    public EventPropertyReader of(Event el) {
-        return EventPropertyReader.of(el, plane, definitionResolver);
+    public static EventPropertyReader of(Event el, BPMNPlane plane, DefinitionResolver definitionResolver) {
+        if (el instanceof BoundaryEvent) {
+            return new BoundaryEventPropertyReader((BoundaryEvent) el, plane, definitionResolver);
+        } else if (el instanceof CatchEvent) {
+            CatchEvent catchEvent = (CatchEvent) el;
+            return new CatchEventPropertyReader(catchEvent, plane, definitionResolver);
+        } else if (el instanceof ThrowEvent) {
+            ThrowEvent throwEvent = (ThrowEvent) el;
+            return new ThrowEventPropertyReader(throwEvent, plane, definitionResolver);
+        } else {
+            throw new IllegalArgumentException(el.toString());
+        }
     }
-
+    
     public SubProcessPropertyReader of(SubProcess el) {
         return new SubProcessPropertyReader(el, plane, definitionResolver);
     }

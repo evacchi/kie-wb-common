@@ -64,7 +64,7 @@ public class DefinitionResolver {
         this.process = findProcess();
         this.plane = findPlane();
     }
-    
+
     public BPMNPlane getPlane() {
         return plane;
     }
