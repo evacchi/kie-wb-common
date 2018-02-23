@@ -15,6 +15,8 @@ import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNEdge;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
@@ -83,20 +85,19 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     }
 
     public void setPackage(String value) {
-        process.getAnyAttribute().add(
-                attribute("packageName", String.valueOf(value)));
+        Attribute.packageName.of(flowElement).set(value);
     }
 
     public void setVersion(String value) {
-        process.getAnyAttribute().add(attribute("version", String.valueOf(value)));
+        Attribute.version.of(flowElement).set(value);
     }
 
     public void setAdHoc(Boolean adHoc) {
-        process.getAnyAttribute().add(attribute("adHoc", String.valueOf(adHoc)));
+        Attribute.adHoc.of(flowElement).set(adHoc);
     }
 
     public void setDescription(String value) {
-        setMeta("customDescription", value);
+        CustomElement.description.of(flowElement).set(value);
     }
 
     public void setSimulationSet(SimulationSet simulations) {

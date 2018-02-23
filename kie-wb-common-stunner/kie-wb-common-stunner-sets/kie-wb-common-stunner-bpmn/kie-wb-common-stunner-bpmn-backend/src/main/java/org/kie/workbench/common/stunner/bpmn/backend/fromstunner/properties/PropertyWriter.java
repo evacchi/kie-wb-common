@@ -27,6 +27,7 @@ import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.DroolsFactory;
 import org.jboss.drools.DroolsPackage;
 import org.jboss.drools.MetaDataType;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.metaData;
@@ -46,7 +47,7 @@ public class PropertyWriter extends BasePropertyWriter {
 
     public void setName(String value) {
         flowElement.setName(value.trim());
-        setMeta("elementname", value);
+        CustomElement.name.of(flowElement).set(value);
     }
 
     public void setDocumentation(String value) {

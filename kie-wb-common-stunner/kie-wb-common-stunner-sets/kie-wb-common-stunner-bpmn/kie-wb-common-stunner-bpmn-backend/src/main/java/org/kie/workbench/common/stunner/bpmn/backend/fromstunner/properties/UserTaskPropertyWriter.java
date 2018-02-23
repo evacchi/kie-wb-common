@@ -2,11 +2,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import java.util.UUID;
 
-import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.InputOutputSpecification;
-import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.PotentialOwner;
 import org.eclipse.bpmn2.ResourceAssignmentExpression;
 import org.eclipse.bpmn2.UserTask;
@@ -16,10 +13,10 @@ import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.OnEntryScriptType;
 import org.jboss.drools.OnExitScriptType;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomInput;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.definition.property.assignee.Actors;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
@@ -33,60 +30,70 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class UserTaskPropertyWriter extends ActivityPropertyWriter {
 
     private final UserTask task;
+    private final CustomInput<String> description;
+    private final CustomInput<String> createdBy;
+    private final CustomInput<String> taskName;
+    private final CustomInput<String> groupId;
+    private final CustomInput<Boolean> skippable;
+    private final CustomInput<String> priority;
+    private final CustomInput<String> subject;
 
     public UserTaskPropertyWriter(UserTask task) {
         super(task);
         this.task = task;
+
+        this.skippable = CustomInput.skippable.of(task);
+        this.addBaseElement(this.skippable.typeDef());
+
+        this.priority = CustomInput.priority.of(task);
+        this.addBaseElement(this.priority.typeDef());
+
+        this.subject = CustomInput.subject.of(task);
+        this.addBaseElement(this.subject.typeDef());
+
+        this.description = CustomInput.description.of(task);
+        this.addBaseElement(this.description.typeDef());
+
+        this.createdBy = CustomInput.createdBy.of(task);
+        this.addBaseElement(this.createdBy.typeDef());
+
+        this.taskName = CustomInput.taskName.of(task);
+        this.addBaseElement(this.taskName.typeDef());
+
+        this.groupId = CustomInput.groupId.of(task);
+        this.addBaseElement(this.skippable.typeDef());
     }
 
     public void setAsync(boolean async) {
-        setMeta("customAsync", String.valueOf(async));
+        CustomElement.async.of(task).set(async);
     }
 
     public void setSkippable(boolean skippable) {
-        setInput("Skippable", String.valueOf(skippable));
+        this.skippable.set(skippable);
     }
 
     public void setPriority(String priority) {
-        setInput("Priority", priority);
+        this.priority.set(priority);
     }
 
     public void setSubject(String subject) {
-        setInput("Comment", subject);
+        this.subject.set(subject);
     }
 
     public void setDescription(String description) {
-        setInput("Description", description);
+        this.description.set(description);
     }
 
     public void setCreatedBy(String createdBy) {
-        setInput("CreatedBy", createdBy);
+        this.createdBy.set(createdBy);
     }
 
     public void setAdHocAutostart(boolean autoStart) {
-        setMeta("customAutoStart", String.valueOf(autoStart));
+        CustomElement.autoStart.of(task).set(autoStart);
     }
 
-//    public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-//        InputOutputSpecification ioSpec = bpmn2.createInputOutputSpecification();
-//        task.setIoSpecification(ioSpec);
-//        assignmentsInfo.getAssociations().getInputs()
-//                .stream()
-//                .map(as -> this.addDataInputAssociation(
-//                        as, assignmentsInfo.getInputs()))
-//                .forEach(dia -> {
-//                    InputSet inputSet = bpmn2.createInputSet();
-//                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
-//                    ioSpec.getDataInputs().add((DataInput) dia.getTargetRef());
-//                    ioSpec.getInputSets().add(inputSet);
-//                    dia.getSourceRef().forEach(this::addBaseElement);
-//                    task.getDataInputAssociations().add(dia);
-//                });
-//    }
-
     public void setTaskName(String taskName) {
-        //task.setName(taskName.trim());
-        setInput("TaskName", taskName);
+        this.taskName.set(taskName);
     }
 
     public void setActors(Actors actors) {
@@ -108,7 +115,7 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setGroupId(String value) {
-        setInput("GroupId", asCData(value));
+        groupId.set(asCData(value));
     }
 
     public void setOnEntryAction(OnEntryAction onEntryAction) {
@@ -155,5 +162,4 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
         flowElement.getExtensionValues().add(eav);
         eav.getValue().add(value);
     }
-
 }

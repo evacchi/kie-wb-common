@@ -10,13 +10,14 @@ public class Attribute<T> {
 
     public static final AttributeDefinition<Boolean> independent = new BooleanAttribute("independent", false);
     public static final AttributeDefinition<Boolean> adHoc = new BooleanAttribute("adHoc", false);
-    public static final AttributeDefinition<Boolean> waitforCompletion = new BooleanAttribute("waitforCompletion", false);
+    public static final AttributeDefinition<Boolean> waitForCompletion = new BooleanAttribute("waitForCompletion", false);
     public static final AttributeDefinition<String> ruleFlowGroup = new StringAttribute("ruleFlowGroup", "");
     public static final AttributeDefinition<String> packageName = new StringAttribute("packageName", Package.DEFAULT_PACKAGE);
     public static final AttributeDefinition<String> version = new StringAttribute("version", "1.0");
     public static final AttributeDefinition<Boolean> boundarycaForBoundaryEvent = new BooleanAttribute("boundaryca", true);
     public static final AttributeDefinition<Boolean> boundarycaForEvent = new BooleanAttribute("boundaryca", false);
     public static final AttributeDefinition<String> priority = new StringAttribute("priority", null);
+    public static final AttributeDefinition<String> dtype = new StringAttribute("dtype", "java.lang.String");
     public static final AttributeDefinition<String> dg = new StringAttribute("dg", "") {
         @Override
         public String getValue(BaseElement element) {

@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.eclipse.bpmn2.FlowNode;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.di.BPMNEdge;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.content.view.Connection;
 import org.kie.workbench.common.stunner.core.graph.content.view.DiscreteConnection;
@@ -28,12 +29,12 @@ public class SequenceFlowPropertyWriter extends PropertyWriter {
 
     public void setAutoConnectionSource(Connection connection) {
         DiscreteConnection c = (DiscreteConnection) connection;
-        setMeta("isAutoConnection.source", Boolean.toString(c.isAuto()));
+        CustomElement.autoConnectionSource.of(sequenceFlow).set(c.isAuto());
     }
 
     public void setAutoConnectionTarget(Connection connection) {
         DiscreteConnection c = (DiscreteConnection) connection;
-        setMeta("isAutoConnection.target", Boolean.toString(c.isAuto()));
+        CustomElement.autoConnectionTarget.of(sequenceFlow).set(c.isAuto());
     }
 
     public void setConnection(ViewConnector<? extends BPMNViewDefinition> content) {

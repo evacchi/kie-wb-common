@@ -29,6 +29,7 @@ import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessVariables;
@@ -132,7 +133,7 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
     }
 
     public void setVersion(String value) {
-        process.getAnyAttribute().add(attribute("version", String.valueOf(value)));
+        Attribute.version.of(process).set(value);
     }
 
     public void setAdHoc(Boolean adHoc) {

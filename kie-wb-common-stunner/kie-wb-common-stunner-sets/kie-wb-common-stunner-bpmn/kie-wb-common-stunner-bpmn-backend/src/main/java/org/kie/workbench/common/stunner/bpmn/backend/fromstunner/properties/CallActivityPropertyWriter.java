@@ -2,6 +2,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.CallActivity;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 
 public class CallActivityPropertyWriter extends ActivityPropertyWriter {
 
@@ -13,17 +15,15 @@ public class CallActivityPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setIndependent(Boolean independent) {
-        FeatureMap.Entry value = attribute("independent", independent);
-        this.activity.getAnyAttribute().add(value);
+        Attribute.independent.of(activity).set(independent);
     }
 
     public void setWaitForCompletion(Boolean waitForCompletion) {
-        FeatureMap.Entry value = attribute("waitForCompletion", waitForCompletion);
-        this.activity.getAnyAttribute().add(value);
+        Attribute.waitForCompletion.of(activity).set(waitForCompletion);
     }
 
     public void setAsync(Boolean async) {
-        setMeta("customAsync", String.valueOf(async));
+        CustomElement.async.of(activity).set(async);
     }
 
     public void setCalledElement(String value) {

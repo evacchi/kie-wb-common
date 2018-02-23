@@ -41,7 +41,7 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public boolean isWaitForCompletion() {
-        return Attribute.waitforCompletion.of(element).get();
+        return Attribute.waitForCompletion.of(element).get();
     }
 
     public boolean isAsync() {

@@ -8,7 +8,12 @@ import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.FormalExpression;
+import org.eclipse.bpmn2.InputOutputSpecification;
+import org.eclipse.bpmn2.ItemDefinition;
+import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.Task;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public abstract class CustomInputDefinition<T> {
 
@@ -26,8 +31,6 @@ public abstract class CustomInputDefinition<T> {
 
     public abstract T getValue(Task element);
 
-    public abstract void setValue(Task element, T value);
-
     Optional<String> getStringValue(Task element) {
         for (DataInputAssociation din : element.getDataInputAssociations()) {
             DataInput targetRef = (DataInput) (din.getTargetRef());
@@ -41,9 +44,6 @@ public abstract class CustomInputDefinition<T> {
 
     private static Object evaluate(Assignment assignment) {
         return ((FormalExpression) assignment.getFrom()).getBody();
-    }
-
-    void setStringValue(Task element, String value) {
     }
 
     public CustomInput<T> of(Task element) {
@@ -64,10 +64,6 @@ class BooleanInput extends CustomInputDefinition<Boolean> {
                 .orElse(defaultValue);
     }
 
-    @Override
-    public void setValue(Task element, Boolean value) {
-        setStringValue(element, String.valueOf(value));
-    }
 }
 
 class StringInput extends CustomInputDefinition<String> {
@@ -82,8 +78,4 @@ class StringInput extends CustomInputDefinition<String> {
                 .orElse(defaultValue);
     }
 
-    @Override
-    public void setValue(Task element, String value) {
-        setStringValue(element, value);
-    }
 }

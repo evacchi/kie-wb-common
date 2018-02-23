@@ -144,7 +144,9 @@ public class BPMNDirectDiagramMarshaller implements DiagramMarshaller<Graph, Met
         resource.getContents().add(definitions);
 
         LOG.debug("Diagram marshalling completed successfully.");
-        return renderToString(resource);
+        String outputString = renderToString(resource);
+        LOG.info(outputString);
+        return outputString;
     }
 
     private String renderToString(Bpmn2Resource resource) throws IOException {

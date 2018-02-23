@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.DroolsPackage;
 import org.jboss.drools.OnEntryScriptType;
 import org.jboss.drools.OnExitScriptType;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
 
@@ -44,7 +45,7 @@ public class ScriptTaskPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setAsync(Boolean async) {
-        setMeta("customAsync", String.valueOf(async));
+        CustomElement.async.of(scriptTask).set(async);
     }
 
 }

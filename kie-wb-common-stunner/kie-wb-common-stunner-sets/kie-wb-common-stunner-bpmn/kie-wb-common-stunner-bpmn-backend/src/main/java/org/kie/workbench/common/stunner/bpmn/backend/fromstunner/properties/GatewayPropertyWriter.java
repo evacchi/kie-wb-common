@@ -8,6 +8,7 @@ import org.eclipse.bpmn2.GatewayDirection;
 import org.eclipse.bpmn2.InclusiveGateway;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.emf.ecore.util.FeatureMap;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
@@ -26,8 +27,7 @@ public class GatewayPropertyWriter extends PropertyWriter {
         if (defaultRouteExpression == null) {
             return;
         }
-        FeatureMap.Entry dg = attribute("dg", defaultRouteExpression);
-        this.gateway.getAnyAttribute().add(dg);
+        Attribute.dg.of(gateway).set(defaultRouteExpression);
 
         String[] split = defaultRouteExpression.split(" : ");
         this.defaultGatewayId = (split.length == 1) ? split[0] : split[1];

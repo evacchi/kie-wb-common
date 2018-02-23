@@ -8,6 +8,8 @@ import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl.SimpleFeatureMapEntry;
 import org.eclipse.emf.ecore.util.FeatureMap;
 import org.jboss.drools.OnEntryScriptType;
 import org.jboss.drools.OnExitScriptType;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
@@ -28,17 +30,15 @@ public class BusinessRuleTaskPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setAsync(Boolean value) {
-        setMeta("customAsync", String.valueOf(value));
+        CustomElement.async.of(baseElement).set(value);
     }
 
     public void setRuleFlowGroup(RuleFlowGroup ruleFlowGroup) {
-        String value = ruleFlowGroup.getValue();
-        FeatureMap.Entry attribute = attribute("ruleFlowGroup", value);
-        getFlowElement().getAnyAttribute().add(attribute);
+        Attribute.ruleFlowGroup.of(baseElement).set(ruleFlowGroup.getValue());
     }
 
     public void setAdHocAutostart(Boolean value) {
-        setMeta("customAutoStart", String.valueOf(value));
+        CustomElement.autoStart.of(baseElement).set(value);
     }
 
     public void setOnEntryAction(OnEntryAction onEntryAction) {
