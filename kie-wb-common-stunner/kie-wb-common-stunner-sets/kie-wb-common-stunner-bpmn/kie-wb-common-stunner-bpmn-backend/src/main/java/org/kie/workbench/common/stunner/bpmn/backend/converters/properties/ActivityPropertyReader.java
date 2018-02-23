@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.InputOutputSpecification;
@@ -49,28 +50,18 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public AssignmentsInfo getAssignmentsInfo() {
-        InputOutputSpecification ioSpecification = activity.getIoSpecification();
-        if (ioSpecification == null) {
-            return AssignmentsInfos.of(
-                    Collections.emptyList(),
-//                    Collections.emptyList(),
-                    activity.getDataInputAssociations(),
-                    Collections.emptyList(),
-//                    Collections.emptyList(),
-                    activity.getDataOutputAssociations(),
-                    false
-            );
-        } else {
-            return AssignmentsInfos.of(
-                    ioSpecification.getDataInputs(),
-                    //ioSpecification.getInputSets(),
-                    activity.getDataInputAssociations(),
-                    ioSpecification.getDataOutputs(),
-                    //ioSpecification.getOutputSets(),
-                    activity.getDataOutputAssociations(),
-                    true
-            );
-        }
+        Optional<InputOutputSpecification> ioSpecification =
+                Optional.ofNullable(activity.getIoSpecification());
+
+        return AssignmentsInfos.of(
+                ioSpecification.map(InputOutputSpecification::getDataInputs)
+                        .orElse(Collections.emptyList()),
+                activity.getDataInputAssociations(),
+                ioSpecification.map(InputOutputSpecification::getDataOutputs)
+                        .orElse(Collections.emptyList()),
+                activity.getDataOutputAssociations(),
+                ioSpecification.isPresent()
+        );
     }
 
 //    @Override

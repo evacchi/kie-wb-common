@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
@@ -47,7 +47,9 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
         List<String> users = new ArrayList<>();
         for (ResourceRole role : roles) {
             if (role instanceof PotentialOwner) {
-                FormalExpression fe = (FormalExpression) role.getResourceAssignmentExpression().getExpression();
+                FormalExpression fe = (FormalExpression)
+                        role.getResourceAssignmentExpression()
+                                .getExpression();
                 users.add(fe.getBody());
             }
         }
@@ -55,26 +57,18 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
     }
 
     public AssignmentsInfo getAssignmentsInfo() {
-        InputOutputSpecification ioSpecification = task.getIoSpecification();
-        if (ioSpecification == null) {
-            return AssignmentsInfos.of(
-                    Collections.emptyList(),
-//                            Collections.emptyList(),
-                    task.getDataInputAssociations(),
-                    Collections.emptyList(),
-//                            Collections.emptyList(),
-                    task.getDataOutputAssociations(),
-                    false);
-        } else {
-            return AssignmentsInfos.of(
-                    ioSpecification.getDataInputs(),
-                    //ioSpecification.getInputSets(),
-                    task.getDataInputAssociations(),
-                    ioSpecification.getDataOutputs(),
-                    //ioSpecification.getOutputSets(),
-                    task.getDataOutputAssociations(),
-                    true);
-        }
+        Optional<InputOutputSpecification> ioSpecification =
+                Optional.ofNullable(task.getIoSpecification());
+
+        return AssignmentsInfos.of(
+                ioSpecification.map(InputOutputSpecification::getDataInputs)
+                        .orElse(Collections.emptyList()),
+                task.getDataInputAssociations(),
+                ioSpecification.map(InputOutputSpecification::getDataOutputs)
+                        .orElse(Collections.emptyList()),
+                task.getDataOutputAssociations(),
+                ioSpecification.isPresent()
+        );
     }
 
     public ScriptTypeListValue getOnEntryAction() {
@@ -120,23 +114,4 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
     public boolean isAdHocAutostart() {
         return CustomElement.autoStart.of(element).get();
     }
-
-//    public String input(String name) {
-//        return optionalInput(name).orElse("");
-//    }
-//
-//    public Optional<String> optionalInput(String name) {
-//        for (DataInputAssociation din : task.getDataInputAssociations()) {
-//            DataInput targetRef = (DataInput) (din.getTargetRef());
-//            if (targetRef.getName().equalsIgnoreCase(name)) {
-//                Assignment assignment = din.getAssignment().get(0);
-//                return Optional.of(evaluate(assignment).toString());
-//            }
-//        }
-//        return Optional.empty();
-//    }
-//
-//    private static Object evaluate(Assignment assignment) {
-//        return ((FormalExpression) assignment.getFrom()).getBody();
-//    }
 }

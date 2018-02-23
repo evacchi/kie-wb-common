@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.eclipse.bpmn2.BusinessRuleTask;
 import org.eclipse.bpmn2.InputOutputSpecification;
@@ -36,26 +37,18 @@ public class BusinessRuleTaskPropertyReader extends TaskPropertyReader {
     }
 
     public AssignmentsInfo getAssignmentsInfo() {
-        InputOutputSpecification ioSpecification = task.getIoSpecification();
-        if (ioSpecification == null) {
-            return AssignmentsInfos.of(
-                    Collections.emptyList(),
-//                            Collections.emptyList(),
-                    task.getDataInputAssociations(),
-                    Collections.emptyList(),
-//                            Collections.emptyList(),
-                    task.getDataOutputAssociations(),
-                    false);
-        } else {
-            return AssignmentsInfos.of(
-                    ioSpecification.getDataInputs(),
-                    //ioSpecification.getInputSets(),
-                    task.getDataInputAssociations(),
-                    ioSpecification.getDataOutputs(),
-                    //ioSpecification.getOutputSets(),
-                    task.getDataOutputAssociations(),
-                    true);
-        }
+        Optional<InputOutputSpecification> ioSpecification =
+                Optional.ofNullable(task.getIoSpecification());
+
+        return AssignmentsInfos.of(
+                ioSpecification.map(InputOutputSpecification::getDataInputs)
+                        .orElse(Collections.emptyList()),
+                task.getDataInputAssociations(),
+                ioSpecification.map(InputOutputSpecification::getDataOutputs)
+                        .orElse(Collections.emptyList()),
+                task.getDataOutputAssociations(),
+                ioSpecification.isPresent()
+        );
     }
 
     public ScriptTypeListValue getOnEntryAction() {

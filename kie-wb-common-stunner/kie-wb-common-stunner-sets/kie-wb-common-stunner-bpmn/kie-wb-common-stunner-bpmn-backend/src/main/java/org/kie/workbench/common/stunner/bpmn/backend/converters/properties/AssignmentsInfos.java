@@ -37,10 +37,8 @@ public class AssignmentsInfos {
 
     public static AssignmentsInfo of(
             final List<DataInput> datainput,
-//            final List<InputSet> inputSets,
             final List<DataInputAssociation> inputAssociations,
             final List<DataOutput> dataoutput,
-//            final List<OutputSet> dataoutputset,
             final List<DataOutputAssociation> outputAssociations,
             boolean alternativeEncoding) {
 

@@ -38,10 +38,8 @@ class CatchEventPropertyReader extends EventPropertyReader {
     public AssignmentsInfo getAssignmentsInfo() {
         return AssignmentsInfos.of(
                 Collections.emptyList(),
-//                Collections.emptyList(),
                 Collections.emptyList(),
                 catchEvent.getDataOutputs(),
-//                Collections.singletonList(catchEvent.getOutputSet()),
                 catchEvent.getDataOutputAssociation(),
                 false);
     }
