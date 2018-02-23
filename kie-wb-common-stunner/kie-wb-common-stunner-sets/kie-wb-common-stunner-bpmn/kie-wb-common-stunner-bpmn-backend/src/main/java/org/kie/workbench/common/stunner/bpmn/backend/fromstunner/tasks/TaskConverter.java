@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks;
 import org.eclipse.bpmn2.Task;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BusinessRuleTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.UserTaskPropertyWriter;
@@ -40,98 +41,104 @@ public class TaskConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseTask>, ?> node) {
         return NodeMatch.fromNode(BaseTask.class, PropertyWriter.class)
-                .when(NoneTask.class, n -> {
-                    Task task = bpmn2.createTask();
-                    task.setId(n.getUUID());
-                    NoneTask definition = n.getContent().getDefinition();
-                    ActivityPropertyWriter p = new ActivityPropertyWriter(task);
-                    p.setName(definition.getGeneral().getName().getValue());
-                    p.setBounds(n.getContent().getBounds());
+                .when(NoneTask.class, this::noneTask)
+                .when(ScriptTask.class, this::scriptTask)
+                .when(BusinessRuleTask.class, this::businessRuleTask)
+                .when(UserTask.class, this::userTask)
+                .apply(node).value();
+    }
 
-                    p.setSimulationSet(definition.getSimulationSet());
-                    return p;
-                })
-                .when(ScriptTask.class, n -> {
-                    org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
-                    task.setId(n.getUUID());
-                    ScriptTask definition = n.getContent().getDefinition();
-                    ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
+    private PropertyWriter userTask(Node<View<UserTask>, ?> n) {
+        org.eclipse.bpmn2.UserTask task = bpmn2.createUserTask();
+        task.setId(n.getUUID());
+        UserTask definition = n.getContent().getDefinition();
+        UserTaskPropertyWriter p = new UserTaskPropertyWriter(task);
 
+        TaskGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
 
-                    TaskGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
+        p.setSimulationSet(definition.getSimulationSet());
 
-                    ScriptTaskExecutionSet executionSet = definition.getExecutionSet();
+        UserTaskExecutionSet executionSet = definition.getExecutionSet();
 
-                    p.setScript(executionSet.getScript().getValue());
-                    p.setAsync(executionSet.getIsAsync().getValue());
+        p.setTaskName(executionSet.getTaskName().getValue());
+        p.setActors(executionSet.getActors());
+        p.setGroupId(executionSet.getGroupid().getValue());
+        p.setAssignmentsInfo(executionSet.getAssignmentsinfo());
+        p.setAsync(executionSet.getIsAsync().getValue());
+        p.setSkippable(executionSet.getSkippable().getValue());
+        p.setPriority(executionSet.getPriority().getValue());
+        p.setSubject(executionSet.getSubject().getValue());
+        p.setDescription(executionSet.getDescription().getValue());
+        p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+        p.setCreatedBy(executionSet.getCreatedBy().getValue());
+        p.setOnEntryAction(executionSet.getOnEntryAction());
+        p.setOnExitAction(executionSet.getOnExitAction());
 
-                    p.setSimulationSet(definition.getSimulationSet());
+        p.setBounds(n.getContent().getBounds());
 
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(BusinessRuleTask.class, n -> {
-                    org.eclipse.bpmn2.BusinessRuleTask task = bpmn2.createBusinessRuleTask();
-                    task.setId(n.getUUID());
-                    BusinessRuleTask definition = n.getContent().getDefinition();
-                    BusinessRuleTaskPropertyWriter p = new BusinessRuleTaskPropertyWriter(task);
+        return p;
+    }
 
+    private PropertyWriter businessRuleTask(Node<View<BusinessRuleTask>, ?> n) {
+        org.eclipse.bpmn2.BusinessRuleTask task = bpmn2.createBusinessRuleTask();
+        task.setId(n.getUUID());
+        BusinessRuleTask definition = n.getContent().getDefinition();
+        BusinessRuleTaskPropertyWriter p = new BusinessRuleTaskPropertyWriter(task);
 
-                    TaskGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
+        TaskGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
 
-                    BusinessRuleTaskExecutionSet executionSet =
-                            definition.getExecutionSet();
+        BusinessRuleTaskExecutionSet executionSet =
+                definition.getExecutionSet();
 
-                    p.setAsync(executionSet.getIsAsync().getValue());
-                    p.setOnEntryAction(executionSet.getOnEntryAction());
-                    p.setOnExitAction(executionSet.getOnExitAction());
-                    p.setRuleFlowGroup(executionSet.getRuleFlowGroup());
-                    p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
+        p.setAsync(executionSet.getIsAsync().getValue());
+        p.setOnEntryAction(executionSet.getOnEntryAction());
+        p.setOnExitAction(executionSet.getOnExitAction());
+        p.setRuleFlowGroup(executionSet.getRuleFlowGroup());
+        p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
 
-                    p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
+        p.setAssignmentsInfo(definition.getDataIOSet().getAssignmentsinfo());
 
-                    p.setSimulationSet(definition.getSimulationSet());
+        p.setSimulationSet(definition.getSimulationSet());
 
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(UserTask.class, n -> {
-                    org.eclipse.bpmn2.UserTask task = bpmn2.createUserTask();
-                    task.setId(n.getUUID());
-                    UserTask definition = n.getContent().getDefinition();
-                    UserTaskPropertyWriter p = new UserTaskPropertyWriter(task);
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
 
+    private PropertyWriter scriptTask(Node<View<ScriptTask>, ?> n) {
+        org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
+        task.setId(n.getUUID());
+        ScriptTask definition = n.getContent().getDefinition();
+        ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
 
-                    TaskGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
+        TaskGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
 
-                    p.setSimulationSet(definition.getSimulationSet());
+        ScriptTaskExecutionSet executionSet = definition.getExecutionSet();
 
-                    UserTaskExecutionSet executionSet = definition.getExecutionSet();
+        p.setScript(executionSet.getScript().getValue());
+        p.setAsync(executionSet.getIsAsync().getValue());
 
-                    p.setTaskName(executionSet.getTaskName().getValue());
-                    p.setActors(executionSet.getActors());
-                    p.setGroupId(executionSet.getGroupid().getValue());
-                    p.setAssignmentsInfo(executionSet.getAssignmentsinfo());
-                    p.setAsync(executionSet.getIsAsync().getValue());
-                    p.setSkippable(executionSet.getSkippable().getValue());
-                    p.setPriority(executionSet.getPriority().getValue());
-                    p.setSubject(executionSet.getSubject().getValue());
-                    p.setDescription(executionSet.getDescription().getValue());
-                    p.setAdHocAutostart(executionSet.getAdHocAutostart().getValue());
-                    p.setCreatedBy(executionSet.getCreatedBy().getValue());
-                    p.setOnEntryAction(executionSet.getOnEntryAction());
-                    p.setOnExitAction(executionSet.getOnExitAction());
+        p.setSimulationSet(definition.getSimulationSet());
 
-                    p.setBounds(n.getContent().getBounds());
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
 
-                    return p;
-                }).apply(node).value();
+    private PropertyWriter noneTask(Node<View<NoneTask>, ?> n) {
+        Task task = bpmn2.createTask();
+        task.setId(n.getUUID());
+        NoneTask definition = n.getContent().getDefinition();
+        ActivityPropertyWriter p = new ActivityPropertyWriter(task);
+        p.setName(definition.getGeneral().getName().getValue());
+        p.setBounds(n.getContent().getBounds());
+
+        p.setSimulationSet(definition.getSimulationSet());
+        return p;
     }
 
     protected String asCData(String value) {

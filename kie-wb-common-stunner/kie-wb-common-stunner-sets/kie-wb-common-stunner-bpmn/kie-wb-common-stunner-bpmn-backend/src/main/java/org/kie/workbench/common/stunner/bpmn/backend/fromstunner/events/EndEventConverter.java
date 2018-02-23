@@ -17,9 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 
 import org.eclipse.bpmn2.EndEvent;
-import org.eclipse.bpmn2.TerminateEventDefinition;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ThrowEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
@@ -40,97 +38,107 @@ public class EndEventConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
         return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
-                .when(EndNoneEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    event.setId(node.getUUID());
-
-                    BaseEndEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(EndMessageEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    event.setId(node.getUUID());
-
-                    EndMessageEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setAssignmentsInfo(
-                            definition.getDataIOSet().getAssignmentsinfo());
-
-                    MessageEventExecutionSet executionSet =
-                            definition.getExecutionSet();
-
-                    p.addMessage(executionSet.getMessageRef());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(EndSignalEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    event.setId(node.getUUID());
-
-                    EndSignalEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setAssignmentsInfo(
-                            definition.getDataIOSet().getAssignmentsinfo());
-
-                    p.addSignal(definition.getExecutionSet().getSignalRef());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(EndTerminateEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    event.setId(node.getUUID());
-
-                    EndTerminateEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.addTerminate();
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(EndErrorEvent.class, n -> {
-                    EndEvent event = bpmn2.createEndEvent();
-                    event.setId(node.getUUID());
-
-                    EndErrorEvent definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setAssignmentsInfo(
-                            definition.getDataIOSet().getAssignmentsinfo());
-
-                    ErrorEventExecutionSet executionSet = definition.getExecutionSet();
-                    p.addError(executionSet.getErrorRef());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
+                .when(EndNoneEvent.class, this::noneEvent)
+                .when(EndMessageEvent.class, this::messageEvent)
+                .when(EndSignalEvent.class, this::signalEvent)
+                .when(EndTerminateEvent.class, this::terminateEvent)
+                .when(EndErrorEvent.class, this::errorEvent)
                 .apply(node).value();
+    }
+
+    private PropertyWriter errorEvent(Node<View<EndErrorEvent>, ?> n) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(n.getUUID());
+
+        EndErrorEvent definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setAssignmentsInfo(
+                definition.getDataIOSet().getAssignmentsinfo());
+
+        ErrorEventExecutionSet executionSet = definition.getExecutionSet();
+        p.addError(executionSet.getErrorRef());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
+
+    private PropertyWriter terminateEvent(Node<View<EndTerminateEvent>, ?> n) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(n.getUUID());
+
+        EndTerminateEvent definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.addTerminate();
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
+
+    private PropertyWriter signalEvent(Node<View<EndSignalEvent>, ?> n) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(n.getUUID());
+
+        EndSignalEvent definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setAssignmentsInfo(
+                definition.getDataIOSet().getAssignmentsinfo());
+
+        p.addSignal(definition.getExecutionSet().getSignalRef());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
+
+    private PropertyWriter messageEvent(Node<View<EndMessageEvent>, ?> n) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(n.getUUID());
+
+        EndMessageEvent definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setAssignmentsInfo(
+                definition.getDataIOSet().getAssignmentsinfo());
+
+        MessageEventExecutionSet executionSet =
+                definition.getExecutionSet();
+
+        p.addMessage(executionSet.getMessageRef());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
+
+    private PropertyWriter noneEvent(Node<View<EndNoneEvent>, ?> n) {
+        EndEvent event = bpmn2.createEndEvent();
+        event.setId(n.getUUID());
+
+        BaseEndEvent definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
     }
 }

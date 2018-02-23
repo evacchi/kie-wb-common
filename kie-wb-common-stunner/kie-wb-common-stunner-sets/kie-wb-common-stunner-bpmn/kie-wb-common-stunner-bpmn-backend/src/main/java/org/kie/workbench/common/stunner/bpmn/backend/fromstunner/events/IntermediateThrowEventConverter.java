@@ -34,47 +34,51 @@ public class IntermediateThrowEventConverter {
 
     public PropertyWriter toFlowElement(Node<View<BaseThrowingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseThrowingIntermediateEvent.class, PropertyWriter.class)
-                .when(IntermediateMessageEventThrowing.class, n -> {
-                    IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
-                    event.setId(node.getUUID());
-
-                    IntermediateMessageEventThrowing definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setAssignmentsInfo(
-                            definition.getDataIOSet().getAssignmentsinfo());
-
-                    MessageEventExecutionSet executionSet = definition.getExecutionSet();
-
-                    p.addMessage(executionSet.getMessageRef());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
-                .when(IntermediateSignalEventThrowing.class, n -> {
-                    IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
-                    event.setId(node.getUUID());
-
-                    IntermediateSignalEventThrowing definition = n.getContent().getDefinition();
-                    ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
-
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
-
-                    p.setAssignmentsInfo(
-                            definition.getDataIOSet().getAssignmentsinfo());
-
-                    p.addSignal(definition.getExecutionSet().getSignalRef());
-                    p.addSignalScope(definition.getExecutionSet().getSignalScope());
-
-                    p.setBounds(n.getContent().getBounds());
-                    return p;
-                })
+                .when(IntermediateMessageEventThrowing.class, this::messageEvent)
+                .when(IntermediateSignalEventThrowing.class, this::signalEvent)
                 .apply(node).value();
+    }
+
+    private PropertyWriter signalEvent(Node<View<IntermediateSignalEventThrowing>, ?> n) {
+        IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
+        event.setId(n.getUUID());
+
+        IntermediateSignalEventThrowing definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setAssignmentsInfo(
+                definition.getDataIOSet().getAssignmentsinfo());
+
+        p.addSignal(definition.getExecutionSet().getSignalRef());
+        p.addSignalScope(definition.getExecutionSet().getSignalScope());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
+    }
+
+    private PropertyWriter messageEvent(Node<View<IntermediateMessageEventThrowing>, ?> n) {
+        IntermediateThrowEvent event = bpmn2.createIntermediateThrowEvent();
+        event.setId(n.getUUID());
+
+        IntermediateMessageEventThrowing definition = n.getContent().getDefinition();
+        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+
+        BPMNGeneralSet general = definition.getGeneral();
+        p.setName(general.getName().getValue());
+        p.setDocumentation(general.getDocumentation().getValue());
+
+        p.setAssignmentsInfo(
+                definition.getDataIOSet().getAssignmentsinfo());
+
+        MessageEventExecutionSet executionSet = definition.getExecutionSet();
+
+        p.addMessage(executionSet.getMessageRef());
+
+        p.setBounds(n.getContent().getBounds());
+        return p;
     }
 }
