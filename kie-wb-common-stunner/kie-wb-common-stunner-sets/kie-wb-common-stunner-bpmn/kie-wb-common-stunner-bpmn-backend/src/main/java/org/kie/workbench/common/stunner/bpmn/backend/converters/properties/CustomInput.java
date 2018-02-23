@@ -13,7 +13,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class CustomInput<T> {
 
-    public static final CustomInputDefinition<String> taskName = new StringInput("TaskName", "Task");
+    public static final CustomInputDefinition<String> taskName = new StringInput("TaskName","Task");
     public static final CustomInputDefinition<String> priority = new StringInput("Priority", "");
     public static final CustomInputDefinition<String> subject = new StringInput("Comment", "");
     public static final CustomInputDefinition<String> description = new StringInput("Description", "");
@@ -28,7 +28,7 @@ public class CustomInput<T> {
     public CustomInput(CustomInputDefinition<T> inputDefinition, Task element) {
         this.inputDefinition = inputDefinition;
         this.element = element;
-        this.typeDef = typedefInput(inputDefinition.name(), "java.lang.String");
+        this.typeDef = typedefInput(inputDefinition.name(), inputDefinition.type());
     }
 
     public ItemDefinition typeDef() {

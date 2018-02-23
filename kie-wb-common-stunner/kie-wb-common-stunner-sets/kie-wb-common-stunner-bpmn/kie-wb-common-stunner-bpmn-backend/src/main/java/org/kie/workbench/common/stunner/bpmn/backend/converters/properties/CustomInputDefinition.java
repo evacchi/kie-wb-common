@@ -1,32 +1,31 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.bpmn2.Assignment;
-import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.FormalExpression;
-import org.eclipse.bpmn2.InputOutputSpecification;
-import org.eclipse.bpmn2.ItemDefinition;
-import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.Task;
-
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public abstract class CustomInputDefinition<T> {
 
     private final String name;
+    private final String type;
     protected final T defaultValue;
 
-    public CustomInputDefinition(String name, T defaultValue) {
+    public CustomInputDefinition(String name, String type, T defaultValue) {
         this.name = name;
+        this.type = type;
         this.defaultValue = defaultValue;
     }
 
     public String name() {
         return name;
+    }
+
+    public String type() {
+        return type;
     }
 
     public abstract T getValue(Task element);
@@ -54,7 +53,7 @@ public abstract class CustomInputDefinition<T> {
 class BooleanInput extends CustomInputDefinition<Boolean> {
 
     BooleanInput(String name, Boolean defaultValue) {
-        super(name, defaultValue);
+        super(name, "java.lang.Boolean", defaultValue);
     }
 
     @Override
@@ -63,13 +62,17 @@ class BooleanInput extends CustomInputDefinition<Boolean> {
                 .map(Boolean::parseBoolean)
                 .orElse(defaultValue);
     }
-
 }
 
 class StringInput extends CustomInputDefinition<String> {
 
+    StringInput(String name, String type, String defaultValue) {
+        super(name, type, defaultValue);
+    }
+
+
     StringInput(String name, String defaultValue) {
-        super(name, defaultValue);
+        this(name, "java.lang.String", defaultValue);
     }
 
     @Override
@@ -77,5 +80,4 @@ class StringInput extends CustomInputDefinition<String> {
         return getStringValue(element)
                 .orElse(defaultValue);
     }
-
 }
