@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
         this.task = element;
     }
 
-    public String getActors() {
+    public Collection<String> getActors() {
         // get the user task actors
         List<ResourceRole> roles = task.getResources();
         List<String> users = new ArrayList<>();
@@ -50,7 +51,7 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
                 users.add(fe.getBody());
             }
         }
-        return users.stream().collect(Collectors.joining(","));
+        return users;
     }
 
     public AssignmentsInfo getAssignmentsInfo() {

@@ -85,7 +85,7 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
     }
 
     public void setActors(Actors actors) {
-        for (String actor : actors.getValue().split(",")) {
+        for (String actor : actors.getActors()) {
             PotentialOwner potentialOwner = bpmn2.createPotentialOwner();
             potentialOwner.setId(UUID.randomUUID().toString());
 

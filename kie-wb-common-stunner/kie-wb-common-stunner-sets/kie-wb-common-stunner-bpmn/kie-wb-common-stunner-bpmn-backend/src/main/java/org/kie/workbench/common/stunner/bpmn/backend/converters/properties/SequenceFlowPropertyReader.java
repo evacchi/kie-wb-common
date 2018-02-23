@@ -67,13 +67,7 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
                     conditionExpression.getBody());
         }
     }
-
-    public String getConditionExpressionLanguage() {
-        return conditionExpression == null ?
-                "" :
-                Scripts.scriptLanguageFromUri(conditionExpression.getLanguage());
-    }
-
+    
     public String getSourceId() {
         return seq.getSourceRef().getId();
     }
