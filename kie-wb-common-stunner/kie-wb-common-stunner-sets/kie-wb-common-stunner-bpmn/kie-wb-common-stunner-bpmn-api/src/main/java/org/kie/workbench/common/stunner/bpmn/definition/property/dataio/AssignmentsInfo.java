@@ -61,7 +61,14 @@ public class AssignmentsInfo implements BPMNProperty {
     }
 
     public AssignmentsInfo(
-            DeclarationList inputs,
+            DeclarationList inputs,//    protected String metaData(String name) {
+//        return optionalMetadata(name).orElse("");
+//    }
+//
+//    protected Optional<String> optionalMetadata(String name) {
+//        return Optional.ofNullable(Utils.getMetaDataValue(element.getExtensionValues(), name));
+//    }
+
             DeclarationList outputs,
             AssociationList associations,
             boolean alternativeEncoding) {

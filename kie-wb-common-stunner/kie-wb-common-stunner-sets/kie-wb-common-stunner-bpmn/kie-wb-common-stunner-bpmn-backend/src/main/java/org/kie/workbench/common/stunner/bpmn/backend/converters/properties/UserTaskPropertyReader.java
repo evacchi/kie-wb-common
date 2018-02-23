@@ -19,12 +19,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.bpmn2.Assignment;
-import org.eclipse.bpmn2.DataInput;
-import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.InputOutputSpecification;
 import org.eclipse.bpmn2.PotentialOwner;
@@ -44,10 +40,6 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
         this.task = element;
     }
 
-    public String getTaskName() {
-        return optionalInput("TaskName").orElse("Task");
-    }
-
     public String getActors() {
         // get the user task actors
         List<ResourceRole> roles = task.getResources();
@@ -59,10 +51,6 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
             }
         }
         return users.stream().collect(Collectors.joining(","));
-    }
-
-    public String getGroupid() {
-        return input("GroupId");
     }
 
     public AssignmentsInfo getAssignmentsInfo() {
@@ -96,50 +84,58 @@ public class UserTaskPropertyReader extends TaskPropertyReader {
         return Scripts.onExit(element.getExtensionValues());
     }
 
+    public String getTaskName() {
+        return CustomInput.taskName.of(task).get();
+    }
+
+    public String getGroupid() {
+        return CustomInput.groupId.of(task).get();
+    }
+
     public boolean isAsync() {
         return CustomElement.async.of(element).get();
     }
 
     public boolean isSkippable() {
-        return Boolean.parseBoolean(input("Skippable"));
+        return CustomInput.skippable.of(task).get();
     }
 
     public String getPriority() {
-        return input("Priority");
+        return CustomInput.priority.of(task).get();
     }
 
     public String getSubject() {
-        return input("Comment");
+        return CustomInput.subject.of(task).get();
     }
 
     public String getDescription() {
-        return input("Description");
+        return CustomInput.description.of(task).get();
     }
 
     public String getCreatedBy() {
-        return input("CreatedBy");
+        return CustomInput.createdBy.of(task).get();
     }
 
     public boolean isAdHocAutostart() {
         return CustomElement.autoStart.of(element).get();
     }
 
-    public String input(String name) {
-        return optionalInput(name).orElse("");
-    }
-
-    public Optional<String> optionalInput(String name) {
-        for (DataInputAssociation din : task.getDataInputAssociations()) {
-            DataInput targetRef = (DataInput) (din.getTargetRef());
-            if (targetRef.getName().equalsIgnoreCase(name)) {
-                Assignment assignment = din.getAssignment().get(0);
-                return Optional.of(evaluate(assignment).toString());
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static Object evaluate(Assignment assignment) {
-        return ((FormalExpression) assignment.getFrom()).getBody();
-    }
+//    public String input(String name) {
+//        return optionalInput(name).orElse("");
+//    }
+//
+//    public Optional<String> optionalInput(String name) {
+//        for (DataInputAssociation din : task.getDataInputAssociations()) {
+//            DataInput targetRef = (DataInput) (din.getTargetRef());
+//            if (targetRef.getName().equalsIgnoreCase(name)) {
+//                Assignment assignment = din.getAssignment().get(0);
+//                return Optional.of(evaluate(assignment).toString());
+//            }
+//        }
+//        return Optional.empty();
+//    }
+//
+//    private static Object evaluate(Assignment assignment) {
+//        return ((FormalExpression) assignment.getFrom()).getBody();
+//    }
 }
