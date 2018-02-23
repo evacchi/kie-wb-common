@@ -17,7 +17,7 @@ public class Attribute<T> {
     public static final AttributeDefinition<Boolean> boundarycaForBoundaryEvent = new BooleanAttribute("boundaryca", true);
     public static final AttributeDefinition<Boolean> boundarycaForEvent = new BooleanAttribute("boundaryca", false);
     public static final AttributeDefinition<String> priority = new StringAttribute("priority", null);
-    public static final AttributeDefinition<String> dtype = new StringAttribute("dtype", "java.lang.String");
+    public static final AttributeDefinition<String> dtype = new StringAttribute("dtype", "");
     public static final AttributeDefinition<String> dg = new StringAttribute("dg", "") {
         @Override
         public String getValue(BaseElement element) {

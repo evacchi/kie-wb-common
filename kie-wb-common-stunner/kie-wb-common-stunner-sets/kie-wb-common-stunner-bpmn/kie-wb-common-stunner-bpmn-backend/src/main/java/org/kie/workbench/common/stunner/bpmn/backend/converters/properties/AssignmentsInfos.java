@@ -20,13 +20,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
 import org.eclipse.bpmn2.ItemAwareElement;
-import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
@@ -69,7 +67,7 @@ public class AssignmentsInfos {
     public static DeclarationList dataOutputDeclarations(List<DataOutput> dataInputs) {
         return new DeclarationList(
                 dataInputs.stream()
-                        .filter(o -> !extractDtype(o).isEmpty())
+                        .filter(o -> !Attribute.dtype.of(o).get().isEmpty())
                         .map(AssignmentsInfos::declarationFromOutput)
                         .collect(Collectors.toList()));
     }
@@ -77,13 +75,13 @@ public class AssignmentsInfos {
     public static AssignmentDeclaration declarationFromInput(DataInput in) {
         return new AssignmentDeclaration(
                 in.getName(),
-                extractDtype(in));
+                Attribute.dtype.of(in).get());
     }
 
     public static AssignmentDeclaration declarationFromOutput(DataOutput out) {
         return new AssignmentDeclaration(
                 out.getName(),
-                extractDtype(out));
+                Attribute.dtype.of(out).get());
     }
 
     public static List<AssociationDeclaration.Output> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
@@ -115,18 +113,5 @@ public class AssignmentsInfos {
         }
 
         return result;
-    }
-
-    private static String extractDtype(BaseElement el) {
-        return getAnyAttributeValue(el, "dtype");
-    }
-
-    private static String getAnyAttributeValue(BaseElement el, String attrName) {
-        for (FeatureMap.Entry entry : el.getAnyAttribute()) {
-            if (attrName.equals(entry.getEStructuralFeature().getName())) {
-                return entry.getValue().toString();
-            }
-        }
-        return "";
     }
 }
