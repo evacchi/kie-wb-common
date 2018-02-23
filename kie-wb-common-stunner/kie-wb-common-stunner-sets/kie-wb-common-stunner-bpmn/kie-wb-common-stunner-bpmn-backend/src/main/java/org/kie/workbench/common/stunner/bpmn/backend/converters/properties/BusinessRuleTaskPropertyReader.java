@@ -67,10 +67,10 @@ public class BusinessRuleTaskPropertyReader extends TaskPropertyReader {
     }
 
     public boolean isAsync() {
-        return Boolean.parseBoolean(metaData("customAsync"));
+        return CustomElement.async.of(element).get();
     }
 
     public boolean isAdHocAutoStart() {
-        return Boolean.parseBoolean(metaData("customAutoStart"));
+        return CustomElement.autoStart.of(element).get();
     }
 }

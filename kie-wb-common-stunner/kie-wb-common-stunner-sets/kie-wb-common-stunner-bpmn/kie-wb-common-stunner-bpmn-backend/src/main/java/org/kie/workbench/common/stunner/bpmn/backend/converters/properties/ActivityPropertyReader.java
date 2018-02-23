@@ -45,7 +45,7 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
     }
 
     public boolean isAsync() {
-        return Boolean.parseBoolean(metaData("customAsync"));
+        return CustomElement.async.of(element).get();
     }
 
     public AssignmentsInfo getAssignmentsInfo() {

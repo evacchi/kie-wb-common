@@ -60,7 +60,7 @@ public abstract class BasePropertyReader {
     }
 
     public String getDescription() {
-        return metaData("customDescription");
+        return CustomElement.description.of(element).get();
     }
 
     public FontSet getFontSet() {

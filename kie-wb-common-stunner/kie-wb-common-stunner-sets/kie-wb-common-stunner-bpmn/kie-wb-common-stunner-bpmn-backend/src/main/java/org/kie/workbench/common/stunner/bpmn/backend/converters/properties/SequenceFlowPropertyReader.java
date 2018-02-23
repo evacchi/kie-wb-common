@@ -17,13 +17,11 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.bpmn2.FormalExpression;
 import org.eclipse.bpmn2.SequenceFlow;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.eclipse.bpmn2.di.BPMNPlane;
-import org.eclipse.bpmn2.di.BPMNShape;
 import org.eclipse.dd.dc.Bounds;
 import org.eclipse.dd.dc.Point;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
@@ -53,11 +51,11 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
     }
 
     public boolean isAutoConnectionSource() {
-        return Boolean.parseBoolean(metaData("isAutoConnection.source"));
+        return CustomElement.autoConnectionSource.of(element).get();
     }
 
     public boolean isAutoConnectionTarget() {
-        return Boolean.parseBoolean(metaData("isAutoConnection.target"));
+        return CustomElement.autoConnectionTarget.of(element).get();
     }
 
     public ScriptTypeValue getConditionExpression() {
@@ -131,5 +129,4 @@ public class SequenceFlowPropertyReader extends BasePropertyReader {
         return Point2D.create(0,
                               targetBounds.getHeight() / 2);
     }
-
 }

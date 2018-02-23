@@ -47,7 +47,7 @@ public class ScriptTaskPropertyReader extends TaskPropertyReader {
     }
 
     public boolean isAsync() {
-        return Boolean.parseBoolean(metaData("customAsync"));
+        return CustomElement.async.of(element).get();
     }
 
 }

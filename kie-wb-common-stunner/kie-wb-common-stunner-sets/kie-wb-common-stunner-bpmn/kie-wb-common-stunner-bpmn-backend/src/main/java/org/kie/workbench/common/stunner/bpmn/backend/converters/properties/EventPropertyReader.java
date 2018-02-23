@@ -53,7 +53,7 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
     }
 
     public String getSignalScope() {
-        return metaData("customScope");
+        return CustomElement.scope.of(element).get();
     }
 
     public abstract AssignmentsInfo getAssignmentsInfo();
