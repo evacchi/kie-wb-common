@@ -21,6 +21,7 @@ public class Attribute<T> {
     public static final AttributeDefinition<Boolean> boundarycaForEvent = new BooleanAttribute(droolsns, "boundaryca", false);
     public static final AttributeDefinition<String> priority = new StringAttribute(droolsns, "priority", null);
     public static final AttributeDefinition<String> dtype = new StringAttribute(droolsns, "dtype", "");
+
     public static final AttributeDefinition<String> dg = new StringAttribute(droolsns, "dg", "") {
         @Override
         public String getValue(BaseElement element) {
@@ -31,6 +32,7 @@ public class Attribute<T> {
             return value.isEmpty() ? null : value;
         }
     };
+
     public static final AttributeDefinition<Point2D> dockerInfo = new AttributeDefinition<Point2D>(droolsns, "dockerinfo", Point2D.create(0, 0)) {
         @Override
         public Point2D getValue(BaseElement element) {

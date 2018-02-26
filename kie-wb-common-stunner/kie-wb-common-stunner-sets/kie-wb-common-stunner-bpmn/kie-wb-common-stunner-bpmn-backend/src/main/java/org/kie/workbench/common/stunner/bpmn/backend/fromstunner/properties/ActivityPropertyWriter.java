@@ -3,9 +3,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 import bpsim.ElementParameters;
 import org.eclipse.bpmn2.Activity;
 import org.eclipse.bpmn2.InputOutputSpecification;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SimulationSets;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
@@ -26,7 +25,7 @@ public class ActivityPropertyWriter extends PropertyWriter {
     }
 
     public void setSimulationSet(SimulationSet simulationSet) {
-        this.simulationParameters = Simulations.toElementParameters(simulationSet);
+        this.simulationParameters = SimulationSets.toElementParameters(simulationSet);
         simulationParameters.setElementRef(activity.getId());
     }
 

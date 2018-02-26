@@ -42,12 +42,11 @@ public class ScriptTaskPropertyReader extends TaskPropertyReader {
 
     public SimulationSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(task.getId())
-                .map(Simulations::simulationSet)
+                .map(SimulationSets::of)
                 .orElse(new SimulationSet());
     }
 
     public boolean isAsync() {
         return CustomElement.async.of(element).get();
     }
-
 }

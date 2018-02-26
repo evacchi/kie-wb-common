@@ -20,7 +20,6 @@ import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
-import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeListValue;
 
 public class TaskPropertyReader extends FlowElementPropertyReader {
 
@@ -35,7 +34,7 @@ public class TaskPropertyReader extends FlowElementPropertyReader {
 
     public SimulationSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(task.getId())
-                .map(Simulations::simulationSet)
+                .map(SimulationSets::of)
                 .orElse(new SimulationSet());
     }
 }

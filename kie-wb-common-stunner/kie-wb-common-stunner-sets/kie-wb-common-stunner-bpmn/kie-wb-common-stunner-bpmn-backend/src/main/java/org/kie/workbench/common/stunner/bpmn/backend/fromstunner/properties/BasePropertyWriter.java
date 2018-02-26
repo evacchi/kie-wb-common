@@ -39,7 +39,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.di;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.metaData;
 
-public class BasePropertyWriter {
+public abstract class BasePropertyWriter {
 
     protected final BaseElement baseElement;
     protected final Map<String, BaseElement> baseElements = new HashMap<>();

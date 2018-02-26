@@ -71,7 +71,7 @@ public class ActivityPropertyReader extends FlowElementPropertyReader {
 
     public SimulationSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(element.getId())
-                .map(Simulations::simulationSet)
+                .map(SimulationSets::of)
                 .orElse(new SimulationSet());
     }
 }

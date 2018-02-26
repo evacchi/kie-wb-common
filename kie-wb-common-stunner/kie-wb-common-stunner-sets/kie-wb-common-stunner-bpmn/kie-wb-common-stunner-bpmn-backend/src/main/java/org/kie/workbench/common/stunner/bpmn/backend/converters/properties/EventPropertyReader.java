@@ -89,7 +89,7 @@ public abstract class EventPropertyReader extends FlowElementPropertyReader {
 
     public SimulationAttributeSet getSimulationSet() {
         return definitionResolver.resolveSimulationParameters(element.getId())
-                .map(Simulations::simulationAttributeSet)
+                .map(SimulationAttributeSets::of)
                 .orElse(new SimulationAttributeSet());
     }
 

@@ -17,7 +17,7 @@ import org.eclipse.bpmn2.SubProcess;
 import org.eclipse.bpmn2.di.BPMNEdge;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.SimulationSets;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.ElementContainer;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
@@ -39,7 +39,7 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     }
 
     public void addSimulationSet(SimulationSet simulations) {
-        this.simulationParameters.add(Simulations.toElementParameters(simulations));
+        this.simulationParameters.add(SimulationSets.toElementParameters(simulations));
     }
 
     public Collection<ElementParameters> getSimulationParameters() {
@@ -101,7 +101,7 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     }
 
     public void setSimulationSet(SimulationSet simulations) {
-        ElementParameters elementParameters = Simulations.toElementParameters(simulations);
+        ElementParameters elementParameters = SimulationSets.toElementParameters(simulations);
         elementParameters.setElementRef(this.baseElement.getId());
         this.simulationParameters.add(elementParameters);
     }
