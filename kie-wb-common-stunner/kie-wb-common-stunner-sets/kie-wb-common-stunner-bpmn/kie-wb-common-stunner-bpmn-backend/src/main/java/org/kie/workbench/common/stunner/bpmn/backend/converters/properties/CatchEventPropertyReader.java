@@ -19,9 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import java.util.Collections;
 
 import org.eclipse.bpmn2.CatchEvent;
-import org.eclipse.bpmn2.StartEvent;
 import org.eclipse.bpmn2.di.BPMNPlane;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Colors;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 

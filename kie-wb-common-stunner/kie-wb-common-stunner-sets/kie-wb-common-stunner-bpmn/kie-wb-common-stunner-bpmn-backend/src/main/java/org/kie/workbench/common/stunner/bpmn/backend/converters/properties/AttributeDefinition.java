@@ -55,7 +55,7 @@ public abstract class AttributeDefinition<T> {
 
 class BooleanAttribute extends AttributeDefinition<Boolean> {
 
-    BooleanAttribute( String namespace, String name, java.lang.Boolean defaultValue) {
+    BooleanAttribute(String namespace, String name, java.lang.Boolean defaultValue) {
         super(namespace, name, defaultValue);
     }
 

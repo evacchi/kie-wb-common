@@ -19,7 +19,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.properties;
 import org.eclipse.bpmn2.Lane;
 import org.eclipse.bpmn2.di.BPMNPlane;
 import org.eclipse.bpmn2.di.BPMNShape;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Colors;
 
 public class LanePropertyReader extends BasePropertyReader {
 
