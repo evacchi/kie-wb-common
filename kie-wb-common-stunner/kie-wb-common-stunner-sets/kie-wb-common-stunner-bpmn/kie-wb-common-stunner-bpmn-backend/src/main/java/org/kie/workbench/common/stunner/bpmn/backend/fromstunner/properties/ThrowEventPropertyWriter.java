@@ -35,13 +35,12 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getInputs()
                 .stream()
-                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
                 .map(declaration -> new InputAssignmentWriter(
                         flowElement.getId(),
                         declaration,
                         assignmentsInfo
                                 .getInputs()
-                                .lookup(declaration.getTarget()))
+                                .lookup(declaration.getRight()))
                 ).forEach(dia -> {
                     this.addBaseElement(dia.getItemDefinition());
                     this.addBaseElement(dia.getProperty());

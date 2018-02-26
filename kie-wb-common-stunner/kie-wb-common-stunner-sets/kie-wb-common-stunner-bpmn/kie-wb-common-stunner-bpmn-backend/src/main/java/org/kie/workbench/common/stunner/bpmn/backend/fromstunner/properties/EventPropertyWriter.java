@@ -39,7 +39,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.Tim
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-public abstract class EventPropertyWriter extends IOPropertyWriter {
+public abstract class EventPropertyWriter extends PropertyWriter {
 
     public EventPropertyWriter(Event event) {
         super(event);

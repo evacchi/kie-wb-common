@@ -16,20 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AssociationList {
 
-    private final List<AssociationDeclaration.Input> inputs;
-    private final List<AssociationDeclaration.Output> outputs;
+    private final List<AssociationDeclaration> inputs;
+    private final List<AssociationDeclaration> outputs;
 
-    public AssociationList(List<AssociationDeclaration.Input> inputs, List<AssociationDeclaration.Output> outputs) {
+    public AssociationList(List<AssociationDeclaration> inputs, List<AssociationDeclaration> outputs) {
         this.inputs = inputs;
         this.outputs = outputs;
     }
@@ -38,10 +36,10 @@ public class AssociationList {
         this.inputs = new ArrayList<>();
         this.outputs = new ArrayList<>();
         for (AssociationDeclaration associationDeclaration : all) {
-            if (associationDeclaration.isInput()) {
-                inputs.add((AssociationDeclaration.Input) associationDeclaration);
+            if (associationDeclaration.getDirection() == AssociationDeclaration.Direction.Input) {
+                inputs.add(associationDeclaration);
             } else {
-                outputs.add((AssociationDeclaration.Output) associationDeclaration);
+                outputs.add(associationDeclaration);
             }
         }
     }
@@ -51,11 +49,11 @@ public class AssociationList {
         this.outputs = new ArrayList<>();
     }
 
-    public List<AssociationDeclaration.Input> getInputs() {
+    public List<AssociationDeclaration> getInputs() {
         return inputs;
     }
 
-    public List<AssociationDeclaration.Output> getOutputs() {
+    public List<AssociationDeclaration> getOutputs() {
         return outputs;
     }
 

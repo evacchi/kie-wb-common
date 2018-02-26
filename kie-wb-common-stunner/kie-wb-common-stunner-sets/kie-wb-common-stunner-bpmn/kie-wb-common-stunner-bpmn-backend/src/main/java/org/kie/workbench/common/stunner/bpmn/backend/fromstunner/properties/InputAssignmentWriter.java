@@ -14,7 +14,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class InputAssignmentWriter {
 
     private final String parentId;
-    private final AssociationDeclaration.SourceTarget associationDeclaration;
+    private final AssociationDeclaration associationDeclaration;
     private final DataInputAssociation association;
     private final Property decl;
     private final InputSet inputSet;
@@ -23,7 +23,7 @@ public class InputAssignmentWriter {
 
     public InputAssignmentWriter(
             String parentId,
-            AssociationDeclaration.SourceTarget associationDeclaration,
+            AssociationDeclaration associationDeclaration,
             String type) {
         this.parentId = parentId;
 
@@ -34,12 +34,12 @@ public class InputAssignmentWriter {
 
         // then we declare a name (a variable) with that type,
         // e.g. mySource:java.lang.String
-        this.decl = varDecl(associationDeclaration.getSource(), typeDef);
+        this.decl = varDecl(associationDeclaration.getLeft(), typeDef);
 
         // then we declare the input that will provide
         // the value that we assign to `source`
         // e.g. myTarget
-        this.target = readInputFrom(associationDeclaration.getTarget(), typeDef);
+        this.target = readInputFrom(associationDeclaration.getRight(), typeDef);
 
         // then we create the actual association between the two
         // e.g. mySource := myTarget (or, to put it differently, myTarget -> mySource)
@@ -88,11 +88,11 @@ public class InputAssignmentWriter {
     }
 
     private String dataInputId() {
-        return parentId + "_" + associationDeclaration.getTarget() + "InputX";
+        return parentId + "_" + associationDeclaration.getRight() + "InputX";
     }
 
     private String itemId() {
-        return "_" + parentId + "_" + associationDeclaration.getTarget() + "InputXItem";
+        return "_" + parentId + "_" + associationDeclaration.getRight() + "InputXItem";
     }
 
     public Property getProperty() {

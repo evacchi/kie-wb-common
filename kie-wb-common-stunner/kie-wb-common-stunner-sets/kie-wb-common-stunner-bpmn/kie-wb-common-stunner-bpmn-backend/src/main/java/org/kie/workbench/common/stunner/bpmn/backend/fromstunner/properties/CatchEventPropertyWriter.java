@@ -38,13 +38,12 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getOutputs()
                 .stream()
-                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
                 .map(declaration -> new OutputAssignmentWriter(
                         flowElement.getId(),
                         declaration,
                         assignmentsInfo
                                 .getOutputs()
-                                .lookup(declaration.getSource())))
+                                .lookup(declaration.getLeft())))
                 .forEach(doa -> {
                     this.addBaseElement(doa.getItemDefinition());
                     this.addBaseElement(doa.getProperty());

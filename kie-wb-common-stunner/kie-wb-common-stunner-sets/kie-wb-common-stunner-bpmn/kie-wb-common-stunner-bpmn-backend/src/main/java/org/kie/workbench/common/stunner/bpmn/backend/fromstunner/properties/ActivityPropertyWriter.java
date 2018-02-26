@@ -10,7 +10,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.Simu
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
-public class ActivityPropertyWriter extends IOPropertyWriter {
+public class ActivityPropertyWriter extends PropertyWriter {
 
     protected final Activity activity;
     private ElementParameters simulationParameters;
@@ -40,13 +40,12 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getInputs()
                 .stream()
-                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
                 .map(declaration -> new InputAssignmentWriter(
                         flowElement.getId(),
                         declaration,
                         assignmentsInfo
                                 .getInputs()
-                                .lookup(declaration.getTarget())))
+                                .lookup(declaration.getRight())))
                 .forEach(dia -> {
                     this.addBaseElement(dia.getItemDefinition());
                     this.addBaseElement(dia.getProperty());
@@ -59,13 +58,12 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getOutputs()
                 .stream()
-                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
                 .map(declaration -> new OutputAssignmentWriter(
                         flowElement.getId(),
                         declaration,
                         assignmentsInfo
                                 .getOutputs()
-                                .lookup(declaration.getSource())))
+                                .lookup(declaration.getLeft())))
                 .forEach(doa -> {
                     this.addBaseElement(doa.getItemDefinition());
                     this.addBaseElement(doa.getProperty());

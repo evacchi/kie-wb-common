@@ -13,7 +13,7 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class OutputAssignmentWriter {
 
     private final String parentId;
-    private final AssociationDeclaration.SourceTarget associationDeclaration;
+    private final AssociationDeclaration associationDeclaration;
     private final DataOutputAssociation association;
     private final Property decl;
     private final OutputSet outputSet;
@@ -22,7 +22,7 @@ public class OutputAssignmentWriter {
 
     public OutputAssignmentWriter(
             String parentId,
-            AssociationDeclaration.SourceTarget associationDeclaration,
+            AssociationDeclaration associationDeclaration,
             String type) {
         this.parentId = parentId;
 
@@ -33,12 +33,12 @@ public class OutputAssignmentWriter {
 
         // then we declare a name (a variable) with that type,
         // e.g. myTarget:java.lang.String
-        this.decl = varDecl(associationDeclaration.getTarget(), typeDef);
+        this.decl = varDecl(associationDeclaration.getRight(), typeDef);
 
         // then we declare the input that will provide
         // the value that we assign to `source`
         // e.g. myTarget
-        this.source = writeOutputTo(associationDeclaration.getSource(), typeDef);
+        this.source = writeOutputTo(associationDeclaration.getLeft(), typeDef);
 
         // then we create the actual association between the two
         // e.g. mySource := myTarget (or, to put it differently, myTarget -> mySource)
@@ -86,11 +86,11 @@ public class OutputAssignmentWriter {
     }
 
     private String dataOutputId() {
-        return parentId + "_" + associationDeclaration.getSource() + "OutputX";
+        return parentId + "_" + associationDeclaration.getLeft() + "OutputX";
     }
 
     private String itemId() {
-        return "_" + parentId + "_" + associationDeclaration.getSource() + "OutputXItem";
+        return "_" + parentId + "_" + associationDeclaration.getLeft() + "OutputXItem";
     }
 
     public Property getProperty() {

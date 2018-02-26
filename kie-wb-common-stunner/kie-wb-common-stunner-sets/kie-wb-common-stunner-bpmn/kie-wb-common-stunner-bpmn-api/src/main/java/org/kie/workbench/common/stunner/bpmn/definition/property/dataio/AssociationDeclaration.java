@@ -16,140 +16,93 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
-public interface AssociationDeclaration {
+public class AssociationDeclaration {
 
     public static AssociationDeclaration fromString(String encoded) {
         return AssociationParser.parse(encoded);
     }
 
-    public AssociationDeclaration.Pair getPair();
+    public enum Direction {
+        Input("[din]"),
+        Output("[dout]");
 
-    public boolean isInput();
+        private final String prefix;
 
-    interface Pair {
-
-    }
-
-    class FromTo implements AssociationDeclaration.Pair {
-
-        private final String from;
-        private final String to;
-
-        public FromTo(String from, String to) {
-            this.from = from;
-            this.to = to;
+        Direction(String prefix) {
+            this.prefix = prefix;
         }
 
-        public String getFrom() {
-            return from;
-        }
-
-        public String getTo() {
-            return to;
-        }
-
-        @Override
-        public String toString() {
-            return from + "=" + to;
+        public String prefix() {
+            return prefix;
         }
     }
 
-    class SourceTarget implements AssociationDeclaration.Pair {
+    public enum Type {
+        FromTo("="),
+        SourceTarget("->");
 
-        private final String source;
-        private final String target;
+        private final String op;
 
-        public SourceTarget(String source, String target) {
-            this.source = source;
-            this.target = target;
+        Type(String op) {
+            this.op = op;
         }
 
-        public String getSource() {
-            return source;
-        }
-
-        public String getTarget() {
-            return target;
-        }
-
-        @Override
-        public String toString() {
-            return source + "->" + target;
+        public String op() {
+            return op;
         }
     }
 
-    class Input implements AssociationDeclaration {
+    private final Direction direction;
+    private final Type type;
+    private final String left;
+    private final String right;
 
-        protected static final String BEGIN_MARK = "[din]";
-        private AssociationDeclaration.Pair pair;
-
-        public Input(AssociationDeclaration.Pair pair) {
-            this.pair = pair;
-        }
-
-        public AssociationDeclaration.Pair getPair() {
-            return pair;
-        }
-
-        public boolean isInput() {
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return "[din]" + pair.toString();
-        }
+    public AssociationDeclaration(Direction direction, Type type, String left, String right) {
+        this.direction = direction;
+        this.type = type;
+        this.left = left;
+        this.right = right;
     }
 
-    class Output implements AssociationDeclaration {
+    public String getLeft() {
+        return left;
+    }
 
-        protected static final String BEGIN_MARK = "[dout]";
-        private final AssociationDeclaration.Pair pair;
+    public String getRight() {
+        return right;
+    }
 
-        public Output(AssociationDeclaration.Pair pair) {
-            this.pair = pair;
-        }
+    public Direction getDirection() {
+        return direction;
+    }
 
-        public AssociationDeclaration.Pair getPair() {
-            return pair;
-        }
-
-        public boolean isInput() {
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            return "[dout]" + pair.toString();
-        }
+    @Override
+    public String toString() {
+        return direction.prefix() + left + type.op() + right;
     }
 }
 
 class AssociationParser {
 
     public static AssociationDeclaration parse(String encoded) {
-        if (encoded.startsWith(AssociationDeclaration.Input.BEGIN_MARK)) {
-            String rest = encoded.substring(AssociationDeclaration.Input.BEGIN_MARK.length());
-            AssociationDeclaration.Pair associationDeclaration = parseAssociation(rest);
-            return new AssociationDeclaration.Input(associationDeclaration);
-        }
-
-        if (encoded.startsWith(AssociationDeclaration.Output.BEGIN_MARK)) {
-            String rest = encoded.substring(AssociationDeclaration.Output.BEGIN_MARK.length());
-            AssociationDeclaration.Pair associationDeclaration = parseAssociation(rest);
-            return new AssociationDeclaration.Output(associationDeclaration);
+        for (AssociationDeclaration.Direction direction : AssociationDeclaration.Direction.values()) {
+            if (encoded.startsWith(direction.prefix())) {
+                String rest = encoded.substring(direction.prefix().length());
+                return parseAssociation(direction, rest);
+            }
         }
 
         throw new IllegalArgumentException("Cannot parse " + encoded);
     }
 
-    static AssociationDeclaration.Pair parseAssociation(String rest) {
-        if (rest.contains("=")) {
-            String[] association = rest.split("=");
-            return new AssociationDeclaration.FromTo(association[0], association[1]);
-        } else {
-            String[] association = rest.split("->");
-            return new AssociationDeclaration.SourceTarget(association[0], association[1]);
+    static AssociationDeclaration parseAssociation(AssociationDeclaration.Direction direction, String rest) {
+        for (AssociationDeclaration.Type type : AssociationDeclaration.Type.values()) {
+            if (rest.contains(type.op())) {
+                String[] association = rest.split(type.op());
+                return new AssociationDeclaration(direction, type, association[0], association[1]);
+            }
         }
+
+        throw new IllegalArgumentException("Cannot parse " + rest);
     }
 }

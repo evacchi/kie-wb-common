@@ -28,8 +28,11 @@ import org.eclipse.bpmn2.ItemAwareElement;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration.Direction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationList;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.DeclarationList;
+
+import static org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration.Type;
 
 public class AssignmentsInfos {
 
@@ -41,11 +44,11 @@ public class AssignmentsInfos {
             boolean alternativeEncoding) {
 
         DeclarationList inputs = dataInputDeclarations(datainput);
-        List<AssociationDeclaration.Input> inputAssociationDeclarations =
+        List<AssociationDeclaration> inputAssociationDeclarations =
                 inAssociationDeclarations(inputAssociations);
 
         DeclarationList outputs = dataOutputDeclarations(dataoutput);
-        List<AssociationDeclaration.Output> outputAssociationDeclarations =
+        List<AssociationDeclaration> outputAssociationDeclarations =
                 outAssociationDeclarations(outputAssociations);
 
         AssociationList associations = new AssociationList(
@@ -84,21 +87,21 @@ public class AssignmentsInfos {
                 Attribute.dtype.of(out).get());
     }
 
-    public static List<AssociationDeclaration.Output> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
-        List<AssociationDeclaration.Output> result = new ArrayList<>();
+    public static List<AssociationDeclaration> outAssociationDeclarations(List<DataOutputAssociation> outputAssociations) {
+        List<AssociationDeclaration> result = new ArrayList<>();
         for (DataOutputAssociation doa : outputAssociations) {
             DataOutput dataOutput = (DataOutput) doa.getSourceRef().get(0);
             String source = dataOutput.getName();
             String target = doa.getTargetRef().getId();
             if (source != null && source.length() > 0) {
-                result.add(new AssociationDeclaration.Output(new AssociationDeclaration.SourceTarget(source, target)));
+                result.add(new AssociationDeclaration(Direction.Output, Type.SourceTarget, source, target));
             }
         }
         return result;
     }
 
-    public static List<AssociationDeclaration.Input> inAssociationDeclarations(List<DataInputAssociation> inputAssociations) {
-        List<AssociationDeclaration.Input> result = new ArrayList<>();
+    public static List<AssociationDeclaration> inAssociationDeclarations(List<DataInputAssociation> inputAssociations) {
+        List<AssociationDeclaration> result = new ArrayList<>();
 
         for (DataInputAssociation dia : inputAssociations) {
             List<ItemAwareElement> sourceRef = dia.getSourceRef();
@@ -108,7 +111,7 @@ public class AssignmentsInfos {
             String source = sourceRef.get(0).getId();
             String target = ((DataInput) dia.getTargetRef()).getName();
             if (source != null && source.length() > 0) {
-                result.add(new AssociationDeclaration.Input(new AssociationDeclaration.SourceTarget(source, target)));
+                result.add(new AssociationDeclaration(Direction.Input, Type.SourceTarget, source, target));
             }
         }
 
