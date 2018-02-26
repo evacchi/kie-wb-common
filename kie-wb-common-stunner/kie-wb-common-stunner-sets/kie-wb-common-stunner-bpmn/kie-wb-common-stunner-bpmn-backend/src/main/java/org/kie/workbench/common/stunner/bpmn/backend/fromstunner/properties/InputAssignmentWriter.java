@@ -1,6 +1,5 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.InputSet;
@@ -47,7 +46,6 @@ public class InputAssignmentWriter {
 
         this.inputSet = bpmn2.createInputSet();
         this.inputSet.getDataInputRefs().add(target);
-
     }
 
     private DataInputAssociation associationOf(Property source, DataInput dataInput) {
