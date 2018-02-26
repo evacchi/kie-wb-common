@@ -16,13 +16,10 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
-import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.EventDefinition;
-import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 
 public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
@@ -35,15 +32,22 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
     @Override
     public void setAssignmentsInfo(AssignmentsInfo assignmentsInfo) {
-        assignmentsInfo.getAssociations().getInputs()
+        assignmentsInfo.getAssociations()
+                .getInputs()
                 .stream()
-                .map(declaration -> addDataInputAssociation(declaration, assignmentsInfo.getInputs()))
-                .forEach(dia -> {
-                    InputSet inputSet = bpmn2.createInputSet();
-                    dia.getSourceRef().forEach(this::addBaseElement);
-                    inputSet.getDataInputRefs().add((DataInput) dia.getTargetRef());
-                    throwEvent.setInputSet(inputSet);
-                    throwEvent.getDataInputAssociation().add(dia);
+                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
+                .map(declaration -> new InputAssignmentWriter(
+                        flowElement.getId(),
+                        declaration,
+                        assignmentsInfo
+                                .getInputs()
+                                .lookup(declaration.getTarget()))
+                ).forEach(dia -> {
+                    this.addBaseElement(dia.getItemDefinition());
+                    this.addBaseElement(dia.getProperty());
+                    this.addBaseElement(dia.getDataInput());
+                    throwEvent.setInputSet(dia.getInputSet());
+                    throwEvent.getDataInputAssociation().add(dia.getAssociation());
                 });
     }
 

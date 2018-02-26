@@ -2,14 +2,10 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import bpsim.ElementParameters;
 import org.eclipse.bpmn2.Activity;
-import org.eclipse.bpmn2.DataInput;
-import org.eclipse.bpmn2.DataInputAssociation;
-import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.InputOutputSpecification;
-import org.eclipse.bpmn2.InputSet;
-import org.eclipse.bpmn2.OutputSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
@@ -44,36 +40,39 @@ public class ActivityPropertyWriter extends IOPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getInputs()
                 .stream()
-                .map(declaration -> addDataInputAssociation(declaration, assignmentsInfo.getInputs()))
+                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
+                .map(declaration -> new InputAssignmentWriter(
+                        flowElement.getId(),
+                        declaration,
+                        assignmentsInfo
+                                .getInputs()
+                                .lookup(declaration.getTarget())))
                 .forEach(dia -> {
-                    InputSet inputSet = bpmn2.createInputSet();
-                    dia.getSourceRef().forEach(this::addBaseElement);
-                    this.addBaseElement(dia.getTargetRef());
-                    ioSpec.getInputSets().add(inputSet);
-
-                    DataInput targetRef = (DataInput) dia.getTargetRef();
-                    inputSet.getDataInputRefs().add(targetRef);
-                    ioSpec.getDataInputs().add(targetRef);
-
-                    activity.getDataInputAssociations().add(dia);
+                    this.addBaseElement(dia.getItemDefinition());
+                    this.addBaseElement(dia.getProperty());
+                    this.addBaseElement(dia.getDataInput());
+                    ioSpec.getInputSets().add(dia.getInputSet());
+                    ioSpec.getDataInputs().add(dia.getDataInput());
+                    activity.getDataInputAssociations().add(dia.getAssociation());
                 });
 
         assignmentsInfo.getAssociations()
                 .getOutputs()
                 .stream()
-                .map(declaration -> this.addDataOutputAssociation(declaration, assignmentsInfo.getOutputs()))
+                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
+                .map(declaration -> new OutputAssignmentWriter(
+                        flowElement.getId(),
+                        declaration,
+                        assignmentsInfo
+                                .getOutputs()
+                                .lookup(declaration.getSource())))
                 .forEach(doa -> {
-                    OutputSet outputSet = bpmn2.createOutputSet();
-                    doa.getSourceRef().forEach(this::addBaseElement);
-                    this.addBaseElement(doa.getTargetRef());
-                    ioSpec.getOutputSets().add(outputSet);
-
-                    doa.getSourceRef().forEach(i -> {
-                        DataOutput sourceRef = (DataOutput) i;
-                        outputSet.getDataOutputRefs().add(sourceRef);
-                        ioSpec.getDataOutputs().add(sourceRef);
-                    });
-                    activity.getDataOutputAssociations().add(doa);
+                    this.addBaseElement(doa.getItemDefinition());
+                    this.addBaseElement(doa.getProperty());
+                    this.addBaseElement(doa.getDataOutput());
+                    ioSpec.getOutputSets().add(doa.getOutputSet());
+                    ioSpec.getDataOutputs().add(doa.getDataOutput());
+                    activity.getDataOutputAssociations().add(doa.getAssociation());
                 });
     }
 

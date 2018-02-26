@@ -18,14 +18,11 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import bpsim.ElementParameters;
 import org.eclipse.bpmn2.CatchEvent;
-import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.EventDefinition;
-import org.eclipse.bpmn2.OutputSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Simulations;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
-
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class CatchEventPropertyWriter extends EventPropertyWriter {
 
@@ -41,17 +38,19 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
         assignmentsInfo.getAssociations()
                 .getOutputs()
                 .stream()
-                .map(declaration -> this.addDataOutputAssociation(declaration, assignmentsInfo.getOutputs()))
+                .map(declaration -> (AssociationDeclaration.SourceTarget) declaration.getPair())
+                .map(declaration -> new OutputAssignmentWriter(
+                        flowElement.getId(),
+                        declaration,
+                        assignmentsInfo
+                                .getOutputs()
+                                .lookup(declaration.getSource())))
                 .forEach(doa -> {
-                    OutputSet outputSet = bpmn2.createOutputSet();
-                    doa.getSourceRef().forEach(this::addBaseElement);
-                    this.addBaseElement(doa.getTargetRef());
-                    doa.getSourceRef().forEach(i -> {
-                        DataOutput sourceRef = (DataOutput) i;
-                        outputSet.getDataOutputRefs().add(sourceRef);
-                    });
-                    event.setOutputSet(outputSet);
-                    event.getDataOutputAssociation().add(doa);
+                    this.addBaseElement(doa.getItemDefinition());
+                    this.addBaseElement(doa.getProperty());
+                    this.addBaseElement(doa.getDataOutput());
+                    event.setOutputSet(doa.getOutputSet());
+                    event.getDataOutputAssociation().add(doa.getAssociation());
                 });
     }
 
