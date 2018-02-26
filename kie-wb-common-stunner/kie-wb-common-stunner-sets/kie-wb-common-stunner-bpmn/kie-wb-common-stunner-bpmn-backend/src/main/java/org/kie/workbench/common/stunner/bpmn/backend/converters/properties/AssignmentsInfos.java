@@ -23,6 +23,8 @@ import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
+import org.eclipse.bpmn2.ItemAwareElement;
+import org.eclipse.bpmn2.Property;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
@@ -77,7 +79,7 @@ public class AssignmentsInfos {
                 .map(in -> new AssociationDeclaration(
                         Direction.Input,
                         Type.SourceTarget,
-                        in.getSourceRef().get(0).getId(),
+                        getPropertyName((Property) in.getSourceRef().get(0)),
                         ((DataInput) in.getTargetRef()).getName()))
                 .collect(Collectors.toList());
     }
@@ -88,7 +90,12 @@ public class AssignmentsInfos {
                         Direction.Output,
                         Type.SourceTarget,
                         ((DataOutput) out.getSourceRef().get(0)).getName(),
-                        out.getTargetRef().getId()))
+                        getPropertyName((Property) out.getTargetRef())))
                 .collect(Collectors.toList());
+    }
+
+    // fallback to ID for https://issues.jboss.org/browse/JBPM-6708
+    private static String getPropertyName(Property prop) {
+        return prop.getName() == null? prop.getId() : prop.getName();
     }
 }

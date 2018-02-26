@@ -74,6 +74,7 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         return bpmnDiagram;
     }
 
+    // fixme these instanceof have to go!
     public void addChildElement(BasePropertyWriter p) {
         this.childElements.put(p.getElement().getId(), p);
         if (p.getElement() instanceof FlowElement) {
@@ -109,8 +110,16 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         return this.childElements.get(id);
     }
 
+    protected void addBaseElement(BaseElement element) {
+        if (element instanceof Property) {
+            process.getProperties().add((Property) element);
+        } else {
+            super.addBaseElement(element);
+        }
+    }
+
     public void addAllBaseElements(Collection<BaseElement> baseElements) {
-        baseElements.forEach(el -> this.baseElements.put(el.getId(), el));
+        baseElements.forEach(this::addBaseElement);
     }
 
     public void setName(String value) {
@@ -149,6 +158,7 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         return "<![CDATA[" + original + "]]>";
     }
 
+    // fixme verify if this is necessary
     public void setProcessVariables(ProcessVariables processVariables) {
         String value = processVariables.getValue();
         DeclarationList declarationList = DeclarationList.fromString(value);

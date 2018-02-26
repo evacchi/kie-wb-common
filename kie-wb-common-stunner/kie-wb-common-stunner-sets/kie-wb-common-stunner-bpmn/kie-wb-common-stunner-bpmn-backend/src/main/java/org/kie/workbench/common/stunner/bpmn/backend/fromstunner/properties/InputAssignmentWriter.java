@@ -73,7 +73,8 @@ public class InputAssignmentWriter {
 
     private Property varDecl(String varName, ItemDefinition typeDef) {
         Property source = bpmn2.createProperty();
-        source.setId(varName);
+        source.setId(propertyId(varName));
+        source.setName(varName);
         source.setItemSubjectRef(typeDef);
         return source;
     }
@@ -90,7 +91,11 @@ public class InputAssignmentWriter {
     }
 
     private String itemId() {
-        return "_" + parentId + "_" + associationDeclaration.getRight() + "InputXItem";
+        return "_" + dataInputId() + "Item";
+    }
+
+    private String propertyId(String id) {
+        return "prop" + id + dataInputId();
     }
 
     public Property getProperty() {

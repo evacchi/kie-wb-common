@@ -2599,7 +2599,9 @@ public class BPMNDirectDiagramMarshallerTest {
                 List<ItemAwareElement> sourceRef = dataInputAssociation.getSourceRef();
                 if (sourceRef != null && !sourceRef.isEmpty()) {
                     ItemAwareElement result = Arrays.stream(sourceRef.toArray(new ItemAwareElement[sourceRef.size()]))
-                            .filter(itemAwareElement -> id.equals(itemAwareElement.getId()))
+                            .filter(itemAwareElement ->
+                                            id.equals(itemAwareElement.getId())
+                            || id.equals(((Property)itemAwareElement).getName()))
                             .findFirst()
                             .orElse(null);
                     if (result != null) {
@@ -2651,7 +2653,9 @@ public class BPMNDirectDiagramMarshallerTest {
         if (dataOutputAssociations != null) {
             for (DataOutputAssociation dataOutputAssociation : dataOutputAssociations) {
                 ItemAwareElement targetRef = dataOutputAssociation.getTargetRef();
-                if (targetRef != null && id.equals(targetRef.getId())) {
+                if (targetRef != null &&
+                        id.equals(targetRef.getId())
+                        || id.equals(((Property)targetRef).getName())) {
                     return targetRef;
                 }
             }
