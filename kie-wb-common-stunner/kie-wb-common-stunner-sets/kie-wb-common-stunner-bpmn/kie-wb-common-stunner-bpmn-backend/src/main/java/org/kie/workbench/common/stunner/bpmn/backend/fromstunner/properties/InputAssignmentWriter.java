@@ -26,6 +26,7 @@ public class InputAssignmentWriter {
         this.parentId = parentId;
         this.decl = decl;
 
+        // first we declare the type that we will use for the input
         this.typeDef = typedefInput(decl);
 
         // then we declare the input that will provide
@@ -77,10 +78,6 @@ public class InputAssignmentWriter {
 
     private String itemId() {
         return "_" + dataInputId() + "Item";
-    }
-
-    private String propertyId(String id) {
-        return "prop" + id + dataInputId();
     }
 
     public DataInput getDataInput() {

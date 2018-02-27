@@ -32,7 +32,7 @@ public interface VariableScope {
             this.typeDeclaration.setStructureRef(type);
 
             this.typedIdentifier = bpmn2.createProperty();
-            this.typedIdentifier.setId(identifier);
+            this.typedIdentifier.setId("var@" + parentScopeId + "::" + identifier);
             this.typedIdentifier.setName(identifier);
             this.typedIdentifier.setItemSubjectRef(typeDeclaration);
         }
