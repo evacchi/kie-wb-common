@@ -43,10 +43,12 @@ public abstract class BasePropertyWriter {
 
     protected final BaseElement baseElement;
     protected final Map<String, BaseElement> baseElements = new HashMap<>();
+    protected final VariableScope variableScope;
     protected BPMNShape shape;
 
-    public BasePropertyWriter(BaseElement baseElement) {
+    public BasePropertyWriter(BaseElement baseElement, VariableScope variableScope) {
         this.baseElement = baseElement;
+        this.variableScope = variableScope;
     }
 
     public void setBounds(Bounds rect) {

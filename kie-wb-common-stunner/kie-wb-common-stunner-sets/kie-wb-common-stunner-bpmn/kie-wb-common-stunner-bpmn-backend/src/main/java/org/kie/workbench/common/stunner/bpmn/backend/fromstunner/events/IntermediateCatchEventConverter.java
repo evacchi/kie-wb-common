@@ -19,9 +19,9 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 import java.util.List;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateErrorEventCatching;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventCatching;
@@ -40,6 +40,12 @@ import org.kie.workbench.common.stunner.core.graph.content.view.ViewConnector;
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class IntermediateCatchEventConverter {
+
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public IntermediateCatchEventConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
 
     public PropertyWriter toFlowElement(Node<View<BaseCatchingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseCatchingIntermediateEvent.class, PropertyWriter.class)
@@ -130,8 +136,8 @@ public class IntermediateCatchEventConverter {
 
     private CatchEventPropertyWriter createCatchEventPropertyWriter(Node n) {
         return isDocked(n) ?
-                new BoundaryEventPropertyWriter(bpmn2.createBoundaryEvent()) :
-                new CatchEventPropertyWriter(bpmn2.createIntermediateCatchEvent());
+                propertyWriterFactory.of(bpmn2.createBoundaryEvent()) :
+                propertyWriterFactory.of(bpmn2.createIntermediateCatchEvent());
     }
 
     private boolean isDocked(Node node) {

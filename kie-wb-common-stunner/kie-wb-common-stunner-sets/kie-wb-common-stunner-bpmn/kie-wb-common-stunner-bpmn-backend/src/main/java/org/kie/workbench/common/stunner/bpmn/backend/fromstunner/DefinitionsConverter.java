@@ -21,6 +21,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.Proce
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.DefinitionsPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
@@ -29,20 +30,21 @@ public class DefinitionsConverter {
 
     private final DefinitionsBuildingContext context;
     private final ProcessConverter processConverter;
+    private final PropertyWriterFactory propertyWriterFactory;
 
-    public DefinitionsConverter(DefinitionsBuildingContext context) {
+    public DefinitionsConverter(DefinitionsBuildingContext context, PropertyWriterFactory propertyWriterFactory) {
         this.context = context;
-        this.processConverter = new ProcessConverter(context, new ProcessConverterFactory(context));
+        this.processConverter = new ProcessConverter(context, propertyWriterFactory, new ProcessConverterFactory(context, propertyWriterFactory));
+        this.propertyWriterFactory = propertyWriterFactory;
     }
 
     public DefinitionsConverter(Graph graph) {
-        this(new DefinitionsBuildingContext(graph));
+        this(new DefinitionsBuildingContext(graph), new PropertyWriterFactory());
     }
 
     public Definitions toDefinitions() {
         Definitions definitions = bpmn2.createDefinitions();
-        DefinitionsPropertyWriter p =
-                new DefinitionsPropertyWriter(definitions);
+        DefinitionsPropertyWriter p = propertyWriterFactory.of(definitions);
 
         ProcessPropertyWriter pp =
                 processConverter.convertProcess();

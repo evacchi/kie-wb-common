@@ -33,8 +33,8 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     private Collection<ElementParameters> simulationParameters = new ArrayList<>();
     private Map<String, BasePropertyWriter> childElements = new HashMap<>();
 
-    public SubProcessPropertyWriter(SubProcess process) {
-        super(process);
+    public SubProcessPropertyWriter(SubProcess process, VariableScope variableScope) {
+        super(process, variableScope);
         this.process = process;
     }
 

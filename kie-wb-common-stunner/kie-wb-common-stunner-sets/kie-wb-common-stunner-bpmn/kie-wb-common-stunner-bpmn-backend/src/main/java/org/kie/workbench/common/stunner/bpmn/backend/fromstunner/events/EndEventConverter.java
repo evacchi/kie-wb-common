@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 import org.eclipse.bpmn2.EndEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ThrowEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseEndEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.EndErrorEvent;
@@ -36,6 +37,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class EndEventConverter {
 
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public EndEventConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
         return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
                 .when(EndNoneEvent.class, this::noneEvent)
@@ -51,7 +58,7 @@ public class EndEventConverter {
         event.setId(n.getUUID());
 
         EndErrorEvent definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -72,7 +79,7 @@ public class EndEventConverter {
         event.setId(n.getUUID());
 
         EndTerminateEvent definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -89,7 +96,7 @@ public class EndEventConverter {
         event.setId(n.getUUID());
 
         EndSignalEvent definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -109,7 +116,7 @@ public class EndEventConverter {
         event.setId(n.getUUID());
 
         EndMessageEvent definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -132,7 +139,7 @@ public class EndEventConverter {
         event.setId(n.getUUID());
 
         BaseEndEvent definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());

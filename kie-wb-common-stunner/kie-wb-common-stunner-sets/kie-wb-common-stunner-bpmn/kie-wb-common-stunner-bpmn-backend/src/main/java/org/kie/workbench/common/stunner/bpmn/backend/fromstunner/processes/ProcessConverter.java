@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes;
 import org.eclipse.bpmn2.Process;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
@@ -30,10 +31,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class ProcessConverter {
 
     private final DefinitionsBuildingContext context;
+    private final PropertyWriterFactory propertyWriterFactory;
     private final ProcessConverterFactory processConverterFactory;
 
-    public ProcessConverter(DefinitionsBuildingContext context, ProcessConverterFactory processConverterFactory) {
+    public ProcessConverter(DefinitionsBuildingContext context, PropertyWriterFactory propertyWriterFactory, ProcessConverterFactory processConverterFactory) {
         this.context = context;
+        this.propertyWriterFactory = propertyWriterFactory;
         this.processConverterFactory = processConverterFactory;
     }
 
@@ -49,7 +52,7 @@ public class ProcessConverter {
     private ProcessPropertyWriter convertProcessNode(Node<Definition<BPMNDiagramImpl>, ?> node) {
         Process process = bpmn2.createProcess();
 
-        ProcessPropertyWriter p = new ProcessPropertyWriter(process);
+        ProcessPropertyWriter p = propertyWriterFactory.of(process);
         BPMNDiagramImpl definition = node.getContent().getDefinition();
 
         DiagramSet diagramSet = definition.getDiagramSet();

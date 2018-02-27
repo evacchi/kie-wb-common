@@ -27,6 +27,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.gateways.Gatewa
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.ProcessConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.processes.SubProcessConverter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.tasks.TaskConverter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseCatchingIntermediateEvent;
@@ -50,20 +51,25 @@ public class ViewDefinitionConverter {
     private final IntermediateThrowEventConverter intermediateThrowEventConverter;
     private final ReusableSubprocessConverter reusableSubprocessConverter;
     private final SubProcessConverter subProcessConverter;
-    private GatewayConverter gatewayConverter;
-    private DefinitionsBuildingContext context;
+    private final GatewayConverter gatewayConverter;
+    private final DefinitionsBuildingContext context;
+    private final PropertyWriterFactory propertyWriterFactory;
 
-    public ViewDefinitionConverter(DefinitionsBuildingContext context, ProcessConverterFactory processConverterFactory) {
+    public ViewDefinitionConverter(
+            DefinitionsBuildingContext context,
+            PropertyWriterFactory propertyWriterFactory,
+            ProcessConverterFactory processConverterFactory) {
         this.context = context;
+        this.propertyWriterFactory = propertyWriterFactory;
 
-        this.startEventConverter = new StartEventConverter();
-        this.endEventConverter = new EndEventConverter();
-        this.intermediateCatchEventConverter = new IntermediateCatchEventConverter();
-        this.intermediateThrowEventConverter = new IntermediateThrowEventConverter();
-        this.gatewayConverter = new GatewayConverter();
-        this.taskConverter = new TaskConverter();
+        this.startEventConverter = new StartEventConverter(propertyWriterFactory);
+        this.endEventConverter = new EndEventConverter(propertyWriterFactory);
+        this.intermediateCatchEventConverter = new IntermediateCatchEventConverter(propertyWriterFactory);
+        this.intermediateThrowEventConverter = new IntermediateThrowEventConverter(propertyWriterFactory);
+        this.gatewayConverter = new GatewayConverter(propertyWriterFactory);
+        this.taskConverter = new TaskConverter(propertyWriterFactory);
         this.subProcessConverter = processConverterFactory.subProcessConverter();
-        this.reusableSubprocessConverter = new ReusableSubprocessConverter();
+        this.reusableSubprocessConverter = new ReusableSubprocessConverter(propertyWriterFactory);
     }
 
     public Result<PropertyWriter> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {

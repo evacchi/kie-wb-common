@@ -19,14 +19,13 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.ThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 
 public class ThrowEventPropertyWriter extends EventPropertyWriter {
 
     private final ThrowEvent throwEvent;
 
-    public ThrowEventPropertyWriter(ThrowEvent flowElement) {
-        super(flowElement);
+    public ThrowEventPropertyWriter(ThrowEvent flowElement, VariableScope variableScope) {
+        super(flowElement, variableScope);
         this.throwEvent = flowElement;
     }
 
@@ -37,17 +36,17 @@ public class ThrowEventPropertyWriter extends EventPropertyWriter {
                 .stream()
                 .map(declaration -> new InputAssignmentWriter(
                         flowElement.getId(),
-                        declaration,
+                        variableScope.lookup(declaration.getLeft()),
                         assignmentsInfo
                                 .getInputs()
                                 .lookup(declaration.getRight()))
                 ).forEach(dia -> {
-                    this.addBaseElement(dia.getItemDefinition());
-                    this.addBaseElement(dia.getProperty());
-                    this.addBaseElement(dia.getDataInput());
-                    throwEvent.setInputSet(dia.getInputSet());
-                    throwEvent.getDataInputAssociation().add(dia.getAssociation());
-                });
+            //this.addBaseElement(dia.getItemDefinition());
+            //this.addBaseElement(dia.getProperty());
+            this.addBaseElement(dia.getDataInput());
+            throwEvent.setInputSet(dia.getInputSet());
+            throwEvent.getDataInputAssociation().add(dia.getAssociation());
+        });
     }
 
     @Override

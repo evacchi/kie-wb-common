@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner;
 import org.eclipse.bpmn2.FormalExpression;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SequenceFlowPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.SequenceFlow;
 import org.kie.workbench.common.stunner.bpmn.definition.property.connectors.SequenceFlowExecutionSet;
@@ -31,11 +32,17 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class SequenceFlowConverter {
 
+    final PropertyWriterFactory propertyWriterFactory;
+
+    public SequenceFlowConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public SequenceFlowPropertyWriter toFlowElement(Edge<?, ?> edge, ElementContainer process) {
         ViewConnector<SequenceFlow> content = (ViewConnector<SequenceFlow>) edge.getContent();
         SequenceFlow definition = content.getDefinition();
         org.eclipse.bpmn2.SequenceFlow seq = bpmn2.createSequenceFlow();
-        SequenceFlowPropertyWriter p = new SequenceFlowPropertyWriter(seq);
+        SequenceFlowPropertyWriter p = propertyWriterFactory.of(seq);
 
         seq.setId(edge.getUUID());
 

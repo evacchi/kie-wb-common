@@ -41,8 +41,8 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public abstract class EventPropertyWriter extends PropertyWriter {
 
-    public EventPropertyWriter(Event event) {
-        super(event);
+    public EventPropertyWriter(Event event, VariableScope variableScope) {
+        super(event, variableScope);
     }
 
     public abstract void setAssignmentsInfo(AssignmentsInfo assignmentsInfo);

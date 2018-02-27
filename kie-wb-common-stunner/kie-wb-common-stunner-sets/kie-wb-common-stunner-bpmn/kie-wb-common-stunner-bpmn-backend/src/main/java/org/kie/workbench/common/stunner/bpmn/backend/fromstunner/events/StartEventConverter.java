@@ -20,6 +20,7 @@ import org.eclipse.bpmn2.StartEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseStartEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartErrorEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.StartMessageEvent;
@@ -38,6 +39,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class StartEventConverter {
 
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public StartEventConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public PropertyWriter toFlowElement(Node<View<BaseStartEvent>, ?> node) {
         return NodeMatch.fromNode(BaseStartEvent.class, PropertyWriter.class)
                 .when(StartNoneEvent.class, this::noneEvent)
@@ -53,7 +60,7 @@ public class StartEventConverter {
         event.setId(n.getUUID());
 
         StartMessageEvent definition = n.getContent().getDefinition();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+        CatchEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -76,7 +83,7 @@ public class StartEventConverter {
         event.setId(n.getUUID());
 
         StartErrorEvent definition = n.getContent().getDefinition();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+        CatchEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -99,7 +106,7 @@ public class StartEventConverter {
         event.setId(n.getUUID());
 
         StartTimerEvent definition = n.getContent().getDefinition();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+        CatchEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -122,7 +129,7 @@ public class StartEventConverter {
         event.setId(n.getUUID());
 
         StartSignalEvent definition = n.getContent().getDefinition();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+        CatchEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -145,7 +152,7 @@ public class StartEventConverter {
         event.setId(n.getUUID());
 
         StartNoneEvent definition = n.getContent().getDefinition();
-        CatchEventPropertyWriter p = new CatchEventPropertyWriter(event);
+        CatchEventPropertyWriter p = propertyWriterFactory.of(event);
 
         event.setIsInterrupting(false);
 

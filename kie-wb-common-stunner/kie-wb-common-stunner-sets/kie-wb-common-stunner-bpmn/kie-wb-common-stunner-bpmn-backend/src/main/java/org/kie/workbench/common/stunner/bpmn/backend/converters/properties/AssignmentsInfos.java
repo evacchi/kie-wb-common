@@ -23,9 +23,8 @@ import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
 import org.eclipse.bpmn2.DataOutput;
 import org.eclipse.bpmn2.DataOutputAssociation;
-import org.eclipse.bpmn2.ItemAwareElement;
 import org.eclipse.bpmn2.Property;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.VariableDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration.Direction;
@@ -57,7 +56,7 @@ public class AssignmentsInfos {
         return new DeclarationList(
                 dataInputs.stream()
                         .filter(o -> !o.getName().equals("TaskName"))
-                        .map(in -> new AssignmentDeclaration(
+                        .map(in -> new VariableDeclaration(
                                 in.getName(),
                                 Attribute.dtype.of(in).get()))
                         .collect(Collectors.toList()));
@@ -67,7 +66,7 @@ public class AssignmentsInfos {
         return new DeclarationList(
                 dataInputs.stream()
                         .filter(o -> !Attribute.dtype.of(o).get().isEmpty())
-                        .map(out -> new AssignmentDeclaration(
+                        .map(out -> new VariableDeclaration(
                                 out.getName(),
                                 Attribute.dtype.of(out).get()))
                         .collect(Collectors.toList()));

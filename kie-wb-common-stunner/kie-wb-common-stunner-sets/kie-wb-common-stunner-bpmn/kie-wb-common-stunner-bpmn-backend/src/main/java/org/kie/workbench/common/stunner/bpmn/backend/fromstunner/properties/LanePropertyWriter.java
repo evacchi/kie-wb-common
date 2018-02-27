@@ -7,8 +7,8 @@ public class LanePropertyWriter extends BasePropertyWriter {
 
     private final Lane lane;
 
-    public LanePropertyWriter(Lane lane) {
-        super(lane);
+    public LanePropertyWriter(Lane lane, VariableScope variableScope) {
+        super(lane, variableScope);
         this.lane = lane;
     }
 

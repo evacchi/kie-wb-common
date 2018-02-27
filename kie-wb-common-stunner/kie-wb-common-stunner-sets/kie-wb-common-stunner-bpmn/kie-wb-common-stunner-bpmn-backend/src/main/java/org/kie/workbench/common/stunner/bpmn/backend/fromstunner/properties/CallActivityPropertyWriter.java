@@ -1,7 +1,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.CallActivity;
-import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 
@@ -9,8 +8,8 @@ public class CallActivityPropertyWriter extends ActivityPropertyWriter {
 
     private final CallActivity activity;
 
-    public CallActivityPropertyWriter(CallActivity activity) {
-        super(activity);
+    public CallActivityPropertyWriter(CallActivity activity, VariableScope variableScope) {
+        super(activity, variableScope);
         this.activity = activity;
     }
 

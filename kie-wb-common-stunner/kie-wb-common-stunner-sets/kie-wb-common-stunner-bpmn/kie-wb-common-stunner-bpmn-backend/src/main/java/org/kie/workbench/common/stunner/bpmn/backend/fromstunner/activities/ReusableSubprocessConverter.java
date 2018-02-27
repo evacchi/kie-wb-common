@@ -3,6 +3,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.activities;
 import org.eclipse.bpmn2.CallActivity;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.CallActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.ReusableSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ReusableSubprocessTaskExecutionSet;
@@ -13,11 +14,18 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class ReusableSubprocessConverter {
 
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public ReusableSubprocessConverter(PropertyWriterFactory propertyWriterFactory) {
+
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public PropertyWriter toFlowElement(Node<View<ReusableSubprocess>, ?> n) {
         CallActivity activity = bpmn2.createCallActivity();
         activity.setId(n.getUUID());
 
-        CallActivityPropertyWriter p = new CallActivityPropertyWriter(activity);
+        CallActivityPropertyWriter p = propertyWriterFactory.of(activity);
 
         ReusableSubprocess definition = n.getContent().getDefinition();
 

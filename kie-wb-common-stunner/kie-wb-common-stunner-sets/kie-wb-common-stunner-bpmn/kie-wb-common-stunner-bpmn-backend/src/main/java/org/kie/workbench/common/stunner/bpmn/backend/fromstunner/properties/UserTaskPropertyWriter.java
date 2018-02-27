@@ -26,8 +26,8 @@ public class UserTaskPropertyWriter extends ActivityPropertyWriter {
     private final CustomInput<String> priority;
     private final CustomInput<String> subject;
 
-    public UserTaskPropertyWriter(UserTask task) {
-        super(task);
+    public UserTaskPropertyWriter(UserTask task, VariableScope variableScope) {
+        super(task, variableScope);
         this.task = task;
 
         this.skippable = CustomInput.skippable.of(task);

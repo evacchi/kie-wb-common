@@ -7,7 +7,6 @@ import org.eclipse.bpmn2.Gateway;
 import org.eclipse.bpmn2.GatewayDirection;
 import org.eclipse.bpmn2.InclusiveGateway;
 import org.eclipse.bpmn2.SequenceFlow;
-import org.eclipse.emf.ecore.util.FeatureMap;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
@@ -18,8 +17,8 @@ public class GatewayPropertyWriter extends PropertyWriter {
     private final Gateway gateway;
     private String defaultGatewayId;
 
-    public GatewayPropertyWriter(Gateway gateway) {
-        super(gateway);
+    public GatewayPropertyWriter(Gateway gateway, VariableScope variableScope) {
+        super(gateway, variableScope);
         this.gateway = gateway;
     }
 

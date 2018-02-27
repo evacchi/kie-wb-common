@@ -4,15 +4,14 @@ import org.eclipse.bpmn2.BusinessRuleTask;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
-import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnEntryAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.OnExitAction;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.RuleFlowGroup;
 
 public class BusinessRuleTaskPropertyWriter extends ActivityPropertyWriter {
 
-    public BusinessRuleTaskPropertyWriter(BusinessRuleTask task) {
-        super(task);
+    public BusinessRuleTaskPropertyWriter(BusinessRuleTask task, VariableScope variableScope) {
+        super(task, variableScope);
     }
 
     public void setAsync(Boolean value) {

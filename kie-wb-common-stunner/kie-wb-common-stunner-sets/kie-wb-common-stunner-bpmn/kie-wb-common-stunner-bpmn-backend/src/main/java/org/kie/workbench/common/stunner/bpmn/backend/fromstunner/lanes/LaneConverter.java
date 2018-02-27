@@ -3,6 +3,8 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.lanes;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ProcessPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
@@ -13,13 +15,19 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class LaneConverter {
 
+    final PropertyWriterFactory propertyWriterFactory;
+
+    public LaneConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public Result<LanePropertyWriter> toElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
         return NodeMatch.fromNode(BPMNViewDefinition.class, LanePropertyWriter.class)
                 .when(Lane.class, n -> {
                     org.eclipse.bpmn2.Lane lane = bpmn2.createLane();
                     lane.setId(n.getUUID());
 
-                    LanePropertyWriter p = new LanePropertyWriter(lane);
+                    LanePropertyWriter p = propertyWriterFactory.of(lane);
 
                     Lane definition = n.getContent().getDefinition();
                     BPMNGeneralSet general = definition.getGeneral();

@@ -19,12 +19,12 @@ package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class AssignmentDeclaration {
+public class VariableDeclaration {
 
     private final String identifier;
     private final String type;
 
-    public AssignmentDeclaration(String identifier, String type) {
+    public VariableDeclaration(String identifier, String type) {
         this.identifier = identifier;
         this.type = type;
     }
@@ -46,11 +46,11 @@ public class AssignmentDeclaration {
         }
     }
 
-    public static AssignmentDeclaration fromString(String encoded) {
+    public static VariableDeclaration fromString(String encoded) {
         String[] split = encoded.split(":");
         String identifier = split[0];
         String type = (split.length == 2)? split[1] : null;
-        return new AssignmentDeclaration(identifier, type);
+        return new VariableDeclaration(identifier, type);
     }
 }
 

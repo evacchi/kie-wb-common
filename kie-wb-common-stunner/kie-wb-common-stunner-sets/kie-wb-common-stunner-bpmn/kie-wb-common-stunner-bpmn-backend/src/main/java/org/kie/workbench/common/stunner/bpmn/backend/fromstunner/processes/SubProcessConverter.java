@@ -20,6 +20,7 @@ import org.eclipse.bpmn2.SubProcess;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.DefinitionsBuildingContext;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.SubProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
@@ -34,10 +35,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 public class SubProcessConverter {
 
     private final DefinitionsBuildingContext context;
+    private final PropertyWriterFactory propertyWriterFactory;
     private final ProcessConverterFactory processConverterFactory;
 
-    public SubProcessConverter(DefinitionsBuildingContext context, ProcessConverterFactory processConverterFactory) {
+    public SubProcessConverter(DefinitionsBuildingContext context, PropertyWriterFactory propertyWriterFactory, ProcessConverterFactory processConverterFactory) {
         this.context = context;
+        this.propertyWriterFactory = propertyWriterFactory;
         this.processConverterFactory = processConverterFactory;
     }
 
@@ -60,7 +63,7 @@ public class SubProcessConverter {
         SubProcess process = bpmn2.createSubProcess();
         process.setId(n.getUUID());
 
-        SubProcessPropertyWriter p = new SubProcessPropertyWriter(process);
+        SubProcessPropertyWriter p = propertyWriterFactory.of(process);
 
         EventSubprocess definition = n.getContent().getDefinition();
         process.setTriggeredByEvent(true);
@@ -84,7 +87,7 @@ public class SubProcessConverter {
         SubProcess process = bpmn2.createSubProcess();
         process.setId(n.getUUID());
 
-        SubProcessPropertyWriter p = new SubProcessPropertyWriter(process);
+        SubProcessPropertyWriter p = propertyWriterFactory.of(process);
 
         EmbeddedSubprocess definition = n.getContent().getDefinition();
 

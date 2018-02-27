@@ -6,46 +6,46 @@ import org.eclipse.bpmn2.InputSet;
 import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.Property;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.VariableDeclaration;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class InputAssignmentWriter {
 
     private final String parentId;
-    private final AssociationDeclaration associationDeclaration;
     private final DataInputAssociation association;
-    private final Property decl;
     private final InputSet inputSet;
     private final DataInput target;
-    private ItemDefinition typeDef;
+    private final ItemDefinition typeDef;
+    private final VariableDeclaration decl;
 
     public InputAssignmentWriter(
             String parentId,
-            AssociationDeclaration associationDeclaration,
-            String type) {
+            VariableScope.Variable variable,
+            VariableDeclaration decl) {
         this.parentId = parentId;
+        this.decl = decl;
 
-        this.associationDeclaration = associationDeclaration;
-
-        // first we declare the type of this assignment
-        this.typeDef = typedefInput(type);
-
-        // then we declare a name (a variable) with that type,
-        // e.g. mySource:java.lang.String
-        this.decl = varDecl(associationDeclaration.getLeft(), typeDef);
+        this.typeDef = typedefInput(decl);
 
         // then we declare the input that will provide
         // the value that we assign to `source`
         // e.g. myTarget
-        this.target = readInputFrom(associationDeclaration.getRight(), typeDef);
+        this.target = readInputFrom(decl.getIdentifier(), typeDef);
 
         // then we create the actual association between the two
         // e.g. mySource := myTarget (or, to put it differently, myTarget -> mySource)
-        this.association = associationOf(decl, target);
+        this.association = associationOf(variable.getTypedIdentifier(), target);
 
         this.inputSet = bpmn2.createInputSet();
         this.inputSet.getDataInputRefs().add(target);
+    }
+
+    public ItemDefinition typedefInput(VariableDeclaration decl) {
+        ItemDefinition typeDef = bpmn2.createItemDefinition();
+        typeDef.setId(itemId());
+        typeDef.setStructureRef(decl.getType());
+        return typeDef;
     }
 
     private DataInputAssociation associationOf(Property source, DataInput dataInput) {
@@ -71,23 +71,8 @@ public class InputAssignmentWriter {
         return dataInput;
     }
 
-    private Property varDecl(String varName, ItemDefinition typeDef) {
-        Property source = bpmn2.createProperty();
-        source.setId(propertyId(varName));
-        source.setName(varName);
-        source.setItemSubjectRef(typeDef);
-        return source;
-    }
-
-    private ItemDefinition typedefInput(String type) {
-        ItemDefinition typeDef = bpmn2.createItemDefinition();
-        typeDef.setId(itemId());
-        typeDef.setStructureRef(type);
-        return typeDef;
-    }
-
     private String dataInputId() {
-        return parentId + "_" + associationDeclaration.getRight() + "InputX";
+        return parentId + "_" + decl.getIdentifier() + "InputX";
     }
 
     private String itemId() {
@@ -98,12 +83,12 @@ public class InputAssignmentWriter {
         return "prop" + id + dataInputId();
     }
 
-    public Property getProperty() {
-        return decl;
-    }
-
     public DataInput getDataInput() {
         return target;
+    }
+
+    public ItemDefinition getItemDefinition() {
+        return typeDef;
     }
 
     public InputSet getInputSet() {
@@ -112,9 +97,5 @@ public class InputAssignmentWriter {
 
     public DataInputAssociation getAssociation() {
         return association;
-    }
-
-    public ItemDefinition getItemDefinition() {
-        return typeDef;
     }
 }

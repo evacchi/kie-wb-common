@@ -22,8 +22,8 @@ public class SequenceFlowPropertyWriter extends PropertyWriter {
     private BasePropertyWriter target;
     private BPMNEdge bpmnEdge;
 
-    public SequenceFlowPropertyWriter(SequenceFlow sequenceFlow) {
-        super(sequenceFlow);
+    public SequenceFlowPropertyWriter(SequenceFlow sequenceFlow, VariableScope variableScope) {
+        super(sequenceFlow, variableScope);
         this.sequenceFlow = sequenceFlow;
     }
 

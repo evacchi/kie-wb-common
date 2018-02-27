@@ -6,43 +6,37 @@ import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.OutputSet;
 import org.eclipse.bpmn2.Property;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Attribute;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssociationDeclaration;
+import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.VariableDeclaration;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.bpmn2;
 
 public class OutputAssignmentWriter {
 
     private final String parentId;
-    private final AssociationDeclaration associationDeclaration;
     private final DataOutputAssociation association;
-    private final Property decl;
+    private final VariableDeclaration decl;
     private final OutputSet outputSet;
     private final DataOutput source;
     private ItemDefinition typeDef;
 
     public OutputAssignmentWriter(
             String parentId,
-            AssociationDeclaration associationDeclaration,
-            String type) {
+            VariableDeclaration decl,
+            VariableScope.Variable variable) {
         this.parentId = parentId;
-
-        this.associationDeclaration = associationDeclaration;
+        this.decl = decl;
 
         // first we declare the type of this assignment
-        this.typeDef = typedefOutput(type);
-
-        // then we declare a name (a variable) with that type,
-        // e.g. myTarget:java.lang.String
-        this.decl = varDecl(associationDeclaration.getRight(), typeDef);
+        this.typeDef = typedefOutput(decl);
 
         // then we declare the input that will provide
         // the value that we assign to `source`
         // e.g. myTarget
-        this.source = writeOutputTo(associationDeclaration.getLeft(), typeDef);
+        this.source = writeOutputTo(decl.getIdentifier(), typeDef);
 
         // then we create the actual association between the two
         // e.g. mySource := myTarget (or, to put it differently, myTarget -> mySource)
-        this.association = associationOf(decl, source);
+        this.association = associationOf(variable.getTypedIdentifier(), source);
 
         this.outputSet = bpmn2.createOutputSet();
         this.outputSet.getDataOutputRefs().add(source);
@@ -79,15 +73,15 @@ public class OutputAssignmentWriter {
         return source;
     }
 
-    private ItemDefinition typedefOutput(String type) {
+    private ItemDefinition typedefOutput(VariableDeclaration decl) {
         ItemDefinition typeDef = bpmn2.createItemDefinition();
         typeDef.setId(itemId());
-        typeDef.setStructureRef(type);
+        typeDef.setStructureRef(decl.getType());
         return typeDef;
     }
 
     private String dataOutputId() {
-        return parentId + "_" + associationDeclaration.getLeft() + "OutputX";
+        return parentId + "_" + decl.getIdentifier() + "OutputX";
     }
 
     private String itemId() {
@@ -96,10 +90,6 @@ public class OutputAssignmentWriter {
 
     private String propertyId(String id) {
         return "prop_" + id + dataOutputId();
-    }
-
-    public Property getProperty() {
-        return decl;
     }
 
     public DataOutput getDataOutput() {

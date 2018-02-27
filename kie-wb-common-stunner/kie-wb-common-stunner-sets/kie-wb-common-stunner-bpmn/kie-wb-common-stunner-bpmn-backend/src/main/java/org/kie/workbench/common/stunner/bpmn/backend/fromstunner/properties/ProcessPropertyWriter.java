@@ -16,7 +16,6 @@ import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.ExtensionAttributeValue;
 import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Process;
 import org.eclipse.bpmn2.Property;
@@ -45,8 +44,8 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
     private Map<String, BasePropertyWriter> childElements = new HashMap<>();
     private Collection<ElementParameters> simulationParameters = new ArrayList<>();
 
-    public ProcessPropertyWriter(Process process) {
-        super(process);
+    public ProcessPropertyWriter(Process process, VariableScope variableScope) {
+        super(process, variableScope);
         this.process = process;
 
         this.bpmnDiagram = di.createBPMNDiagram();
@@ -56,7 +55,17 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         bpmnDiagram.setPlane(bpmnPlane);
     }
 
+    @Override
+    public BaseElement getElement() {
+        return getProcess();
+    }
+
     public Process getProcess() {
+        List<Property> properties = process.getProperties();
+        variableScope.getVariables().forEach(v -> {
+            properties.add(v.getTypedIdentifier());
+            addBaseElement(v.getTypeDeclaration());
+        });
         return process;
     }
 
@@ -158,21 +167,11 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         return "<![CDATA[" + original + "]]>";
     }
 
-    // fixme verify if this is necessary
     public void setProcessVariables(ProcessVariables processVariables) {
         String value = processVariables.getValue();
         DeclarationList declarationList = DeclarationList.fromString(value);
         declarationList.getDeclarations().forEach(decl -> {
-            ItemDefinition typeDef = bpmn2.createItemDefinition();
-            typeDef.setId("_" + decl.getIdentifier() + "Item");
-            typeDef.setStructureRef(decl.getType());
-
-            Property property = bpmn2.createProperty();
-            property.setId(decl.getIdentifier());
-            property.setItemSubjectRef(typeDef);
-
-            process.getProperties().add(property);
-            this.addBaseElement(typeDef);
+            variableScope.declare(this.process.getId(), decl.getIdentifier(), decl.getType());
         });
     }
 

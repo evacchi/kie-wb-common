@@ -24,36 +24,36 @@ import java.util.stream.Collectors;
 
 public class DeclarationList {
 
-    private final List<AssignmentDeclaration> declarations;
+    private final List<VariableDeclaration> declarations;
 
     public DeclarationList() {
         this.declarations = Collections.emptyList();
     }
 
-    public DeclarationList(List<AssignmentDeclaration> declarations) {
+    public DeclarationList(List<VariableDeclaration> declarations) {
         this.declarations = declarations;
     }
 
-    public String lookup(String identifier) {
+    public VariableDeclaration lookup(String identifier) {
         return declarations.stream().filter(d -> identifier.equals(d.getIdentifier()))
-                .findFirst().map(AssignmentDeclaration::getType).orElse(null);
+                .findFirst().orElse(null);
     }
 
-    public Collection<AssignmentDeclaration> getDeclarations() {
+    public Collection<VariableDeclaration> getDeclarations() {
         return declarations;
     }
 
     @Override
     public String toString() {
         return declarations.stream()
-                .map(AssignmentDeclaration::toString)
+                .map(VariableDeclaration::toString)
                 .collect(Collectors.joining(","));
     }
 
     public static DeclarationList fromString(String encoded) {
         return new DeclarationList(
                 Arrays.asList(encoded.split(",")).stream()
-                        .map(AssignmentDeclaration::fromString)
+                        .map(VariableDeclaration::fromString)
                         .collect(Collectors.toList()));
     }
 }

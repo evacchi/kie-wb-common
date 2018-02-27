@@ -21,6 +21,7 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BusinessRuleTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ScriptTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.UserTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
@@ -39,6 +40,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class TaskConverter {
 
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public TaskConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public PropertyWriter toFlowElement(Node<View<BaseTask>, ?> node) {
         return NodeMatch.fromNode(BaseTask.class, PropertyWriter.class)
                 .when(NoneTask.class, this::noneTask)
@@ -52,7 +59,7 @@ public class TaskConverter {
         org.eclipse.bpmn2.UserTask task = bpmn2.createUserTask();
         task.setId(n.getUUID());
         UserTask definition = n.getContent().getDefinition();
-        UserTaskPropertyWriter p = new UserTaskPropertyWriter(task);
+        UserTaskPropertyWriter p = propertyWriterFactory.of(task);
 
         TaskGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -85,7 +92,7 @@ public class TaskConverter {
         org.eclipse.bpmn2.BusinessRuleTask task = bpmn2.createBusinessRuleTask();
         task.setId(n.getUUID());
         BusinessRuleTask definition = n.getContent().getDefinition();
-        BusinessRuleTaskPropertyWriter p = new BusinessRuleTaskPropertyWriter(task);
+        BusinessRuleTaskPropertyWriter p = propertyWriterFactory.of(task);
 
         TaskGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -112,7 +119,7 @@ public class TaskConverter {
         org.eclipse.bpmn2.ScriptTask task = bpmn2.createScriptTask();
         task.setId(n.getUUID());
         ScriptTask definition = n.getContent().getDefinition();
-        ScriptTaskPropertyWriter p = new ScriptTaskPropertyWriter(task);
+        ScriptTaskPropertyWriter p = propertyWriterFactory.of(task);
 
         TaskGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -133,7 +140,7 @@ public class TaskConverter {
         Task task = bpmn2.createTask();
         task.setId(n.getUUID());
         NoneTask definition = n.getContent().getDefinition();
-        ActivityPropertyWriter p = new ActivityPropertyWriter(task);
+        ActivityPropertyWriter p =  propertyWriterFactory.of(task);
         p.setName(definition.getGeneral().getName().getValue());
         p.setBounds(n.getContent().getBounds());
 

@@ -30,6 +30,8 @@ import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.Acti
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BasePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.BoundaryEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.LanePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
@@ -42,24 +44,27 @@ public class ProcessConverterFactory {
     private final LaneConverter laneConverter;
 
     private final SequenceFlowConverter sequenceFlowConverter;
+    private final PropertyWriterFactory propertyWriterFactory;
 
-    public ProcessConverterFactory(DefinitionsBuildingContext context) {
+    public ProcessConverterFactory(DefinitionsBuildingContext context, PropertyWriterFactory propertyWriterFactory) {
         this.context = context;
+        this.propertyWriterFactory = propertyWriterFactory;
 
         this.viewDefinitionConverter =
                 new ViewDefinitionConverter(
                         context,
+                        propertyWriterFactory,
                         this);
 
         this.laneConverter =
-                new LaneConverter();
+                new LaneConverter(propertyWriterFactory);
 
         this.sequenceFlowConverter =
-                new SequenceFlowConverter();
+                new SequenceFlowConverter(propertyWriterFactory);
     }
 
     public SubProcessConverter subProcessConverter() {
-        return new SubProcessConverter(context, this);
+        return new SubProcessConverter(context, propertyWriterFactory, this);
     }
 
     public void convertChildNodes(

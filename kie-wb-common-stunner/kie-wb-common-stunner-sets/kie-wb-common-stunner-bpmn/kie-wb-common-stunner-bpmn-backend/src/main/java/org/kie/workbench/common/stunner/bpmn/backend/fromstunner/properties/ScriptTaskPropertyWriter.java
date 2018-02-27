@@ -17,24 +17,16 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.ScriptTask;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.impl.EStructuralFeatureImpl;
-import org.eclipse.emf.ecore.util.FeatureMap;
-import org.jboss.drools.DroolsPackage;
-import org.jboss.drools.OnEntryScriptType;
-import org.jboss.drools.OnExitScriptType;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.CustomElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.properties.Scripts;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.ScriptTypeValue;
-
-import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.droolsFactory;
 
 public class ScriptTaskPropertyWriter extends ActivityPropertyWriter {
 
     private final ScriptTask scriptTask;
 
-    public ScriptTaskPropertyWriter(ScriptTask scriptTask) {
-        super(scriptTask);
+    public ScriptTaskPropertyWriter(ScriptTask scriptTask, VariableScope variableScope) {
+        super(scriptTask, variableScope);
         this.scriptTask = scriptTask;
     }
 

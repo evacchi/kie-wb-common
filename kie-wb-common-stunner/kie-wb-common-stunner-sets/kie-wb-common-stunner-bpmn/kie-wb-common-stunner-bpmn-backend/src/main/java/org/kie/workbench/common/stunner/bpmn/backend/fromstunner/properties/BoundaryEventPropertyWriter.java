@@ -17,9 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties;
 
 import org.eclipse.bpmn2.BoundaryEvent;
-import org.eclipse.bpmn2.CatchEvent;
 import org.eclipse.bpmn2.EventDefinition;
-import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factories.dc;
 
@@ -27,8 +25,8 @@ public class BoundaryEventPropertyWriter extends CatchEventPropertyWriter {
 
     private final BoundaryEvent event;
 
-    public BoundaryEventPropertyWriter(BoundaryEvent event) {
-        super(event);
+    public BoundaryEventPropertyWriter(BoundaryEvent event, VariableScope variableScope) {
+        super(event, variableScope);
         this.event = event;
     }
 

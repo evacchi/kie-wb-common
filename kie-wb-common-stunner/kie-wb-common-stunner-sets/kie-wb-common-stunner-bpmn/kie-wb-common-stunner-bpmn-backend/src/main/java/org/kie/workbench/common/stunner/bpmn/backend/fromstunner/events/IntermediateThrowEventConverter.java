@@ -19,6 +19,7 @@ package org.kie.workbench.common.stunner.bpmn.backend.fromstunner.events;
 import org.eclipse.bpmn2.IntermediateThrowEvent;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.fromstunner.properties.ThrowEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.IntermediateMessageEventThrowing;
@@ -32,6 +33,12 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public class IntermediateThrowEventConverter {
 
+    private final PropertyWriterFactory propertyWriterFactory;
+
+    public IntermediateThrowEventConverter(PropertyWriterFactory propertyWriterFactory) {
+        this.propertyWriterFactory = propertyWriterFactory;
+    }
+
     public PropertyWriter toFlowElement(Node<View<BaseThrowingIntermediateEvent>, ?> node) {
         return NodeMatch.fromNode(BaseThrowingIntermediateEvent.class, PropertyWriter.class)
                 .when(IntermediateMessageEventThrowing.class, this::messageEvent)
@@ -44,7 +51,7 @@ public class IntermediateThrowEventConverter {
         event.setId(n.getUUID());
 
         IntermediateSignalEventThrowing definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());
@@ -65,7 +72,7 @@ public class IntermediateThrowEventConverter {
         event.setId(n.getUUID());
 
         IntermediateMessageEventThrowing definition = n.getContent().getDefinition();
-        ThrowEventPropertyWriter p = new ThrowEventPropertyWriter(event);
+        ThrowEventPropertyWriter p = propertyWriterFactory.of(event);
 
         BPMNGeneralSet general = definition.getGeneral();
         p.setName(general.getName().getValue());

@@ -28,8 +28,8 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
     private final CatchEvent event;
     private ElementParameters simulationParameters;
 
-    public CatchEventPropertyWriter(CatchEvent event) {
-        super(event);
+    public CatchEventPropertyWriter(CatchEvent event, VariableScope variableScope) {
+        super(event, variableScope);
         this.event = event;
     }
 
@@ -39,13 +39,14 @@ public class CatchEventPropertyWriter extends EventPropertyWriter {
                 .stream()
                 .map(declaration -> new OutputAssignmentWriter(
                         flowElement.getId(),
-                        declaration,
                         assignmentsInfo
                                 .getOutputs()
-                                .lookup(declaration.getLeft())))
+                                .lookup(declaration.getLeft()),
+                        variableScope.lookup(declaration.getRight())
+                ))
                 .forEach(doa -> {
                     this.addBaseElement(doa.getItemDefinition());
-                    this.addBaseElement(doa.getProperty());
+                    //this.addBaseElement(doa.getProperty());
                     this.addBaseElement(doa.getDataOutput());
                     event.setOutputSet(doa.getOutputSet());
                     event.getDataOutputAssociation().add(doa.getAssociation());
