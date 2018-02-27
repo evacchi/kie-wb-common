@@ -10,11 +10,11 @@ import static org.kie.workbench.common.stunner.bpmn.backend.fromstunner.Factorie
 
 public interface VariableScope {
 
-    public void declare(String scopeId, String identifier, String type);
+    public Variable declare(String scopeId, String identifier, String type);
 
     public Variable lookup(String identifier);
 
-    public Collection<Variable> getVariables();
+    public Collection<Variable> getVariables(String scopeId);
 
     public static class Variable {
 
@@ -43,6 +43,10 @@ public interface VariableScope {
 
         public Property getTypedIdentifier() {
             return typedIdentifier;
+        }
+
+        public String getParentScopeId() {
+            return parentScopeId;
         }
     }
 }

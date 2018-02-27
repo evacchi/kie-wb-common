@@ -55,17 +55,7 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
         bpmnDiagram.setPlane(bpmnPlane);
     }
 
-    @Override
-    public BaseElement getElement() {
-        return getProcess();
-    }
-
     public Process getProcess() {
-        List<Property> properties = process.getProperties();
-        variableScope.getVariables().forEach(v -> {
-            properties.add(v.getTypedIdentifier());
-            addBaseElement(v.getTypeDeclaration());
-        });
         return process;
     }
 
@@ -170,8 +160,13 @@ public class ProcessPropertyWriter extends BasePropertyWriter implements Element
     public void setProcessVariables(ProcessVariables processVariables) {
         String value = processVariables.getValue();
         DeclarationList declarationList = DeclarationList.fromString(value);
+
+        List<Property> properties = process.getProperties();
         declarationList.getDeclarations().forEach(decl -> {
-            variableScope.declare(this.process.getId(), decl.getIdentifier(), decl.getType());
+            VariableScope.Variable variable =
+                    variableScope.declare(this.process.getId(), decl.getIdentifier(), decl.getType());
+            properties.add(variable.getTypedIdentifier());
+            addBaseElement(variable.getTypeDeclaration());
         });
     }
 

@@ -10,7 +10,6 @@ import bpsim.ElementParameters;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.Documentation;
 import org.eclipse.bpmn2.FlowElement;
-import org.eclipse.bpmn2.ItemDefinition;
 import org.eclipse.bpmn2.LaneSet;
 import org.eclipse.bpmn2.Property;
 import org.eclipse.bpmn2.SubProcess;
@@ -114,17 +113,13 @@ public class SubProcessPropertyWriter extends PropertyWriter implements ElementC
     public void setProcessVariables(ProcessVariables processVariables) {
         String value = processVariables.getValue();
         DeclarationList declarationList = DeclarationList.fromString(value);
+
+        List<Property> properties = process.getProperties();
         declarationList.getDeclarations().forEach(decl -> {
-            ItemDefinition typeDef = bpmn2.createItemDefinition();
-            typeDef.setId("_" + decl.getIdentifier() + "Item");
-            typeDef.setStructureRef(decl.getType());
-
-            Property property = bpmn2.createProperty();
-            property.setId(decl.getIdentifier());
-            property.setItemSubjectRef(typeDef);
-
-            process.getProperties().add(property);
-            this.addBaseElement(typeDef);
+            VariableScope.Variable variable =
+                    variableScope.declare(this.process.getId(), decl.getIdentifier(), decl.getType());
+            properties.add(variable.getTypedIdentifier());
+            addBaseElement(variable.getTypeDeclaration());
         });
     }
 
