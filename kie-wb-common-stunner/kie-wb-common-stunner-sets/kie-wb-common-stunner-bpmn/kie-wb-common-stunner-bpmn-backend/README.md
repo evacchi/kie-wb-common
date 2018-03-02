@@ -14,19 +14,30 @@ Enable with flag:
 
 #### Converters
 
+
 - A **Converter** is a class with a `convert` method, that converts an Eclipse BPMN2 object into either:
 
    - a `Node<View<BPMNDiagramImpl>, ?>` in the case of a `Process`
    - a `Node<? extends View<? extends BPMNViewDefinition>>` instance in the case of a FlowElement 
      (e.g. `StartEvent`, `Task`, etc.), a Lane, or a SubProcess
    - an `Edge<? extends View<? extends BPMNViewDefinition>, ?>` in the case of a SequenceFlow
-   
+
+- Converter classes form a delegation tree. The root of such a tree is the converter for the Diagram root, called "Process" 
+when converting *to* the Stunner model, called "ViewDefinitionConverter" when converting *from* the Stunner model. 
+The delegation tree follows the hierarchy and structure of the BPMN data model. 
+
+- For instance, a Process converter will convert all of the FlowElements contained in the Process section. 
+A suitable conversion method is invoked, depending on the type of each FlowElement. The way matching is done, 
+is describe through code, using a `Match` helper (see Utilities section)
+
 - Each converter is responsible of handling a set of classes from Eclipse BPMN2 model. For instance,
   `TaskConverter` handles `Task`s. It instances a `Node`/`Edge` object (throught the `TypedFactoryManager` -- see below)
   for the recognized type, and fills its fields with all the supported values in the original model.
   At the end of the conversion it usually **return the element**, and/or, in some cases, it may **add it to the canvas** 
   (e.g., subprocess converters return their subprocess node, but also add in their child nodes).
-  
+
+
+
   Fields from the Eclipse BPMN2 model, for convience, are generally accessed through a `PropertyReader`. 
   
   
