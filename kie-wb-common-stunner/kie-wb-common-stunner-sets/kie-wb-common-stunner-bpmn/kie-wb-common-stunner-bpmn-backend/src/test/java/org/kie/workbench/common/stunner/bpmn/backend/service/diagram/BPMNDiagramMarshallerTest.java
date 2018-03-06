@@ -107,6 +107,8 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.Diagram
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.IsInterrupting;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.message.MessageRef;
 import org.kie.workbench.common.stunner.bpmn.definition.property.event.signal.SignalRef;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.CancellingTimerEventExecutionSet;
+import org.kie.workbench.common.stunner.bpmn.definition.property.event.timer.TimerSettings;
 import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGeneralSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.task.AdHocSubprocessTaskExecutionSet;
@@ -219,6 +221,7 @@ public class BPMNDiagramMarshallerTest {
     private static final String BPMN_MAGNETDOCKERS = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/magnetDockers.bpmn";
     private static final String BPMN_MAGNETSINLANE = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/magnetsInLane.bpmn";
     private static final String BPMN_ENDERROR_EVENT = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/endErrorEvent.bpmn";
+    private static final String BPMN_EVENT_DEFINITION_REF = "org/kie/workbench/common/stunner/bpmn/backend/service/diagram/eventDefinitionRef.bpmn";
 
     private static final String NEW_LINE = System.lineSeparator();
 
@@ -1813,6 +1816,18 @@ public class BPMNDiagramMarshallerTest {
                       7);
         assertEquals("Lanes test",
                      diagram.getMetadata().getTitle());
+    }
+
+    @Test
+    public void testUnmarshallEventDefinitionRef() throws Exception {
+        Diagram<Graph, Metadata> diagram = unmarshall(BPMN_EVENT_DEFINITION_REF);
+        Node<? extends Definition<IntermediateTimerEvent>, ?> intermediateTimerEvent =
+                diagram.getGraph().getNode("FLOWNODE_9e71d692-986c-11e7-40d3-005056844bde");
+        IntermediateTimerEvent definition = intermediateTimerEvent.getContent().getDefinition();
+        CancellingTimerEventExecutionSet executionSet = definition.getExecutionSet();
+        TimerSettings timerSettings = executionSet.getTimerSettings();
+        String timeDate = timerSettings.getValue().getTimeDate();
+        assertNotNull(timeDate);
     }
 
     @Test
