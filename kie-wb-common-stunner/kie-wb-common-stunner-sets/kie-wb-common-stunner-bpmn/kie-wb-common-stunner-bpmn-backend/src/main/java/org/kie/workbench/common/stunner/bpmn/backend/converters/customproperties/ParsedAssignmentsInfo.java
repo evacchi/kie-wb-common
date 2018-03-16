@@ -183,7 +183,9 @@ public class ParsedAssignmentsInfo {
 
     @Override
     public String toString() {
-        if (isEmpty()) return "";
+        if (isEmpty()) {
+            return "";
+        }
         return encodeStringRepresentation(
                 inputs,
                 outputs,
