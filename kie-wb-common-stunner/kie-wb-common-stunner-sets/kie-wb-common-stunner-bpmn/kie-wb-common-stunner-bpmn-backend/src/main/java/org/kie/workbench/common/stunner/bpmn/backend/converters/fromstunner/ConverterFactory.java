@@ -101,7 +101,7 @@ public class ConverterFactory {
     }
 
     public SubProcessConverter subProcessConverter() {
-        return new SubProcessConverter(context, propertyWriterFactory, this);
+        return new SubProcessConverter(context, propertyWriterFactory);
     }
 
     public SequenceFlowConverter sequenceFlowConverter() {

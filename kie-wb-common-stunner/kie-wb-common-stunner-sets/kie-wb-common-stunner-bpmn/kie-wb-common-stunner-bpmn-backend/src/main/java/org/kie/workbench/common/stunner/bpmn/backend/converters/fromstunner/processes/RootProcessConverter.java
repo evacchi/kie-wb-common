@@ -16,26 +16,39 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.processes;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.eclipse.bpmn2.Process;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.DefinitionsBuildingContext;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ElementContainer;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ActivityPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BasePropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BoundaryEventPropertyWriter;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNDiagramImpl;
+import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.property.diagram.DiagramSet;
 import org.kie.workbench.common.stunner.bpmn.definition.property.variables.ProcessData;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.definition.Definition;
+import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
-public class RootProcessConverter extends AbstractProcessConverter {
+public class RootProcessConverter {
 
     private final DefinitionsBuildingContext context;
     private final PropertyWriterFactory propertyWriterFactory;
+    private final ConverterFactory converterFactory;
 
     public RootProcessConverter(DefinitionsBuildingContext context, PropertyWriterFactory propertyWriterFactory, ConverterFactory converterFactory) {
-        super(converterFactory);
+        this.converterFactory = converterFactory;
         this.context = context;
         this.propertyWriterFactory = propertyWriterFactory;
     }
@@ -43,8 +56,8 @@ public class RootProcessConverter extends AbstractProcessConverter {
     public ProcessPropertyWriter convertProcess() {
         ProcessPropertyWriter processRoot = convertProcessNode(context.firstNode());
 
-        super.convertChildNodes(processRoot, context.nodes(), context.lanes());
-        super.convertEdges(processRoot, context);
+        convertChildNodes(processRoot, context.nodes(), context.lanes());
+        convertEdges(processRoot, context);
 
         return processRoot;
     }
@@ -71,5 +84,55 @@ public class RootProcessConverter extends AbstractProcessConverter {
         p.setProcessVariables(processData.getProcessVariables());
 
         return p;
+    }
+
+    public void convertChildNodes(
+            ElementContainer p,
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> nodes,
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes) {
+        nodes.map(converterFactory.viewDefinitionConverter()::toFlowElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .forEach(p::addChildElement);
+
+        convertLanes(lanes, p);
+    }
+
+    private void convertLanes(
+            Stream<? extends Node<View<? extends BPMNViewDefinition>, ?>> lanes,
+            ElementContainer p) {
+        List<LanePropertyWriter> collect = lanes
+                .map(converterFactory.laneConverter()::toElement)
+                .filter(Result::notIgnored)
+                .map(Result::value)
+                .collect(Collectors.toList());
+
+        p.addLaneSet(collect);
+    }
+
+    public void convertEdges(ElementContainer p, DefinitionsBuildingContext context) {
+        context.childEdges()
+                .forEach(e -> {
+                    BasePropertyWriter pSrc = p.getChildElement(e.getSourceNode().getUUID());
+                    // if it's null, then it's a root: skip it
+                    if (pSrc != null) {
+                        BasePropertyWriter pTgt = p.getChildElement(e.getTargetNode().getUUID());
+                        pTgt.setParent(pSrc);
+                    }
+                });
+
+        context.dockEdges()
+                .forEach(e -> {
+                    ActivityPropertyWriter pSrc =
+                            (ActivityPropertyWriter) p.getChildElement(e.getSourceNode().getUUID());
+                    BoundaryEventPropertyWriter pTgt =
+                            (BoundaryEventPropertyWriter) p.getChildElement(e.getTargetNode().getUUID());
+
+                    pTgt.setParentActivity(pSrc);
+                });
+
+        context.edges()
+                .map(e -> converterFactory.sequenceFlowConverter().toFlowElement(e, p))
+                .forEach(p::addChildElement);
     }
 }

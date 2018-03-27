@@ -36,17 +36,14 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
-public class SubProcessConverter extends AbstractProcessConverter {
+public class SubProcessConverter {
 
     private final DefinitionsBuildingContext context;
     private final PropertyWriterFactory propertyWriterFactory;
 
     public SubProcessConverter(
             DefinitionsBuildingContext context,
-            PropertyWriterFactory propertyWriterFactory,
-            ConverterFactory converterFactory) {
-
-        super(converterFactory);
+            PropertyWriterFactory propertyWriterFactory) {
         this.context = context;
         this.propertyWriterFactory = propertyWriterFactory;
     }
@@ -58,11 +55,6 @@ public class SubProcessConverter extends AbstractProcessConverter {
                         .when(EventSubprocess.class, this::convertEventSubprocessNode)
                         .when(AdHocSubprocess.class, this::convertAdHocSubprocessNode)
                         .apply(node).value();
-
-        DefinitionsBuildingContext subContext = context.withRootNode(node);
-
-        super.convertChildNodes(processRoot, subContext.nodes(), subContext.lanes());
-        super.convertEdges(processRoot, subContext);
 
         return processRoot;
     }
