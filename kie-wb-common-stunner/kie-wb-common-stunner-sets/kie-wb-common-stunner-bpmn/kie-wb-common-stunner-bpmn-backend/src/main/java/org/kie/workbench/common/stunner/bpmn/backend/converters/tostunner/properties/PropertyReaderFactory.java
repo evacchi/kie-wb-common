@@ -89,7 +89,12 @@ public class PropertyReaderFactory {
                 .filter(wid -> wid.getName().equals(serviceTaskName))
                 .findFirst();
         if (def.isPresent()) {
-            return new ServiceTaskPropertyReader(el, def.get(), plane, definitionResolver);
+            WorkItemDefinition workItemDefinition = def.get();
+            if (workItemDefinition.isTyped()) {
+                return new TypedServiceTaskPropertyReader(el, workItemDefinition, plane, definitionResolver);
+            } else {
+                return new ServiceTaskPropertyReader(el, workItemDefinition, plane, definitionResolver);
+            }
         } else {
             throw new NoSuchElementException("Cannot find WorkItemDefinition for " + serviceTaskName);
         }

@@ -35,6 +35,9 @@ public class WorkItemDefinition {
     private String defaultHandler;
     private String parameters;
     private String results;
+    private String typedParameters;
+    private String typedResults;
+
     private Dependencies dependencies;
 
     public void setUri(String uri) {
@@ -81,10 +84,21 @@ public class WorkItemDefinition {
         return this;
     }
 
+    public WorkItemDefinition setTypedParameters(String typedParameters) {
+        this.typedParameters = typedParameters;
+        return this;
+    }
+
     public WorkItemDefinition setResults(String results) {
         this.results = results;
         return this;
     }
+
+    public WorkItemDefinition setTypedResults(String typedResults) {
+        this.typedResults = typedResults;
+        return this;
+    }
+
 
     public WorkItemDefinition setDependencies(Dependencies dependencies) {
         this.dependencies = dependencies;
@@ -127,12 +141,24 @@ public class WorkItemDefinition {
         return parameters;
     }
 
+    public String getTypedParameters() {
+        return typedParameters;
+    }
+
+    public String getTypedResults() {
+        return typedResults;
+    }
+
     public String getResults() {
         return results;
     }
 
     public Dependencies getDependencies() {
         return dependencies;
+    }
+
+    public boolean isTyped() {
+        return typedParameters != null || typedResults != null;
     }
 
     @Override
@@ -146,7 +172,9 @@ public class WorkItemDefinition {
                                          (null != iconDefinition) ? iconDefinition.hashCode() : 0,
                                          (null != defaultHandler) ? defaultHandler.hashCode() : 0,
                                          (null != parameters) ? parameters.hashCode() : 0,
+                                         (null != typedParameters) ? typedParameters.hashCode() : 0,
                                          (null != results) ? results.hashCode() : 0,
+                                         (null != typedResults) ? typedResults.hashCode() : 0,
                                          (null != dependencies) ? dependencies.hashCode() : 0);
     }
 
@@ -163,7 +191,9 @@ public class WorkItemDefinition {
                     Objects.equals(iconDefinition, other.iconDefinition) &&
                     Objects.equals(defaultHandler, other.defaultHandler) &&
                     Objects.equals(parameters, other.parameters) &&
+                    Objects.equals(typedParameters, other.typedParameters) &&
                     Objects.equals(results, other.results) &&
+                    Objects.equals(typedResults, other.typedResults) &&
                     Objects.equals(dependencies, other.dependencies);
         }
         return false;
