@@ -1,5 +1,12 @@
 [
   [
+    "name" : "ExtendedEmail",
+    "typedParameters" : "org.jbpm.process.workitem.email.typed.EmailWorkItemHandler",
+    "displayName" : "Email",
+    "icon" : "defaultemailicon.gif"
+  ],
+
+  [
     "name" : "Email",
     "parameters" : [
       "From" : new StringDataType(),

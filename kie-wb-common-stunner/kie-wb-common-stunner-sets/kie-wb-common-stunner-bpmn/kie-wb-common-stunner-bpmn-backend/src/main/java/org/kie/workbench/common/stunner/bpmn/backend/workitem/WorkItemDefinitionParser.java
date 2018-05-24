@@ -100,8 +100,14 @@ public class WorkItemDefinitionParser {
         workItem.setIconDefinition(iconDefinition);
         // Parameters.
         workItem.setParameters(parseParameters(workDefinition.getParameters()));
-        workItem.setTypedParameters(workDefinition.getTypedParameters().getCanonicalName());
-        workItem.setTypedResults(workDefinition.getTypedResults().getCanonicalName());
+        Class<?> typedParameters = workDefinition.getTypedParameters();
+        if (typedParameters != null) {
+            workItem.setTypedParameters(typedParameters.getCanonicalName());
+        }
+        Class<?> typedResults = workDefinition.getTypedResults();
+        if (typedResults != null) {
+            workItem.setTypedResults(typedResults.getCanonicalName());
+        }
         // Results.
         workItem.setResults(parseParameters(workDefinition.getResults()));
         // Dependencies.

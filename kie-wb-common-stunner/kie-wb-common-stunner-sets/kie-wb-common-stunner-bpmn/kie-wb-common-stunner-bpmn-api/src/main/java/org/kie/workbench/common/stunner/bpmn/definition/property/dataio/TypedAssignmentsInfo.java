@@ -16,6 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.definition.property.dataio;
 
+import java.util.Objects;
+
 import javax.annotation.Nullable;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -30,15 +32,12 @@ import org.kie.workbench.common.stunner.core.definition.annotation.Property;
 @FieldDefinition(i18nMode = I18nMode.OVERRIDE_I18N_KEY)
 public class TypedAssignmentsInfo extends AssignmentsInfo {
 
-    private final String inputTypeName;
+    private String inputTypeName;
 
-    private final String outputTypeName;
+    private String outputTypeName;
 
-    public TypedAssignmentsInfo(
-            @Nullable String inputTypeName,
-            @Nullable String outputTypeName) {
-        this.inputTypeName = inputTypeName;
-        this.outputTypeName = outputTypeName;
+    public TypedAssignmentsInfo() {
+        super();
     }
 
     public TypedAssignmentsInfo(
@@ -50,11 +49,47 @@ public class TypedAssignmentsInfo extends AssignmentsInfo {
         this.outputTypeName = outputTypeName;
     }
 
+    public void setInputTypeName(String inputTypeName) {
+        this.inputTypeName = inputTypeName;
+    }
+
+    public void setOutputTypeName(String outputTypeName) {
+        this.outputTypeName = outputTypeName;
+    }
+
     public String getInputTypeName() {
         return inputTypeName;
     }
 
     public String getOutputTypeName() {
         return outputTypeName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof TypedAssignmentsInfo) {
+            TypedAssignmentsInfo other = (TypedAssignmentsInfo) o;
+            return super.equals(o) &&
+                    Objects.equals(inputTypeName, other.inputTypeName) &&
+                    Objects.equals(outputTypeName, other.outputTypeName);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getValue(),
+                inputTypeName,
+                outputTypeName);
+    }
+
+    @Override
+    public String toString() {
+        return "TypedAssignmentsInfo{" +
+                "value='" + getValue() + '\'' +
+                "inputTypeName='" + inputTypeName + '\'' +
+                ", outputTypeName='" + outputTypeName + '\'' +
+                "} ";
     }
 }
