@@ -16,7 +16,11 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.workitem;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +43,8 @@ import org.jbpm.process.core.datatype.impl.type.EnumDataType;
 import org.jbpm.process.core.impl.ParameterDefinitionImpl;
 import org.jbpm.process.workitem.WorkDefinitionImpl;
 import org.jbpm.util.WidMVELEvaluator;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.DeclarationList;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.VariableDeclaration;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNCategories;
 import org.kie.workbench.common.stunner.bpmn.workitem.IconDefinition;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
@@ -98,18 +104,9 @@ public class WorkItemDefinitionParser {
         iconDefinition.setUri(icon);
         iconDefinition.setIconData(iconData);
         workItem.setIconDefinition(iconDefinition);
-        // Parameters.
-        workItem.setParameters(parseParameters(workDefinition.getParameters()));
-        Class<?> typedParameters = workDefinition.getTypedParameters();
-        if (typedParameters != null) {
-            workItem.setTypedParameters(typedParameters.getCanonicalName());
-        }
-        Class<?> typedResults = workDefinition.getTypedResults();
-        if (typedResults != null) {
-            workItem.setTypedResults(typedResults.getCanonicalName());
-        }
-        // Results.
-        workItem.setResults(parseParameters(workDefinition.getResults()));
+        readParameters(workDefinition, workItem);
+        readResults(workDefinition, workItem);
+
         // Dependencies.
         final String[] dependencies = workDefinition.getMavenDependencies();
         final List<Dependency> dependencyList = null == dependencies ?
@@ -120,6 +117,55 @@ public class WorkItemDefinitionParser {
                         .collect(Collectors.toList());
         workItem.setDependencies(new Dependencies(dependencyList));
         return workItem;
+    }
+
+    private static Stream<VariableDeclaration> introspect(String type) {
+        if (type == null) {
+            return Stream.empty();
+        }
+        try {
+            Class<?> t = Class.forName(type);
+            BeanInfo beanInfo = Introspector.getBeanInfo(t);
+            return Arrays.stream(beanInfo.getPropertyDescriptors())
+                    .filter(d -> !d.getName().equals("class"))
+                    .map(d -> new VariableDeclaration(
+                            d.getName(),
+                            d.getPropertyType().getCanonicalName()));
+        } catch (IntrospectionException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void readResults(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem) {
+        // Results.
+        Stream<VariableDeclaration> parameters = toDeclarations(workDefinition);
+        String typedResults = workDefinition.getTypedResults();
+        workItem.setTypedResults(typedResults);
+        Stream<VariableDeclaration> introspectedParams = introspect(typedResults);
+        DeclarationList declarationList = new DeclarationList(Stream.concat(parameters, introspectedParams));
+        String resultsString = declarationList.asString();
+        workItem.setResults(resultsString);
+    }
+
+    private static void readParameters(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem) {
+        // Parameters.
+        Stream<VariableDeclaration> parameters = toDeclarations(workDefinition);
+
+        String typedParameters = workDefinition.getTypedParameters();
+        workItem.setTypedParameters(typedParameters);
+        Stream<VariableDeclaration> introspectedParams = introspect(typedParameters);
+
+        DeclarationList declarationList = new DeclarationList(Stream.concat(parameters, introspectedParams));
+        String parametersString = declarationList.asString();
+        workItem.setParameters(parametersString);
+    }
+
+    private static Stream<VariableDeclaration> toDeclarations(WorkDefinitionImpl workDefinition) {
+        return workDefinition
+                .getParameters()
+                .stream()
+                .map(def -> new VariableDeclaration(
+                        def.getName(), def.getType().getStringType()));
     }
 
     private static Dependency parseDependency(final String raw) {
@@ -135,13 +181,6 @@ public class WorkItemDefinitionParser {
             result.setScope(gav[3]);
         }
         return result;
-    }
-
-    private static String parseParameters(final Collection<ParameterDefinition> parameters) {
-        return "|" + parameters.stream()
-                .map(param -> param.getName() + ":" + param.getType().getStringType())
-                .sorted(String::compareTo)
-                .collect(Collectors.joining(",")) + "|";
     }
 
     @SuppressWarnings("unchecked")
@@ -212,10 +251,19 @@ public class WorkItemDefinitionParser {
                       "parameters",
                       workDefinition::setParameters);
 
+        set(workDefinitionMap,
+                      "typedParameters",
+                      workDefinition::setTypedParameters);
+
         // Results.
         setParameters(workDefinitionMap,
                       "results",
                       workDefinition::setResults);
+
+        set(workDefinitionMap,
+            "typedResults",
+            workDefinition::setTypedResults);
+
 
         // Parameter values.
         final Map<String, Object> values = (Map<String, Object>) workDefinitionMap.get("parameterValues");

@@ -29,6 +29,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jbpm.process.workitem.WorkDefinitionImpl;
 import org.jbpm.process.workitem.WorkItemRepository;
+import org.kie.workbench.common.services.backend.project.ModuleClassLoaderHelper;
 import org.kie.workbench.common.stunner.bpmn.backend.workitem.WorkItemDefinitionParser;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
 import org.kie.workbench.common.stunner.bpmn.workitem.service.WorkItemDefinitionService;
@@ -41,13 +42,15 @@ public class WorkItemDefinitionRemoteService
             url -> new WorkItemsHolder(WorkItemRepository.getWorkDefinitions(url));
 
     private final Function<String, WorkItemsHolder> lookupService;
+    private final ModuleClassLoaderHelper moduleClassLoaderHelper;
 
     public WorkItemDefinitionRemoteService() {
-        this(DEFAULT_LOOKUP_SERVICE);
+        this(DEFAULT_LOOKUP_SERVICE, null);
     }
 
-    WorkItemDefinitionRemoteService(Function<String, WorkItemsHolder> lookupService) {
+    WorkItemDefinitionRemoteService(Function<String, WorkItemsHolder> lookupService, ModuleClassLoaderHelper moduleClassLoaderHelper) {
         this.lookupService = lookupService;
+        this.moduleClassLoaderHelper = moduleClassLoaderHelper;
     }
 
     @Override

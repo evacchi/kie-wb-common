@@ -88,7 +88,7 @@ public class TypedAssignmentsInfo extends AssignmentsInfo {
     public String toString() {
         return "TypedAssignmentsInfo{" +
                 "value='" + getValue() + '\'' +
-                "inputTypeName='" + inputTypeName + '\'' +
+                ", inputTypeName='" + inputTypeName + '\'' +
                 ", outputTypeName='" + outputTypeName + '\'' +
                 "} ";
     }

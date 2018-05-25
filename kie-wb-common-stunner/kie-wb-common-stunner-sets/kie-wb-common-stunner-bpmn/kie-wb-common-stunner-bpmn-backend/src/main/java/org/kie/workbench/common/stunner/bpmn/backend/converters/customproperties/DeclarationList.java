@@ -21,6 +21,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public class DeclarationList {
 
@@ -34,12 +37,16 @@ public class DeclarationList {
         this.declarations = declarations;
     }
 
+    public DeclarationList(Stream<VariableDeclaration> declarations) {
+        this.declarations = declarations.collect(toList());
+    }
+
     public static DeclarationList fromString(String encoded) {
         return new DeclarationList(
                 Arrays.stream(encoded.split(","))
                         .filter(s -> !s.isEmpty()) // "" makes no sense
                         .map(VariableDeclaration::fromString)
-                        .collect(Collectors.toList()));
+                        .collect(toList()));
     }
 
     public VariableDeclaration lookup(String identifier) {
@@ -53,8 +60,13 @@ public class DeclarationList {
 
     @Override
     public String toString() {
+        return asString();
+    }
+
+    public String asString() {
         return declarations.stream()
                 .map(VariableDeclaration::toString)
+                .sorted(String::compareTo)
                 .collect(Collectors.joining(","));
     }
 }

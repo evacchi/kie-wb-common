@@ -60,7 +60,7 @@ public class WorkItemDefinitionRemoteServiceTest {
                     put(WD1_NAME, wd1);
                     put(WD2_NAME, wd2);
                 }}));
-        tested = new WorkItemDefinitionRemoteService(lookupService);
+        tested = new WorkItemDefinitionRemoteService(lookupService, null);
     }
 
     @Test

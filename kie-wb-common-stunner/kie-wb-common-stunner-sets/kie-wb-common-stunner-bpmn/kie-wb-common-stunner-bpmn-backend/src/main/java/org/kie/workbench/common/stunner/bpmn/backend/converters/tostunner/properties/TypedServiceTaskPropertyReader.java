@@ -16,8 +16,13 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.bpmn2.Task;
 import org.eclipse.bpmn2.di.BPMNPlane;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomInput;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomInputDefinition;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.AssignmentsInfo;
 import org.kie.workbench.common.stunner.bpmn.definition.property.dataio.TypedAssignmentsInfo;
@@ -26,6 +31,8 @@ import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
 public class TypedServiceTaskPropertyReader extends ServiceTaskPropertyReader {
 
     private final WorkItemDefinition workItemDefinition;
+    final CustomInput<Object> typedParameters;
+    final CustomInput<Object> typedResults;
 
     public TypedServiceTaskPropertyReader(
             Task task,
@@ -34,14 +41,49 @@ public class TypedServiceTaskPropertyReader extends ServiceTaskPropertyReader {
             DefinitionResolver definitionResolver) {
         super(task, workItemDefinition, plane, definitionResolver);
         this.workItemDefinition = workItemDefinition;
+        this.typedParameters =
+                new JsonDefinition(workItemDefinition.getTypedParameters())
+                        .of(task);
+        this.typedResults =
+                new JsonDefinition(workItemDefinition.getTypedResults())
+                        .of(task);
     }
 
-    public AssignmentsInfo getAssignmentsInfo() {
+    public AssignmentsInfo getTypedAssignmentsInfo() {
         AssignmentsInfo assignmentsInfo = super.getAssignmentsInfo();
 
         return new TypedAssignmentsInfo(
                 assignmentsInfo.getValue(),
                 workItemDefinition.getTypedParameters(),
                 workItemDefinition.getTypedResults());
+    }
+
+    static class JsonDefinition extends CustomInputDefinition<Object> {
+
+        private final ObjectMapper mapper;
+        private final Class<?> classDef;
+
+        public JsonDefinition(String type) {
+            super("$" + type, type, null);
+            try {
+                this.classDef = Class.forName(type);
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException(e);
+            }
+            this.mapper = new ObjectMapper();
+        }
+
+        @Override
+        public Object getValue(Task element) {
+            Optional<String> stringValue = getStringValue(element);
+            if (stringValue.isPresent()) {
+                try {
+                    return mapper.readValue(stringValue.get(), classDef);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            return null;
+        }
     }
 }
