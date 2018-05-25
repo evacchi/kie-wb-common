@@ -67,18 +67,27 @@ public class WorkItemDefinitionParser {
                                                                          Pattern.UNICODE_CHARACTER_CLASS);
 
     public static Collection<WorkItemDefinition> parse(final String content,
+                                                       final ClassLoader moduleClassLoader,
                                                        final Function<WorkDefinitionImpl, String> uriProvider,
                                                        final Function<String, String> dataUriProvider) throws Exception {
         final Map<String, WorkDefinitionImpl> definitionMap = parseJBPMWorkItemDefinitions(content,
                                                                                            dataUriProvider);
         return definitionMap.values().stream()
                 .map(wid -> parse(wid,
+                                  moduleClassLoader,
                                   uriProvider,
                                   dataUriProvider))
                 .collect(Collectors.toList());
     }
 
+    public static WorkItemDefinition parse(final WorkDefinitionImpl content,
+                                           final Function<WorkDefinitionImpl, String> uriProvider,
+                                           final Function<String, String> dataUriProvider) {
+        return parse(content, null, uriProvider, dataUriProvider);
+    }
+
     public static WorkItemDefinition parse(final WorkDefinitionImpl workDefinition,
+                                           final ClassLoader moduleClassLoader,
                                            final Function<WorkDefinitionImpl, String> uriProvider,
                                            final Function<String, String> dataUriProvider) {
         final WorkItemDefinition workItem = new WorkItemDefinition();
@@ -104,8 +113,8 @@ public class WorkItemDefinitionParser {
         iconDefinition.setUri(icon);
         iconDefinition.setIconData(iconData);
         workItem.setIconDefinition(iconDefinition);
-        readParameters(workDefinition, workItem);
-        readResults(workDefinition, workItem);
+        readParameters(workDefinition, workItem, moduleClassLoader);
+        readResults(workDefinition, workItem, moduleClassLoader);
 
         // Dependencies.
         final String[] dependencies = workDefinition.getMavenDependencies();
@@ -119,12 +128,12 @@ public class WorkItemDefinitionParser {
         return workItem;
     }
 
-    private static Stream<VariableDeclaration> introspect(String type) {
+    private static Stream<VariableDeclaration> introspect(String type, ClassLoader moduleClassLoader) {
         if (type == null) {
             return Stream.empty();
         }
         try {
-            Class<?> t = Class.forName(type);
+            Class<?> t = moduleClassLoader.loadClass(type);
             BeanInfo beanInfo = Introspector.getBeanInfo(t);
             return Arrays.stream(beanInfo.getPropertyDescriptors())
                     .filter(d -> !d.getName().equals("class"))
@@ -136,24 +145,24 @@ public class WorkItemDefinitionParser {
         }
     }
 
-    private static void readResults(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem) {
+    private static void readResults(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem, ClassLoader moduleClassLoader) {
         // Results.
         Stream<VariableDeclaration> parameters = toDeclarations(workDefinition);
         String typedResults = workDefinition.getTypedResults();
         workItem.setTypedResults(typedResults);
-        Stream<VariableDeclaration> introspectedParams = introspect(typedResults);
+        Stream<VariableDeclaration> introspectedParams = introspect(typedResults, moduleClassLoader);
         DeclarationList declarationList = new DeclarationList(Stream.concat(parameters, introspectedParams));
         String resultsString = declarationList.asString();
         workItem.setResults(resultsString);
     }
 
-    private static void readParameters(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem) {
+    private static void readParameters(WorkDefinitionImpl workDefinition, WorkItemDefinition workItem, ClassLoader moduleClassLoader) {
         // Parameters.
         Stream<VariableDeclaration> parameters = toDeclarations(workDefinition);
 
         String typedParameters = workDefinition.getTypedParameters();
         workItem.setTypedParameters(typedParameters);
-        Stream<VariableDeclaration> introspectedParams = introspect(typedParameters);
+        Stream<VariableDeclaration> introspectedParams = introspect(typedParameters, moduleClassLoader);
 
         DeclarationList declarationList = new DeclarationList(Stream.concat(parameters, introspectedParams));
         String parametersString = declarationList.asString();
@@ -252,8 +261,8 @@ public class WorkItemDefinitionParser {
                       workDefinition::setParameters);
 
         set(workDefinitionMap,
-                      "typedParameters",
-                      workDefinition::setTypedParameters);
+            "typedParameters",
+            workDefinition::setTypedParameters);
 
         // Results.
         setParameters(workDefinitionMap,
@@ -263,7 +272,6 @@ public class WorkItemDefinitionParser {
         set(workDefinitionMap,
             "typedResults",
             workDefinition::setTypedResults);
-
 
         // Parameter values.
         final Map<String, Object> values = (Map<String, Object>) workDefinitionMap.get("parameterValues");

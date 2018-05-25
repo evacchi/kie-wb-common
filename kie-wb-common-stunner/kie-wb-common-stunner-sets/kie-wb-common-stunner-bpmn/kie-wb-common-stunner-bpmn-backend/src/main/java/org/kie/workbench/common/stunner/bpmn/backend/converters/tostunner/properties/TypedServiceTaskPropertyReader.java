@@ -41,12 +41,8 @@ public class TypedServiceTaskPropertyReader extends ServiceTaskPropertyReader {
             DefinitionResolver definitionResolver) {
         super(task, workItemDefinition, plane, definitionResolver);
         this.workItemDefinition = workItemDefinition;
-        this.typedParameters =
-                new JsonDefinition(workItemDefinition.getTypedParameters())
-                        .of(task);
-        this.typedResults =
-                new JsonDefinition(workItemDefinition.getTypedResults())
-                        .of(task);
+        this.typedParameters = null;
+        this.typedResults = null;
     }
 
     public AssignmentsInfo getTypedAssignmentsInfo() {

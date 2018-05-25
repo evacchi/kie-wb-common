@@ -116,6 +116,7 @@ public class WorkItemDefinitionParserTest {
         String raw = loadStream(WID_EMAIL);
         Collection<WorkItemDefinition> workItemDefinitions =
                 WorkItemDefinitionParser.parse(raw,
+                                               null,
                                                w -> "uri",
                                                dataUriProvider);
         assertNotNull(workItemDefinitions);
@@ -139,6 +140,7 @@ public class WorkItemDefinitionParserTest {
         String raw = loadStream(WID_FTP);
         Collection<WorkItemDefinition> workItemDefinitions =
                 WorkItemDefinitionParser.parse(raw,
+                                               null,
                                                w -> "uri",
                                                dataUriProvider);
         assertNotNull(workItemDefinitions);

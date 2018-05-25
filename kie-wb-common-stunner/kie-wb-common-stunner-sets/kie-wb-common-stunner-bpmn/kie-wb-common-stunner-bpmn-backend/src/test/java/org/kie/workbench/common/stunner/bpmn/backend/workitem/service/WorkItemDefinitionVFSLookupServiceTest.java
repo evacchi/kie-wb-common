@@ -76,6 +76,8 @@ public class WorkItemDefinitionVFSLookupServiceTest {
         when(resources.resolveResources(eq(metadata))).thenReturn(Collections.singleton(path));
 
         this.tested = new WorkItemDefinitionVFSLookupService(vfsService,
+                                                             null,
+                                                             null,
                                                              resources);
     }
 

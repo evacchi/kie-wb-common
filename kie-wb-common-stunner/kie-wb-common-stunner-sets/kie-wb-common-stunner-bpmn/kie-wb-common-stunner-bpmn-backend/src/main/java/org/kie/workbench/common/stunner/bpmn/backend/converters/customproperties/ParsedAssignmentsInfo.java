@@ -109,9 +109,9 @@ public class ParsedAssignmentsInfo {
             );
         }
 
-        if (split.length < 5) {
-            throw new IllegalArgumentException(encoded);
-        }
+            if (split.length < 5) {
+                throw new IllegalArgumentException(encoded);
+            }
 
         boolean alternativeEncoding = false;
         String in = split[0];

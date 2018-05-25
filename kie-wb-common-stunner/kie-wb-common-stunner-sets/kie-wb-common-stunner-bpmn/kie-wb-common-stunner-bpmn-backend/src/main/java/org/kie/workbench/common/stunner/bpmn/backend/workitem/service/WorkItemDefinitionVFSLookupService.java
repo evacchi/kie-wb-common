@@ -25,6 +25,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.server.annotations.Service;
+import org.kie.workbench.common.services.backend.project.ModuleClassLoaderHelper;
+import org.kie.workbench.common.services.shared.project.KieModule;
+import org.kie.workbench.common.services.shared.project.KieModuleService;
 import org.kie.workbench.common.stunner.bpmn.backend.workitem.WorkItemDefinitionResources;
 import org.kie.workbench.common.stunner.bpmn.workitem.WorkItemDefinition;
 import org.kie.workbench.common.stunner.bpmn.workitem.service.WorkItemDefinitionService;
@@ -45,18 +48,26 @@ public class WorkItemDefinitionVFSLookupService
     private static final Logger LOG = LoggerFactory.getLogger(WorkItemDefinitionVFSLookupService.class.getName());
 
     private final VFSService vfsService;
+    private final KieModuleService kieModuleService;
+    private final ModuleClassLoaderHelper moduleClassLoaderHelper;
     private final WorkItemDefinitionResources resources;
 
     // CDI proxy.
     protected WorkItemDefinitionVFSLookupService() {
         this.vfsService = null;
+        this.kieModuleService = null;
+        this.moduleClassLoaderHelper = null;
         this.resources = null;
     }
 
     @Inject
     public WorkItemDefinitionVFSLookupService(final VFSService vfsService,
+                                              final KieModuleService kieModuleService,
+                                              final ModuleClassLoaderHelper moduleClassLoaderHelper,
                                               final WorkItemDefinitionResources resources) {
         this.vfsService = vfsService;
+        this.kieModuleService = kieModuleService;
+        this.moduleClassLoaderHelper = moduleClassLoaderHelper;
         this.resources = resources;
     }
 
@@ -74,21 +85,27 @@ public class WorkItemDefinitionVFSLookupService
 
     public Collection<WorkItemDefinition> search(final Metadata metadata,
                                                  final Path root) {
+
+        KieModule kieModule = kieModuleService.resolveModule(root);
+        ClassLoader moduleClassLoader = moduleClassLoaderHelper.getModuleClassLoader(kieModule);
+
         final DirectoryStream<Path> files =
                 vfsService.newDirectoryStream(root,
                                               WorkItemDefinitionVFSLookupService::isWorkItemPathValid);
         return StreamSupport.stream(files.spliterator(),
                                     false)
-                .flatMap(resource -> get(metadata, resource).stream())
+                .flatMap(resource -> get(metadata, resource, moduleClassLoader).stream())
                 .collect(Collectors.toList());
     }
 
     public Collection<WorkItemDefinition> get(final Metadata metadata,
-                                              final Path resource) {
+                                              final Path resource,
+                                              final ClassLoader moduleClassLoader) {
         final String content = vfsService.readAllString(resource);
         try {
 
             return parse(content,
+                         moduleClassLoader,
                          wid -> resource.toURI(),
                          icon -> resources.generateIconDataURI(metadata,
                                                                resource,
