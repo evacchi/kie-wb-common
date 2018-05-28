@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -136,7 +137,11 @@ public class WorkItemDefinitionParser {
             Class<?> t = moduleClassLoader.loadClass(type);
             BeanInfo beanInfo = Introspector.getBeanInfo(t);
             return Arrays.stream(beanInfo.getPropertyDescriptors())
-                    .filter(d -> !d.getName().equals("class"))
+                    .filter(d -> !(d.getName().equals("class")
+                            || d.isHidden()
+                            || d.isExpert()
+                            || Optional.ofNullable(d.getValue("transient"))
+                            .map(Boolean.class::cast).orElse(false)))
                     .map(d -> new VariableDeclaration(
                             d.getName(),
                             d.getPropertyType().getCanonicalName()));
