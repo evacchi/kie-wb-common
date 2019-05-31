@@ -110,8 +110,6 @@ public class BPMNStandaloneClientDiagramServiceImpl implements SubmarineClientDi
     public void transform(final String xml,
                           final ServiceCallback<SubmarineDiagram> callback) {
 
-        AdHocSubProcess clientside = Bpmn2Factory.eINSTANCE.createAdHocSubProcess();
-        OnEntryScriptType onEntryScriptType = DroolsFactory.eINSTANCE.createOnEntryScriptType();
         Bpmn2Resource bpmn2Resource = new Bpmn2Resource();
         try {
             bpmn2Resource.load(xml);
@@ -153,9 +151,7 @@ public class BPMNStandaloneClientDiagramServiceImpl implements SubmarineClientDi
                         commandFactory,
                         commandManager);
         graphBuilder.render(diagramRoot);
-
-        GWT.log(clientside.toString());
-        GWT.log(onEntryScriptType.toString());
+        
         GWT.log(diagramRoot.toString());
 
 
