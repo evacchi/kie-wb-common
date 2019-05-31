@@ -47,6 +47,13 @@
 
   <!-- BPMN -->
   <inherits name="org.kie.workbench.common.stunner.bpmn.StunnerBpmnClient"/>
+  <inherits name="org.eclipse.Bpmn2" />
+  <inherits name="org.eclipse.emf.ecore.xmi.Xmi" />
+  <inherits name='org.eclipse.emf.ecore.Ecore' />
+  <inherits name="org.submarine.SaxCompat"/>
+  <inherits name="org.jboss.drools.Drools" />
+  <inherits name="bpsim.Bpsim" />
+  <inherits name="org.kie.workbench.common.stunner.bpmn.backend.converters.Converters" />
 
   <extend-property name="locale" values="es"/>
   <extend-property name="locale" values="fr"/>
