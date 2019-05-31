@@ -31,7 +31,7 @@ public class LanePropertyWriter extends BasePropertyWriter {
     }
 
     public void setName(String value) {
-        lane.setName(StringEscapeUtils.escapeXml10(value.trim()));
+        lane.setName(/*fixmeStringEscapeUtils.escapeXml10*/(value.trim()));
         CustomElement.name.of(lane).set(value);
     }
 

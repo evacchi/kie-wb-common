@@ -136,7 +136,7 @@ public class NodeMatch<In, Out> {
 
         public Result<R> match(Node<? extends View<? extends BPMNViewDefinition>, ?> value) {
             BPMNViewDefinition definition = value.getContent().getDefinition();
-            return when.isAssignableFrom(definition.getClass()) ?
+            return when == definition.getClass() ? //fixme when.isAssignableFrom(definition.getClass()) ?
                     then.apply((Node) value) : Result.failure(value.getClass().getName());
         }
     }
