@@ -788,7 +788,6 @@
           <hostedWebapp>src/main/webapp</hostedWebapp>
           <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
           <compileReport>true</compileReport>
-          <detailedSoyc>true</detailedSoyc>
           <compileSourcesArtifacts>
 
             <compileSourcesArtifact>org.kie.soup:kie-soup-commons</compileSourcesArtifact>

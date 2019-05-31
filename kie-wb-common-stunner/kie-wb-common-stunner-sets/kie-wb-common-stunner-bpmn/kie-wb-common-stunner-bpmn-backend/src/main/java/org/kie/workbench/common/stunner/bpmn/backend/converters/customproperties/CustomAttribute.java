@@ -99,7 +99,9 @@ public class CustomAttribute<T> {
 
         @Override
         public void setValue(BaseElement element, Point2D value) {
-            setStringValue(element, String.format("%.1f^%.1f|", value.getX(), value.getY()));
+            // fixme String stringRepr = String.format("%.1f^%.1f|", value.getX(), value.getY());
+            String stringRepr = value.getX() + "^" + value.getY() + "|";
+            setStringValue(element, stringRepr);
         }
     };
 

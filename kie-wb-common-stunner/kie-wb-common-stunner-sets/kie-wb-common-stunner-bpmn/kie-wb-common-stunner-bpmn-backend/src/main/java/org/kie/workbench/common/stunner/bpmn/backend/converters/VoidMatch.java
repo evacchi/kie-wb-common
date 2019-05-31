@@ -96,7 +96,8 @@ public class VoidMatch<In> {
         }
 
         public Result<Void> match(Object value) {
-            if (when.isAssignableFrom(value.getClass())) {
+            if (when==(value.getClass())) { //fixme
+//            if (when.isAssignableFrom(value.getClass())) { //fixme
                 then.accept((T) value);
                 return Result.success(null);
             } else {

@@ -52,8 +52,8 @@ public class AssociationConverter {
         BasePropertyWriter pTgt = process.getChildElement(edge.getTargetNode().getUUID());
 
         if (pSrc == null || pTgt == null) {
-            String msg = String.format("BasePropertyWriter was not found for source node or target node at edge: %s, pSrc = %s, pTgt = %s", edge.getUUID(), pSrc, pTgt);
-            LOG.debug(msg);
+            String msg = "BasePropertyWriter was not found for source node or target node at edge: " + edge.getUUID() + ", pSrc = " + pSrc + ", pTgt = " + pTgt;
+            //fixme LOG.debug(msg);
             return Result.failure(msg);
         }
 

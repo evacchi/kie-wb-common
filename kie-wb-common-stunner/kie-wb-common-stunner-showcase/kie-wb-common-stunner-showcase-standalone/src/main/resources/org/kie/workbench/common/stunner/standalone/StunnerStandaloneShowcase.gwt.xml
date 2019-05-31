@@ -54,6 +54,7 @@
   <inherits name="org.jboss.drools.Drools" />
   <inherits name="bpsim.Bpsim" />
   <inherits name="org.kie.workbench.common.stunner.bpmn.backend.converters.Converters" />
+  <inherits name="org.kie.workbench.common.stunner.bpmn.backend.legacy.util.Util" />
 
   <extend-property name="locale" values="es"/>
   <extend-property name="locale" values="fr"/>

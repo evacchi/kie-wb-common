@@ -53,7 +53,7 @@ public class SequenceFlowConverter {
         BasePropertyWriter pTgt = process.getChildElement(edge.getTargetNode().getUUID());
 
         if (pSrc == null || pTgt == null) {
-            String msg = String.format("pSrc = %s, pTgt = %s", pSrc, pTgt);
+            String msg = "pSrc = " + pSrc + ", pTgt = " + pTgt;
             LOG.debug(msg);
             return Result.failure(msg);
         }

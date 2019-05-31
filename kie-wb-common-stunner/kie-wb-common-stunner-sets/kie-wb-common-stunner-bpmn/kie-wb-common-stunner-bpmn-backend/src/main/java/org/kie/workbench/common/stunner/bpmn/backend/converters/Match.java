@@ -144,7 +144,7 @@ public class Match<In, Out> {
         }
 
         public Result<R> match(Object value) {
-            return when.isAssignableFrom(value.getClass()) ?
+            return when == value.getClass() /* fixme when.isAssignableFrom(value.getClass()) */ ?
                     then.apply((T) value) : Result.failure(value.getClass().getName());
         }
     }

@@ -131,9 +131,9 @@ public class GraphBuilder {
             workingSet.addAll(
                     prioritized(current.getChildren()));
 
-            logger.debug("{} :: {}",
-                         current.getParent().value().getUUID(),
-                         current.value().getUUID());
+//            fixme logger.debug("{} :: {}",
+//                         current.getParent().value().getUUID(),
+//                         current.value().getUUID());
 
             this.addChildNode(current);
             current.getEdges().forEach(this::addEdge);
@@ -197,8 +197,9 @@ public class GraphBuilder {
      */
     private void translate(Node<? extends View, ?> node, double deltaX, double deltaY) {
 
-        logger.debug("Translating {} from {} with (deltaX,deltaY) ({},{})",
-                     node.getUUID(), node.getContent().getBounds(), deltaX, deltaX);
+        // fixme
+//        logger.debug("Translating {} from {} with (deltaX,deltaY) ({},{})",
+//                     node.getUUID(), node.getContent().getBounds(), deltaX, deltaX);
 
         Bounds childBounds = node.getContent().getBounds();
         double constrainedX = childBounds.getUpperLeft().getX() - deltaX;
