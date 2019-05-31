@@ -36,6 +36,7 @@ import org.jboss.drools.DroolsFactory;
 import org.jboss.drools.OnEntryScriptType;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.stunner.bpmn.BPMNDefinitionSet;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
@@ -43,13 +44,19 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.Conver
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.GraphBuilder;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
+import org.kie.workbench.common.stunner.core.api.DefinitionManager;
+import org.kie.workbench.common.stunner.core.api.FactoryManager;
 import org.kie.workbench.common.stunner.core.client.api.ShapeManager;
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
 import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.kie.workbench.common.stunner.core.diagram.MetadataImpl;
 import org.kie.workbench.common.stunner.core.graph.Graph;
 import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.command.GraphCommandManager;
+import org.kie.workbench.common.stunner.core.graph.command.impl.GraphCommandFactory;
 import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
+import org.kie.workbench.common.stunner.core.rule.RuleManager;
 import org.kie.workbench.common.stunner.core.util.StringUtils;
 import org.kie.workbench.common.stunner.standalone.client.marshalling.Bpmn2Resource;
 import org.kie.workbench.common.stunner.submarine.api.diagram.SubmarineDiagram;
@@ -102,6 +109,7 @@ public class BPMNStandaloneClientDiagramServiceImpl implements SubmarineClientDi
     @Override
     public void transform(final String xml,
                           final ServiceCallback<SubmarineDiagram> callback) {
+
         AdHocSubProcess clientside = Bpmn2Factory.eINSTANCE.createAdHocSubProcess();
         OnEntryScriptType onEntryScriptType = DroolsFactory.eINSTANCE.createOnEntryScriptType();
         Bpmn2Resource bpmn2Resource = new Bpmn2Resource();
@@ -112,29 +120,39 @@ public class BPMNStandaloneClientDiagramServiceImpl implements SubmarineClientDi
         }
         DocumentRoot docRoot = (DocumentRoot) bpmn2Resource.getContents().get(0);
         DefinitionResolver definitionResolver = new DefinitionResolver(docRoot.getDefinitions(), Collections.emptyList());
-        TypedFactoryManager typedFactoryManager = new TypedFactoryManager(null/* fixme ?? */);
+        // fixme this should come from outside
+        FactoryManager factoryManager = null;
+        TypedFactoryManager typedFactoryManager = new TypedFactoryManager(factoryManager);
         ConverterFactory converterFactory = new ConverterFactory(definitionResolver, typedFactoryManager);
         BpmnNode diagramRoot = converterFactory.rootProcessConverter().convertProcess();
 
+        // fixme: should it come from outside?
+        Metadata metadata = new MetadataImpl();
 
-//        // the root node contains all of the information
-//        // needed to build the entire graph (including parent/child relationships)
-//        // thus, we can now walk the graph to issue all the commands
-//        // to draw it on our canvas
-//        Diagram<Graph<DefinitionSet, Node>, Metadata> diagram =
-//                typedFactoryManager.newDiagram(
-//                        definitionResolver.getDefinitions().getId(),
-//                        getDefinitionSetClass(),
-//                        metadata);
-//        GraphBuilder graphBuilder =
-//                new GraphBuilder(
-//                        diagram.getGraph(),
-//                        definitionManager,
-//                        typedFactoryManager,
-//                        ruleManager,
-//                        commandFactory,
-//                        commandManager);
-//        graphBuilder.render(diagramRoot);
+        // fixme, this comes from outside (see BaseDirectDiagramMarshaller)
+        DefinitionManager definitionManager = null;
+        RuleManager ruleManager = null;
+        GraphCommandFactory commandFactory = null;
+        GraphCommandManager commandManager = null;
+
+        // the root node contains all of the information
+        // needed to build the entire graph (including parent/child relationships)
+        // thus, we can now walk the graph to issue all the commands
+        // to draw it on our canvas
+        Diagram<Graph<DefinitionSet, Node>, Metadata> diagram =
+                typedFactoryManager.newDiagram(
+                        definitionResolver.getDefinitions().getId(),
+                        BPMNDefinitionSet.class,
+                        metadata);
+        GraphBuilder graphBuilder =
+                new GraphBuilder(
+                        diagram.getGraph(),
+                        definitionManager,
+                        typedFactoryManager,
+                        ruleManager,
+                        commandFactory,
+                        commandManager);
+        graphBuilder.render(diagramRoot);
 
         GWT.log(clientside.toString());
         GWT.log(onEntryScriptType.toString());
