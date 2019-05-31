@@ -16,18 +16,42 @@
 
 package org.kie.workbench.common.stunner.standalone.client.services;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.Objects;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.xml.client.Document;
+import com.google.gwt.xml.client.XMLParser;
 import elemental2.promise.Promise;
+import org.eclipse.bpmn2.AdHocSubProcess;
+import org.eclipse.bpmn2.Bpmn2Factory;
+import org.eclipse.bpmn2.Bpmn2Package;
+import org.eclipse.bpmn2.DocumentRoot;
+import org.eclipse.emf.ecore.EObject;
+import org.jboss.drools.DroolsFactory;
+import org.jboss.drools.OnEntryScriptType;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.ConverterFactory;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.DefinitionResolver;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.GraphBuilder;
+import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.PropertyReaderFactory;
 import org.kie.workbench.common.stunner.core.client.api.ShapeManager;
 import org.kie.workbench.common.stunner.core.client.service.ServiceCallback;
+import org.kie.workbench.common.stunner.core.diagram.Diagram;
 import org.kie.workbench.common.stunner.core.diagram.Metadata;
+import org.kie.workbench.common.stunner.core.graph.Graph;
+import org.kie.workbench.common.stunner.core.graph.Node;
+import org.kie.workbench.common.stunner.core.graph.content.definition.DefinitionSet;
 import org.kie.workbench.common.stunner.core.util.StringUtils;
+import org.kie.workbench.common.stunner.standalone.client.marshalling.Bpmn2Resource;
 import org.kie.workbench.common.stunner.submarine.api.diagram.SubmarineDiagram;
 import org.kie.workbench.common.stunner.submarine.api.editor.DiagramType;
 import org.kie.workbench.common.stunner.submarine.api.editor.impl.SubmarineDiagramResourceImpl;
@@ -78,6 +102,46 @@ public class BPMNStandaloneClientDiagramServiceImpl implements SubmarineClientDi
     @Override
     public void transform(final String xml,
                           final ServiceCallback<SubmarineDiagram> callback) {
+        AdHocSubProcess clientside = Bpmn2Factory.eINSTANCE.createAdHocSubProcess();
+        OnEntryScriptType onEntryScriptType = DroolsFactory.eINSTANCE.createOnEntryScriptType();
+        Bpmn2Resource bpmn2Resource = new Bpmn2Resource();
+        try {
+            bpmn2Resource.load(xml);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        DocumentRoot docRoot = (DocumentRoot) bpmn2Resource.getContents().get(0);
+        DefinitionResolver definitionResolver = new DefinitionResolver(docRoot.getDefinitions(), Collections.emptyList());
+        TypedFactoryManager typedFactoryManager = new TypedFactoryManager(null/* fixme ?? */);
+        ConverterFactory converterFactory = new ConverterFactory(definitionResolver, typedFactoryManager);
+        BpmnNode diagramRoot = converterFactory.rootProcessConverter().convertProcess();
+
+
+//        // the root node contains all of the information
+//        // needed to build the entire graph (including parent/child relationships)
+//        // thus, we can now walk the graph to issue all the commands
+//        // to draw it on our canvas
+//        Diagram<Graph<DefinitionSet, Node>, Metadata> diagram =
+//                typedFactoryManager.newDiagram(
+//                        definitionResolver.getDefinitions().getId(),
+//                        getDefinitionSetClass(),
+//                        metadata);
+//        GraphBuilder graphBuilder =
+//                new GraphBuilder(
+//                        diagram.getGraph(),
+//                        definitionManager,
+//                        typedFactoryManager,
+//                        ruleManager,
+//                        commandFactory,
+//                        commandManager);
+//        graphBuilder.render(diagramRoot);
+
+        GWT.log(clientside.toString());
+        GWT.log(onEntryScriptType.toString());
+        GWT.log(diagramRoot.toString());
+
+
+
         submarineDiagramServiceCaller.call((SubmarineDiagram d) -> {
             updateClientMetadata(d);
             callback.onSuccess(d);

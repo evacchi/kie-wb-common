@@ -225,6 +225,34 @@
     <dependency>
       <groupId>org.kie.workbench.stunner</groupId>
       <artifactId>kie-wb-common-stunner-bpmn-backend</artifactId>
+      <exclusions>
+<!--        <exclusion>-->
+<!--          <groupId>org.eclipse</groupId>-->
+<!--          <artifactId>org.eclipse.bpmn2</artifactId>-->
+<!--        </exclusion>-->
+
+        <!--
+        [INFO] |  +- org.eclipse.emf:org.eclipse.emf.ecore:jar:2.6.0.v20100614-1136:compile
+        [INFO] |  +- org.eclipse.emf:org.eclipse.emf.common:jar:2.6.0.v20100614-1136:compile
+        [INFO] |  +- org.eclipse.emf:org.eclipse.emf.ecore.xmi:jar:2.5.0.v20100521-1846:compile
+        -->
+        <exclusion>
+          <groupId>org.eclipse.emf</groupId>
+          <artifactId>org.eclipse.emf.common</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.emf</groupId>
+          <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.emf</groupId>
+          <artifactId>org.eclipse.emf.ecore</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.eclipse.emf</groupId>
+          <artifactId>org.eclipse.emf.common</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.kie.workbench.stunner</groupId>
@@ -236,6 +264,42 @@
       <groupId>org.jbpm</groupId>
       <artifactId>jbpm-bpmn2</artifactId>
     </dependency>
+
+    <dependency>
+      <groupId>org.submarine</groupId>
+      <artifactId>bpmn-eclipse-models</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.submarine</groupId>
+      <artifactId>bpmn-eclipse-models</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.submarine</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.submarine</groupId>
+      <artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipselabs</groupId>
+      <artifactId>org.eclipse.emf.gwt.ecore</artifactId>
+      <version>2.9.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.eclipselabs</groupId>
+          <artifactId>org.eclipse.emf.gwt.common</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
 
     <!-- Uberfire Preferences -->
     <!-- Required by stunner-core-api -->
@@ -713,7 +777,7 @@
           <localWorkers>8</localWorkers>
           <deploy>${project.build.directory}/gwt-symbols-deploy</deploy>
           <draftCompile>true</draftCompile>
-          <extraJvmArgs>-Xmx4096m -Xms1024m -Xss1M -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dynamic_validation.enabled=true</extraJvmArgs>
+          <extraJvmArgs>-noverify -Xmx4096m -Xms1024m -Xss1M -XX:CompileThreshold=7000 -Derrai.jboss.home=${errai.jboss.home} -Derrai.dynamic_validation.enabled=true</extraJvmArgs>
           <module>org.kie.workbench.common.stunner.standalone.StunnerStandaloneShowcaseWithSourceMap</module>
           <style>PRETTY</style>
           <logLevel>INFO</logLevel>
@@ -722,8 +786,9 @@
           <disableCastChecking>true</disableCastChecking>
           <runTarget>index.html</runTarget>
           <hostedWebapp>src/main/webapp</hostedWebapp>
-          <gwtSdkFirstInClasspath>false</gwtSdkFirstInClasspath>
-
+          <gwtSdkFirstInClasspath>true</gwtSdkFirstInClasspath>
+          <compileReport>true</compileReport>
+          <detailedSoyc>true</detailedSoyc>
           <compileSourcesArtifacts>
 
             <compileSourcesArtifact>org.kie.soup:kie-soup-commons</compileSourcesArtifact>
@@ -810,8 +875,12 @@
             <compileSourcesArtifact>org.kie.workbench.stunner:kie-wb-common-stunner-forms-client</compileSourcesArtifact>
             <compileSourcesArtifact>org.kie.workbench.stunner:kie-wb-common-stunner-submarine-api</compileSourcesArtifact>
             <compileSourcesArtifact>org.kie.workbench.stunner:kie-wb-common-stunner-submarine-client</compileSourcesArtifact>
-
+            <compileSourcesArtifact>org.submarine:bpmn-eclipse-models</compileSourcesArtifact>
+            <compileSourcesArtifact>org.submarine:org.eclipse.emf.ecore.xmi</compileSourcesArtifact>
+            <compileSourcesArtifact>org.eclipselabs:org.eclipse.emf.gwt.ecore</compileSourcesArtifact>
             <compileSourcesArtifact>org.uberfire:appformer-js-bridge</compileSourcesArtifact>
+            <compileSourcesArtifact>org.jbpm:jbpm-bpmn2-emfextmodel</compileSourcesArtifact>
+            <compileSourcesArtifact>org.kie.workbench.stunner:kie-wb-common-stunner-bpmn-backend</compileSourcesArtifact>
 
           </compileSourcesArtifacts>
         </configuration>
