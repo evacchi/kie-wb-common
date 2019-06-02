@@ -16,7 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.lanes;
 
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.LanePropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
@@ -36,24 +35,24 @@ public class LaneConverter {
         this.propertyWriterFactory = propertyWriterFactory;
     }
 
-    public Result<LanePropertyWriter> toElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
-        return NodeMatch.fromNode(BPMNViewDefinition.class, LanePropertyWriter.class)
-                .when(Lane.class, n -> {
-                    org.eclipse.bpmn2.Lane lane = bpmn2.createLane();
-                    lane.setId(n.getUUID());
+    public Result<LanePropertyWriter> toElement(Node<View<? extends BPMNViewDefinition>, ?> n) {
+        BPMNViewDefinition def = n.getContent().getDefinition();
+        if (def instanceof Lane) {
+            Lane definition = (Lane) def;
+            org.eclipse.bpmn2.Lane lane = bpmn2.createLane();
+            lane.setId(n.getUUID());
 
-                    LanePropertyWriter p = propertyWriterFactory.of(lane);
+            LanePropertyWriter p = propertyWriterFactory.of(lane);
 
-                    Lane definition = n.getContent().getDefinition();
-                    BPMNGeneralSet general = definition.getGeneral();
-                    p.setName(general.getName().getValue());
-                    p.setDocumentation(general.getDocumentation().getValue());
+            BPMNGeneralSet general = definition.getGeneral();
+            p.setName(general.getName().getValue());
+            p.setDocumentation(general.getDocumentation().getValue());
 
-                    p.setAbsoluteBounds(n);
+            p.setAbsoluteBounds(n);
 
-                    return p;
-                })
-                .ignore(Object.class)
-                .apply(node);
+            return Result.success(p);
+        } else {
+            return Result.ignored("not a lane");
+        }
     }
 }

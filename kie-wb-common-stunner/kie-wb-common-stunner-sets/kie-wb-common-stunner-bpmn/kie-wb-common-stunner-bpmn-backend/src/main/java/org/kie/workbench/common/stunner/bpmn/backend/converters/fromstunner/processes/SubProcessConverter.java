@@ -16,7 +16,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.processes;
 
 import org.eclipse.bpmn2.SubProcess;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.ConverterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.DefinitionsBuildingContext;
@@ -26,7 +25,6 @@ import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.prop
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.SubProcessPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseAdHocSubprocess;
-import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EmbeddedSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.EventSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.MultipleInstanceSubprocess;
@@ -40,6 +38,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.variables.Proce
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class SubProcessConverter extends ProcessConverterDelegate {
@@ -56,17 +55,18 @@ public class SubProcessConverter extends ProcessConverterDelegate {
     }
 
     public Result<SubProcessPropertyWriter> convertSubProcess(Node<View<? extends BPMNViewDefinition>, ?> node) {
-        Result<SubProcessPropertyWriter> processRootResult =
-                NodeMatch.fromNode(BaseSubprocess.class, SubProcessPropertyWriter.class)
-                        .when(EmbeddedSubprocess.class, this::convertEmbeddedSubprocessNode)
-                        .when(EventSubprocess.class, this::convertEventSubprocessNode)
-                        .when(BaseAdHocSubprocess.class, this::convertAdHocSubprocessNode)
-                        .when(MultipleInstanceSubprocess.class, this::convertMultipleInstanceSubprocessNode)
-                        .ignore(BPMNViewDefinition.class)
-                        .apply(node);
-
-        if (processRootResult.isIgnored()) {
-            return processRootResult;
+        Result<SubProcessPropertyWriter> processRootResult;
+        BPMNViewDefinition def = node.getContent().getDefinition();
+        if (def instanceof EmbeddedSubprocess) {
+            processRootResult = Result.success(convertEmbeddedSubprocessNode(cast(node)));
+        } else if (def instanceof EventSubprocess) {
+            processRootResult = Result.success(convertEventSubprocessNode(cast(node)));
+        } else if (def instanceof BaseAdHocSubprocess) {
+            processRootResult = Result.success(convertAdHocSubprocessNode(cast(node)));
+        } else if (def instanceof MultipleInstanceSubprocess) {
+            processRootResult = Result.success(convertMultipleInstanceSubprocessNode(cast(node)));
+        } else {
+            return Result.ignored("unknown type");
         }
 
         DefinitionsBuildingContext subContext = context.withRootNode(node);

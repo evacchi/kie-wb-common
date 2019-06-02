@@ -16,8 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
+import java.util.NoSuchElementException;
+
 import org.eclipse.bpmn2.StartEvent;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
@@ -40,6 +41,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGen
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class StartEventConverter {
@@ -51,16 +53,32 @@ public class StartEventConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseStartEvent>, ?> node) {
-        return NodeMatch.fromNode(BaseStartEvent.class, PropertyWriter.class)
-                .when(StartNoneEvent.class, this::noneEvent)
-                .when(StartSignalEvent.class, this::signalEvent)
-                .when(StartTimerEvent.class, this::timerEvent)
-                .when(StartErrorEvent.class, this::errorEvent)
-                .when(StartMessageEvent.class, this::messageEvent)
-                .when(StartConditionalEvent.class, this::conditionalEvent)
-                .when(StartEscalationEvent.class, this::escalationEvent)
-                .when(StartCompensationEvent.class, this::compensationEvent)
-                .apply(node).value();
+        BaseStartEvent def = node.getContent().getDefinition();
+        if (def instanceof StartNoneEvent) {
+            return noneEvent(cast(node));
+        }
+        if (def instanceof StartSignalEvent) {
+            return signalEvent(cast(node));
+        }
+        if (def instanceof StartTimerEvent) {
+            return timerEvent(cast(node));
+        }
+        if (def instanceof StartErrorEvent) {
+            return errorEvent(cast(node));
+        }
+        if (def instanceof StartMessageEvent) {
+            return messageEvent(cast(node));
+        }
+        if (def instanceof StartConditionalEvent) {
+            return conditionalEvent(cast(node));
+        }
+        if (def instanceof StartEscalationEvent) {
+            return escalationEvent(cast(node));
+        }
+        if (def instanceof StartCompensationEvent) {
+            return compensationEvent(cast(node));
+        }
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter messageEvent(Node<View<StartMessageEvent>, ?> n) {

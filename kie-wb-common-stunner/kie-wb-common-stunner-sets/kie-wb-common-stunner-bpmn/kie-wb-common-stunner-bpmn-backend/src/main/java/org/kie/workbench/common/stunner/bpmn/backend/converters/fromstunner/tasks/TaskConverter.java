@@ -16,8 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.tasks;
 
+import java.util.NoSuchElementException;
+
 import org.eclipse.bpmn2.Task;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ActivityPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.BusinessRuleTaskPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.GenericServiceTaskPropertyWriter;
@@ -44,6 +45,7 @@ import org.kie.workbench.common.stunner.bpmn.workitem.ServiceTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class TaskConverter {
@@ -55,14 +57,26 @@ public class TaskConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseTask>, ?> node) {
-        return NodeMatch.fromNode(BaseTask.class, PropertyWriter.class)
-                .when(NoneTask.class, this::noneTask)
-                .when(ScriptTask.class, this::scriptTask)
-                .when(BusinessRuleTask.class, this::businessRuleTask)
-                .when(BaseUserTask.class, this::userTask)
-                .when(ServiceTask.class, this::serviceTask)
-                .when(GenericServiceTask.class, this::genericServiceTask)
-                .apply(node).value();
+        BaseTask def = node.getContent().getDefinition();
+        if (def instanceof NoneTask) {
+            return noneTask(cast(node));
+        }
+        if (def instanceof ScriptTask) {
+            return scriptTask(cast(node));
+        }
+        if (def instanceof BusinessRuleTask) {
+            return businessRuleTask(cast(node));
+        }
+        if (def instanceof BaseUserTask) {
+            return userTask(cast(node));
+        }
+        if (def instanceof ServiceTask) {
+            return serviceTask(cast(node));
+        }
+        if (def instanceof GenericServiceTask) {
+            return genericServiceTask(cast(node));
+        }
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter genericServiceTask(Node<View<GenericServiceTask>, ?> n) {

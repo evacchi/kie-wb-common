@@ -15,7 +15,6 @@
  */
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner;
 
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.definition.BPMNViewDefinition;
@@ -28,8 +27,11 @@ import org.kie.workbench.common.stunner.bpmn.definition.BaseSubprocess;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseTask;
 import org.kie.workbench.common.stunner.bpmn.definition.BaseThrowingIntermediateEvent;
 import org.kie.workbench.common.stunner.bpmn.definition.Lane;
+import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
+
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 
 public class FlowElementConverter {
 
@@ -40,16 +42,32 @@ public class FlowElementConverter {
     }
 
     public Result<PropertyWriter> toFlowElement(Node<View<? extends BPMNViewDefinition>, ?> node) {
-        return NodeMatch.fromNode(BPMNViewDefinition.class, PropertyWriter.class)
-                .when(BaseStartEvent.class, converterFactory.startEventConverter()::toFlowElement)
-                .when(BaseCatchingIntermediateEvent.class, converterFactory.intermediateCatchEventConverter()::toFlowElement)
-                .when(BaseThrowingIntermediateEvent.class, converterFactory.intermediateThrowEventConverter()::toFlowElement)
-                .when(BaseEndEvent.class, converterFactory.endEventConverter()::toFlowElement)
-                .when(BaseTask.class, converterFactory.taskConverter()::toFlowElement)
-                .when(BaseGateway.class, converterFactory.gatewayConverter()::toFlowElement)
-                .when(BaseReusableSubprocess.class, converterFactory.reusableSubprocessConverter()::toFlowElement)
-                .ignore(BaseSubprocess.class)
-                .ignore(Lane.class)
-                .apply(node);
+        BPMNViewDefinition def = node.getContent().getDefinition();
+        if (def instanceof BaseStartEvent) {
+            return Result.success(converterFactory.startEventConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseCatchingIntermediateEvent) {
+            return Result.success(converterFactory.intermediateCatchEventConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseThrowingIntermediateEvent) {
+            return Result.success(converterFactory.intermediateThrowEventConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseEndEvent) {
+            return Result.success(converterFactory.endEventConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseTask) {
+            return Result.success(converterFactory.taskConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseGateway) {
+            return Result.success(converterFactory.gatewayConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseReusableSubprocess) {
+            return Result.success(converterFactory.reusableSubprocessConverter().toFlowElement(cast(node)));
+        }
+        if (def instanceof BaseSubprocess || def instanceof Lane) {
+            return Result.ignored("ignored");
+        }
+
+        return Result.failure("no match");
     }
 }
