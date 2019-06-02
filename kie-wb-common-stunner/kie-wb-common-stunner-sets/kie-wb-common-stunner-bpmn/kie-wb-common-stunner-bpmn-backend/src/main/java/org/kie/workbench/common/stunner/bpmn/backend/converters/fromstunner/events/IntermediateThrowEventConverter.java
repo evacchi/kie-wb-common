@@ -16,8 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
+import java.util.NoSuchElementException;
+
 import org.eclipse.bpmn2.IntermediateThrowEvent;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ThrowEventPropertyWriter;
@@ -31,6 +32,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGen
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class IntermediateThrowEventConverter {
@@ -42,12 +44,20 @@ public class IntermediateThrowEventConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseThrowingIntermediateEvent>, ?> node) {
-        return NodeMatch.fromNode(BaseThrowingIntermediateEvent.class, PropertyWriter.class)
-                .when(IntermediateMessageEventThrowing.class, this::messageEvent)
-                .when(IntermediateSignalEventThrowing.class, this::signalEvent)
-                .when(IntermediateEscalationEventThrowing.class, this::escalationEvent)
-                .when(IntermediateCompensationEventThrowing.class, this::compensationEvent)
-                .apply(node).value();
+        BaseThrowingIntermediateEvent def = node.getContent().getDefinition();
+        if (def instanceof IntermediateMessageEventThrowing) {
+            return messageEvent(cast(node));
+        }
+        if (def instanceof IntermediateSignalEventThrowing) {
+            return signalEvent(cast(node));
+        }
+        if (def instanceof IntermediateEscalationEventThrowing) {
+            return escalationEvent(cast(node));
+        }
+        if (def instanceof IntermediateCompensationEventThrowing) {
+            return compensationEvent(cast(node));
+        }
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter signalEvent(Node<View<IntermediateSignalEventThrowing>, ?> n) {

@@ -16,7 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.gateways;
 
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import java.util.NoSuchElementException;
+
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.GatewayPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
@@ -29,6 +30,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGen
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class GatewayConverter {
@@ -40,11 +42,17 @@ public class GatewayConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseGateway>, ?> node) {
-        return NodeMatch.fromNode(BaseGateway.class, PropertyWriter.class)
-                .when(ParallelGateway.class, this::parallel)
-                .when(ExclusiveGateway.class, this::exclusive)
-                .when(InclusiveGateway.class, this::inclusive)
-                .apply(node).value();
+        BaseGateway def = node.getContent().getDefinition();
+        if (def instanceof ParallelGateway) {
+            return parallel(cast(node));
+        }
+        if (def instanceof ExclusiveGateway) {
+            return exclusive(cast(node));
+        }
+        if (def instanceof InclusiveGateway) {
+            return inclusive(cast(node));
+        }
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter inclusive(Node<View<InclusiveGateway>, ?> n) {

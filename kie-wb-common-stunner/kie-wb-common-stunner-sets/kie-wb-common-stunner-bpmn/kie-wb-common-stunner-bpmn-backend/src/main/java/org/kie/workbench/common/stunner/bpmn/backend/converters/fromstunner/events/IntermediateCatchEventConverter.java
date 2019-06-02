@@ -16,7 +16,8 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
+import java.util.NoSuchElementException;
+
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.CatchEventPropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
@@ -38,6 +39,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGen
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.util.PropertyWriterUtils.getDockSourceNode;
 
@@ -50,16 +52,30 @@ public class IntermediateCatchEventConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseCatchingIntermediateEvent>, ?> node) {
-        return NodeMatch.fromNode(BaseCatchingIntermediateEvent.class, PropertyWriter.class)
-                .when(IntermediateMessageEventCatching.class, this::messageEvent)
-                .when(IntermediateSignalEventCatching.class, this::signalEvent)
-                .when(IntermediateErrorEventCatching.class, this::errorEvent)
-                .when(IntermediateTimerEvent.class, this::timerEvent)
-                .when(IntermediateConditionalEvent.class, this::conditionalEvent)
-                .when(IntermediateEscalationEvent.class, this::escalationEvent)
-                .when(IntermediateCompensationEvent.class, this::compensationEvent)
+        BaseCatchingIntermediateEvent def = node.getContent().getDefinition();
+        if (def instanceof IntermediateMessageEventCatching) {
+            return messageEvent(cast(node));
+        }
+        if (def instanceof IntermediateSignalEventCatching) {
+            return signalEvent(cast(node));
+        }
+        if (def instanceof IntermediateErrorEventCatching) {
+            return errorEvent(cast(node));
+        }
+        if (def instanceof IntermediateTimerEvent) {
+            return timerEvent(cast(node));
+        }
+        if (def instanceof IntermediateConditionalEvent) {
+            return conditionalEvent(cast(node));
+        }
+        if (def instanceof IntermediateEscalationEvent) {
+            return escalationEvent(cast(node));
+        }
+        if (def instanceof IntermediateCompensationEvent) {
+            return compensationEvent(cast(node));
+        }
 
-                .apply(node).value();
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter errorEvent(Node<View<IntermediateErrorEventCatching>, ?> n) {

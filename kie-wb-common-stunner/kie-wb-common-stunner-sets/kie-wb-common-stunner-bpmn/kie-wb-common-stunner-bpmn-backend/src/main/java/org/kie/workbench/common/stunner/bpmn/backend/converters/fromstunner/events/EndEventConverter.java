@@ -16,8 +16,9 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.events;
 
+import java.util.NoSuchElementException;
+
 import org.eclipse.bpmn2.EndEvent;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.NodeMatch;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriter;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.PropertyWriterFactory;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties.ThrowEventPropertyWriter;
@@ -36,6 +37,7 @@ import org.kie.workbench.common.stunner.bpmn.definition.property.general.BPMNGen
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
+import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class EndEventConverter {
@@ -47,15 +49,29 @@ public class EndEventConverter {
     }
 
     public PropertyWriter toFlowElement(Node<View<BaseEndEvent>, ?> node) {
-        return NodeMatch.fromNode(BaseEndEvent.class, PropertyWriter.class)
-                .when(EndNoneEvent.class, this::noneEvent)
-                .when(EndMessageEvent.class, this::messageEvent)
-                .when(EndSignalEvent.class, this::signalEvent)
-                .when(EndTerminateEvent.class, this::terminateEvent)
-                .when(EndErrorEvent.class, this::errorEvent)
-                .when(EndEscalationEvent.class, this::escalationEvent)
-                .when(EndCompensationEvent.class, this::compensationEvent)
-                .apply(node).value();
+        BaseEndEvent def = node.getContent().getDefinition();
+        if (def instanceof EndNoneEvent) {
+            return noneEvent(cast(node));
+        }
+        if (def instanceof EndMessageEvent) {
+            return messageEvent(cast(node));
+        }
+        if (def instanceof EndSignalEvent) {
+            return signalEvent(cast(node));
+        }
+        if (def instanceof EndTerminateEvent) {
+            return terminateEvent(cast(node));
+        }
+        if (def instanceof EndErrorEvent) {
+            return errorEvent(cast(node));
+        }
+        if (def instanceof EndEscalationEvent) {
+            return escalationEvent(cast(node));
+        }
+        if (def instanceof EndCompensationEvent) {
+            return compensationEvent(cast(node));
+        }
+        throw new NoSuchElementException();
     }
 
     private PropertyWriter errorEvent(Node<View<EndErrorEvent>, ?> n) {
