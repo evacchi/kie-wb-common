@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.eclipse.bpmn2.Task;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
+import org.eclipse.bpmn2.UserTask;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomAttribute;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
@@ -75,14 +75,22 @@ public abstract class BaseTaskConverter<U extends BaseUserTask<S>, S extends Bas
     }
 
     public BpmnNode convert(org.eclipse.bpmn2.Task task) {
-        return Match.of(Task.class, BpmnNode.class)
-                .when(org.eclipse.bpmn2.BusinessRuleTask.class, this::businessRuleTask)
-                .when(org.eclipse.bpmn2.ScriptTask.class, this::scriptTask)
-                .when(org.eclipse.bpmn2.UserTask.class, this::userTask)
-                .when(org.eclipse.bpmn2.ServiceTask.class, this::serviceTaskResolver)
-                .missing(org.eclipse.bpmn2.ManualTask.class)
-                .orElse(this::fallback)
-                .apply(task).value();
+        if (task instanceof org.eclipse.bpmn2.BusinessRuleTask) {
+            return businessRuleTask((org.eclipse.bpmn2.BusinessRuleTask) task);
+        }
+        if (task instanceof org.eclipse.bpmn2.ScriptTask) {
+            return scriptTask((org.eclipse.bpmn2.ScriptTask) task);
+        }
+        if (task instanceof org.eclipse.bpmn2.UserTask) {
+            return userTask((UserTask) task);
+        }
+        if (task instanceof org.eclipse.bpmn2.ServiceTask) {
+            return serviceTaskResolver(task);
+        }
+        if (task instanceof org.eclipse.bpmn2.ManualTask) {
+            throw new UnsupportedOperationException("not yet implemented: ManualTask");
+        }
+        return fallback(task);
     }
 
     private BpmnNode jbpmServiceTask(org.eclipse.bpmn2.Task task) {

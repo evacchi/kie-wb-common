@@ -46,6 +46,7 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
  * @param <In> the input type of the match
  * @param <Out> the type of the result of the match
  */
+@Deprecated
 public class Match<In, Out> {
 
     private final Class<?> outputType;
@@ -144,7 +145,7 @@ public class Match<In, Out> {
         }
 
         public Result<R> match(Object value) {
-            return when == value.getClass() /* fixme when.isAssignableFrom(value.getClass()) */ ?
+            return when.isAssignableFrom(value.getClass()) ?
                     then.apply((T) value) : Result.failure(value.getClass().getName());
         }
     }

@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.VoidMatch;
 import org.kie.workbench.common.stunner.core.api.DefinitionManager;
 import org.kie.workbench.common.stunner.core.command.Command;
 import org.kie.workbench.common.stunner.core.command.CommandResult;
@@ -270,18 +269,18 @@ public class GraphBuilder {
     }
 
     private void addEdge(BpmnEdge edge) {
-        VoidMatch.of(BpmnEdge.class)
-                .when(BpmnEdge.Simple.class, e ->
-                        addEdge(e.getEdge(),
-                                e.getSource().value(),
-                                e.getSourceConnection(),
-                                e.getControlPoints(),
-                                e.getTarget().value(),
-                                e.getTargetConnection())
-                )
-                .when(BpmnEdge.Docked.class, e ->
-                        addDockedNode(e.getSource().value(),
-                                      e.getTarget().value())
-                ).apply(edge);
+        if (edge.isDocked()) {
+            addDockedNode(edge.getSource().value(),
+                          edge.getTarget().value());
+        } else {
+            BpmnEdge.Simple e = (BpmnEdge.Simple) edge;
+            addEdge(e.getEdge(),
+                    e.getSource().value(),
+                    e.getSourceConnection(),
+                    e.getControlPoints(),
+                    e.getTarget().value(),
+                    e.getTargetConnection());
+
+        }
     }
 }

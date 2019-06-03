@@ -17,7 +17,6 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.gateways;
 
 import org.eclipse.bpmn2.Gateway;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.GatewayPropertyReader;
@@ -45,11 +44,16 @@ public class GatewayConverter {
     }
 
     public BpmnNode convert(org.eclipse.bpmn2.Gateway gateway) {
-        return Match.of(org.eclipse.bpmn2.Gateway.class, BpmnNode.class)
-                .when(org.eclipse.bpmn2.ParallelGateway.class, this::parallelGateway)
-                .when(org.eclipse.bpmn2.ExclusiveGateway.class, this::exclusiveGateway)
-                .when(org.eclipse.bpmn2.InclusiveGateway.class, this::inclusiveGateway)
-                .apply(gateway).value();
+        if (gateway instanceof org.eclipse.bpmn2.ParallelGateway) {
+            return parallelGateway(gateway);
+        }
+        if (gateway instanceof org.eclipse.bpmn2.ExclusiveGateway) {
+            return exclusiveGateway(gateway);
+        }
+        if (gateway instanceof org.eclipse.bpmn2.InclusiveGateway) {
+            return inclusiveGateway(gateway);
+        }
+        throw new UnsupportedOperationException(gateway.getClass().toString());
     }
 
     private BpmnNode inclusiveGateway(Gateway gateway) {

@@ -39,17 +39,37 @@ public class FlowElementConverter {
     }
 
     public Result<BpmnNode> convertNode(FlowElement flowElement) {
-        return Match.of(FlowElement.class, BpmnNode.class)
-                .when(StartEvent.class, converterFactory.startEventConverter()::convert)
-                .when(EndEvent.class, converterFactory.endEventConverter()::convert)
-                .when(BoundaryEvent.class, converterFactory.intermediateCatchEventConverter()::convertBoundaryEvent)
-                .when(IntermediateCatchEvent.class, converterFactory.intermediateCatchEventConverter()::convertIntermediateCatchEvent)
-                .when(IntermediateThrowEvent.class, converterFactory.intermediateThrowEventConverter()::convert)
-                .when(Task.class, converterFactory.taskConverter()::convert)
-                .when(Gateway.class, converterFactory.gatewayConverter()::convert)
-                .when(SubProcess.class, converterFactory.subProcessConverter()::convertSubProcess)
-                .when(CallActivity.class, converterFactory.callActivityConverter()::convert)
-                .ignore(SequenceFlow.class)
-                .apply(flowElement);
+
+        if (flowElement instanceof StartEvent) {
+            return Result.success(converterFactory.startEventConverter().convert((StartEvent) flowElement));
+        }
+        if (flowElement instanceof EndEvent) {
+            return Result.success(converterFactory.endEventConverter().convert((EndEvent) flowElement));
+        }
+        if (flowElement instanceof BoundaryEvent) {
+            return Result.success(converterFactory.intermediateCatchEventConverter().convertBoundaryEvent((BoundaryEvent) flowElement));
+        }
+        if (flowElement instanceof IntermediateCatchEvent) {
+            return Result.success(converterFactory.intermediateCatchEventConverter().convertIntermediateCatchEvent((IntermediateCatchEvent) flowElement));
+        }
+        if (flowElement instanceof IntermediateThrowEvent) {
+            return Result.success(converterFactory.intermediateThrowEventConverter().convert((IntermediateThrowEvent) flowElement));
+        }
+        if (flowElement instanceof Task) {
+            return Result.success(converterFactory.taskConverter().convert((Task) flowElement));
+        }
+        if (flowElement instanceof Gateway) {
+            return Result.success(converterFactory.gatewayConverter().convert((Gateway) flowElement));
+        }
+        if (flowElement instanceof SubProcess) {
+            return Result.success(converterFactory.subProcessConverter().convertSubProcess((SubProcess) flowElement));
+        }
+        if (flowElement instanceof CallActivity) {
+            return Result.success(converterFactory.callActivityConverter().convert((CallActivity) flowElement));
+        }
+        if (flowElement instanceof SequenceFlow) {
+            return Result.ignored("sequence flow");
+        }
+        throw new UnsupportedOperationException();
     }
 }

@@ -22,7 +22,6 @@ import org.eclipse.bpmn2.Association;
 import org.eclipse.bpmn2.BaseElement;
 import org.eclipse.bpmn2.BoundaryEvent;
 import org.eclipse.bpmn2.SequenceFlow;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.Result;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.associations.AssociationConverter;
@@ -45,10 +44,15 @@ public class EdgeConverter {
     }
 
     public Result<BpmnEdge> convertEdge(BaseElement baseElement, Map<String, BpmnNode> nodes) {
-        return Match.of(BaseElement.class, BpmnEdge.class)
-                .when(SequenceFlow.class, e -> sequenceFlowConverter.convertEdge(e, nodes))
-                .when(BoundaryEvent.class, e -> boundaryEventConverter.convertEdge(e, nodes))
-                .when(Association.class, e -> associationConverter.convertEdge(e, nodes))
-                .apply(baseElement);
+        if (baseElement instanceof SequenceFlow) {
+            return Result.success(sequenceFlowConverter.convertEdge((SequenceFlow) baseElement, nodes));
+        }
+        if (baseElement instanceof BoundaryEvent) {
+            return Result.success(boundaryEventConverter.convertEdge((BoundaryEvent) baseElement, nodes));
+        }
+        if (baseElement instanceof Association) {
+            return Result.success(associationConverter.convertEdge((Association) baseElement, nodes));
+        }
+        return Result.failure("Unknown type: " + baseElement.getClass());
     }
 }

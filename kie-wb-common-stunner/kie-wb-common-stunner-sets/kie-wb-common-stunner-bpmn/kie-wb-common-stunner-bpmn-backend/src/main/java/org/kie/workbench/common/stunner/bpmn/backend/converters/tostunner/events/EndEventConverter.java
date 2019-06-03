@@ -18,7 +18,6 @@ package org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.event
 
 import java.util.List;
 
-import org.eclipse.bpmn2.CancelEventDefinition;
 import org.eclipse.bpmn2.CompensateEventDefinition;
 import org.eclipse.bpmn2.EndEvent;
 import org.eclipse.bpmn2.ErrorEventDefinition;
@@ -27,7 +26,6 @@ import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.TerminateEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.EventDefinitionReader;
@@ -77,15 +75,27 @@ public class EndEventConverter {
             case 0:
                 return endNoneEvent(event);
             case 1:
-                return Match.of(EventDefinition.class, BpmnNode.class)
-                        .when(TerminateEventDefinition.class, e -> terminateEndEvent(event, e))
-                        .when(SignalEventDefinition.class, e -> signalEventDefinition(event, e))
-                        .when(MessageEventDefinition.class, e -> messageEventDefinition(event, e))
-                        .when(ErrorEventDefinition.class, e -> errorEventDefinition(event, e))
-                        .when(EscalationEventDefinition.class, e -> escalationEventDefinition(event, e))
-                        .when(CompensateEventDefinition.class, e -> compensationEventDefinition(event, e))
-                        .missing(CancelEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).value();
+                EventDefinition e = eventDefinitions.get(0);
+                if (e instanceof TerminateEventDefinition) {
+                    return terminateEndEvent(event, (TerminateEventDefinition) e);
+                }
+                if (e instanceof SignalEventDefinition) {
+                    return signalEventDefinition(event, (SignalEventDefinition) e);
+                }
+                if (e instanceof MessageEventDefinition) {
+                    return messageEventDefinition(event, (MessageEventDefinition) e);
+                }
+                if (e instanceof ErrorEventDefinition) {
+                    return errorEventDefinition(event, (ErrorEventDefinition) e);
+                }
+                if (e instanceof EscalationEventDefinition) {
+                    return escalationEventDefinition(event, (EscalationEventDefinition) e);
+                }
+                if (e instanceof CompensateEventDefinition) {
+                    return compensationEventDefinition(event, (CompensateEventDefinition) e);
+                }
+                throw new UnsupportedOperationException(e.toString());
+
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for end event");
         }

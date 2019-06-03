@@ -249,14 +249,14 @@ public abstract class InitializedVariable {
         }
 
         private String decode(String text) {
-            return text;
 //            fixme
+//            return text;
 
-//             try {
-//                return URLDecoder.decode(text, "UTF-8");
-//            } catch (UnsupportedEncodingException e) {
-//                throw new IllegalArgumentException(text, e);
-//            }
+             try {
+                return URLDecoder.decode(text, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException(text, e);
+            }
         }
     }
 

@@ -27,7 +27,6 @@ import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
 import org.eclipse.bpmn2.StartEvent;
 import org.eclipse.bpmn2.TimerEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.CatchEventPropertyReader;
@@ -79,15 +78,29 @@ public class StartEventConverter {
             case 0:
                 return noneEvent(event);
             case 1:
-                return Match.of(EventDefinition.class, BpmnNode.class)
-                        .when(SignalEventDefinition.class, e -> signalEvent(event, e))
-                        .when(MessageEventDefinition.class, e -> messageEvent(event, e))
-                        .when(TimerEventDefinition.class, e -> timerEvent(event, e))
-                        .when(ErrorEventDefinition.class, e -> errorEvent(event, e))
-                        .when(ConditionalEventDefinition.class, e -> conditionalEvent(event, e))
-                        .when(EscalationEventDefinition.class, e -> escalationEvent(event, e))
-                        .when(CompensateEventDefinition.class, e -> compensationEvent(event, e))
-                        .apply(eventDefinitions.get(0)).value();
+                EventDefinition e = eventDefinitions.get(0);
+                if (e instanceof SignalEventDefinition) {
+                    return signalEvent(event, (SignalEventDefinition) e);
+                }
+                if (e instanceof MessageEventDefinition) {
+                    return messageEvent(event, (MessageEventDefinition) e);
+                }
+                if (e instanceof TimerEventDefinition) {
+                    return timerEvent(event, (TimerEventDefinition) e);
+                }
+                if (e instanceof ErrorEventDefinition) {
+                    return errorEvent(event, (ErrorEventDefinition) e);
+                }
+                if (e instanceof ConditionalEventDefinition) {
+                    return conditionalEvent(event, (ConditionalEventDefinition) e);
+                }
+                if (e instanceof EscalationEventDefinition) {
+                    return escalationEvent(event, (EscalationEventDefinition) e);
+                }
+                if (e instanceof CompensateEventDefinition) {
+                    return compensationEvent(event, (CompensateEventDefinition) e);
+                }
+                throw new UnsupportedOperationException(e.getClass().toString());
             default:
                 throw new UnsupportedOperationException("Multiple event definitions not supported for start event");
         }

@@ -49,6 +49,7 @@ import org.kie.workbench.common.stunner.core.graph.content.view.View;
  * @param <In> the input type of the match
  * @param <Out> the type of the result of the match
  */
+@Deprecated
 public class NodeMatch<In, Out> {
 
     private final Class<?> outputType;

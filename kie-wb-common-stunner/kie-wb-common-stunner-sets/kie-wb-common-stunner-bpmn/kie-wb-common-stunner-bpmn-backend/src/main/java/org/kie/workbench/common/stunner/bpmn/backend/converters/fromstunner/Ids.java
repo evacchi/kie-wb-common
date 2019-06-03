@@ -16,15 +16,18 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner;
 
+import java.io.UnsupportedEncodingException;
+import java.util.UUID;
+
 public class Ids {
 
     public static String fromString(String myString) {
-        return "_"+myString.hashCode(); //fixme
-//        try {
-//            return "_" + UUID.nameUUIDFromBytes(myString.getBytes("UTF-8"));
-//        } catch (UnsupportedEncodingException ex) {
-//            return "_" + UUID.nameUUIDFromBytes(myString.getBytes());
-//        }
+//        return "_"+myString.hashCode(); //fixme
+        try {
+            return "_" + UUID.nameUUIDFromBytes(myString.getBytes("UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            return "_" + UUID.nameUUIDFromBytes(myString.getBytes());
+        }
     }
 
     public static String item(String itemId) {

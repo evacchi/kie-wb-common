@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+@Deprecated
 public class VoidMatch<In> {
 
     LinkedList<VoidMatch.Case<?>> cases = new LinkedList<>();
