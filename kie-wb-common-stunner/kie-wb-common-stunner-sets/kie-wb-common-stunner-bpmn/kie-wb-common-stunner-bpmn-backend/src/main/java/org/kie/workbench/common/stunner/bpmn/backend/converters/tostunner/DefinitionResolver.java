@@ -238,7 +238,7 @@ public class DefinitionResolver {
     }
 
     static double obtainResolutionFactor() {
-        final String resolution = System.getProperty(BPMN_DIAGRAM_RESOLUTION_PROPERTY);
+        final String resolution = System.getProperty(BPMN_DIAGRAM_RESOLUTION_PROPERTY, null);
         if (null != resolution && resolution.trim().length() > 0) {
             try {
                 return Double.parseDouble(resolution);
