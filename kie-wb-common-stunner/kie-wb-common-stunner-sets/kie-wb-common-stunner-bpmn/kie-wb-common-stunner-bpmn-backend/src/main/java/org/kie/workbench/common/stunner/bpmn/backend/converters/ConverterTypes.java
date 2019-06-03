@@ -1,4 +1,4 @@
-package org.kie.workbench.common.stunner.bpmn.backend;
+package org.kie.workbench.common.stunner.bpmn.backend.converters;
 
 import org.kie.workbench.common.stunner.core.graph.Edge;
 import org.kie.workbench.common.stunner.core.graph.Node;
