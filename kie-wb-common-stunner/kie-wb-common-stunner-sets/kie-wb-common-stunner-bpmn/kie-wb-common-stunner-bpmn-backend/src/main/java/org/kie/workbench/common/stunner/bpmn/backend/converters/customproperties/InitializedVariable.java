@@ -16,9 +16,6 @@
 
 package org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import org.eclipse.bpmn2.Assignment;
 import org.eclipse.bpmn2.DataInput;
 import org.eclipse.bpmn2.DataInputAssociation;
@@ -250,13 +247,13 @@ public abstract class InitializedVariable {
 
         private String decode(String text) {
 //            fixme
-//            return text;
-
-             try {
-                return URLDecoder.decode(text, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new IllegalArgumentException(text, e);
-            }
+            return text;
+//
+//             try {
+//                return URLDecoder.decode(text, "UTF-8");
+//            } catch (UnsupportedEncodingException e) {
+//                throw new IllegalArgumentException(text, e);
+//            }
         }
     }
 

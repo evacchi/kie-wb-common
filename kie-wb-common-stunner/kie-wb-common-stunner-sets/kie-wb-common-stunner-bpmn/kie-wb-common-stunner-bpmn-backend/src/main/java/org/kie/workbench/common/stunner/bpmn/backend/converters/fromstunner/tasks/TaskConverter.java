@@ -42,7 +42,7 @@ import org.kie.workbench.common.stunner.bpmn.workitem.ServiceTaskExecutionSet;
 import org.kie.workbench.common.stunner.core.graph.Node;
 import org.kie.workbench.common.stunner.core.graph.content.view.View;
 
-import static org.kie.workbench.common.stunner.bpmn.backend.ConverterTypes.cast;
+import static org.kie.workbench.common.stunner.bpmn.backend.converters.ConverterTypes.cast;
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpmn2;
 
 public class TaskConverter {

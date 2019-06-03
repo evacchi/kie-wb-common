@@ -38,8 +38,8 @@ public class PropertyWriter extends BasePropertyWriter {
         if (value == null || value.isEmpty()) {
             return;
         }
-//        flowElement.setName(/* fixme StringEscapeUtils.escapeXml10 */(value.trim()));
-        flowElement.setName(StringEscapeUtils.escapeXml10(value.trim()));
+        flowElement.setName(/* fixme StringEscapeUtils.escapeXml10 */(value.trim()));
+//        flowElement.setName(StringEscapeUtils.escapeXml10(value.trim()));
         CustomElement.name.of(flowElement).set(value);
     }
 
