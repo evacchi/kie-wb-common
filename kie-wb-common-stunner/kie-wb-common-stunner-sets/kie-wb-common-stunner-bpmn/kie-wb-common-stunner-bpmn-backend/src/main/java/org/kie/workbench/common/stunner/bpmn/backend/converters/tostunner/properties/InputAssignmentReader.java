@@ -70,13 +70,13 @@ public class InputAssignmentReader {
     }
 
     private String encode(String body) {
-        return body;
+//        return body;
         // fixme
-//        try {
-//            return URLEncoder.encode(body, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            throw new IllegalArgumentException(body, e);
-//        }
+        try {
+            return URLEncoder.encode(body, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalArgumentException(body, e);
+        }
     }
 
     public AssociationDeclaration getAssociationDeclaration() {

@@ -23,7 +23,6 @@ import bpsim.ParameterValue;
 import bpsim.PoissonDistributionType;
 import bpsim.TimeParameters;
 import bpsim.UniformDistributionType;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.definition.property.simulation.SimulationAttributeSet;
 
 import static org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.Factories.bpsim;
@@ -38,27 +37,31 @@ public class SimulationAttributeSets {
         Parameter processingTime = timeParams.getProcessingTime();
         ParameterValue paramValue = processingTime.getParameterValue().get(0);
 
-        return Match.of(ParameterValue.class, SimulationAttributeSet.class)
-                .when(NormalDistributionType.class, ndt -> {
-                    SimulationAttributeSet simulationSet = new SimulationAttributeSet();
-                    simulationSet.getMean().setValue(ndt.getMean());
-                    simulationSet.getStandardDeviation().setValue(ndt.getStandardDeviation());
-                    simulationSet.getDistributionType().setValue("normal");
-                    return simulationSet;
-                })
-                .when(UniformDistributionType.class, udt -> {
-                    SimulationAttributeSet simulationSet = new SimulationAttributeSet();
-                    simulationSet.getMin().setValue(udt.getMin());
-                    simulationSet.getMax().setValue(udt.getMax());
-                    simulationSet.getDistributionType().setValue("uniform");
-                    return simulationSet;
-                })
-                .when(PoissonDistributionType.class, pdt -> {
-                    SimulationAttributeSet simulationSet = new SimulationAttributeSet();
-                    simulationSet.getMean().setValue(pdt.getMean());
-                    simulationSet.getDistributionType().setValue("poisson");
-                    return simulationSet;
-                }).apply(paramValue).asSuccess().value();
+        if (paramValue instanceof NormalDistributionType) {
+            NormalDistributionType ndt = (NormalDistributionType) paramValue;
+            SimulationAttributeSet simulationSet = new SimulationAttributeSet();
+            simulationSet.getMean().setValue(ndt.getMean());
+            simulationSet.getStandardDeviation().setValue(ndt.getStandardDeviation());
+            simulationSet.getDistributionType().setValue("normal");
+            return simulationSet;
+        }
+        if (paramValue instanceof UniformDistributionType) {
+            UniformDistributionType udt = (UniformDistributionType) paramValue;
+
+            SimulationAttributeSet simulationSet = new SimulationAttributeSet();
+            simulationSet.getMin().setValue(udt.getMin());
+            simulationSet.getMax().setValue(udt.getMax());
+            simulationSet.getDistributionType().setValue("uniform");
+            return simulationSet;
+        }
+        if (paramValue instanceof PoissonDistributionType) {
+            PoissonDistributionType pdt = (PoissonDistributionType) paramValue;
+            SimulationAttributeSet simulationSet = new SimulationAttributeSet();
+            simulationSet.getMean().setValue(pdt.getMean());
+            simulationSet.getDistributionType().setValue("poisson");
+            return simulationSet;
+        }
+        throw new UnsupportedOperationException();
     }
 
     public static ElementParameters toElementParameters(SimulationAttributeSet simulationSet) {

@@ -26,7 +26,6 @@ import org.eclipse.bpmn2.EventDefinition;
 import org.eclipse.bpmn2.IntermediateThrowEvent;
 import org.eclipse.bpmn2.MessageEventDefinition;
 import org.eclipse.bpmn2.SignalEventDefinition;
-import org.kie.workbench.common.stunner.bpmn.backend.converters.Match;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.TypedFactoryManager;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.BpmnNode;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.tostunner.properties.EventDefinitionReader;
@@ -71,14 +70,24 @@ public class IntermediateThrowEventConverter {
             case 0:
                 throw new UnsupportedOperationException("An intermediate throw event should contain exactly one definition");
             case 1:
-                return Match.of(EventDefinition.class, BpmnNode.class)
-                        .when(SignalEventDefinition.class, e -> signalEvent(event, e))
-                        .when(MessageEventDefinition.class, e -> messageEvent(event, e))
-                        .when(EscalationEventDefinition.class, e -> escalationEvent(event, e))
-                        .when(CompensateEventDefinition.class, e -> compensationEvent(event, e))
-                        .missing(ErrorEventDefinition.class)
-                        .missing(ConditionalEventDefinition.class)
-                        .apply(eventDefinitions.get(0)).value();
+                EventDefinition e = eventDefinitions.get(0);
+                if (e instanceof SignalEventDefinition) {
+                    return signalEvent(event, (SignalEventDefinition) e);
+                }
+                if (e instanceof MessageEventDefinition) {
+                    return messageEvent(event, (MessageEventDefinition) e);
+                }
+                if (e instanceof EscalationEventDefinition) {
+                    return escalationEvent(event, (EscalationEventDefinition) e);
+                }
+                if (e instanceof CompensateEventDefinition) {
+                    return compensationEvent(event, (CompensateEventDefinition) e);
+                }
+                if (e instanceof ErrorEventDefinition || e instanceof ConditionalEventDefinition) {
+                    throw new UnsupportedOperationException(e.getClass().toString());
+                }
+
+                throw new UnsupportedOperationException(e.getClass().toString());
             default:
                 throw new UnsupportedOperationException("Multiple definitions not supported for intermediate throw event");
         }

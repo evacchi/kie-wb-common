@@ -17,6 +17,7 @@
 package org.kie.workbench.common.stunner.bpmn.backend.converters.fromstunner.properties;
 
 import bpsim.ElementParameters;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.bpmn2.FlowElement;
 import org.kie.workbench.common.stunner.bpmn.backend.converters.customproperties.CustomElement;
 
@@ -37,7 +38,8 @@ public class PropertyWriter extends BasePropertyWriter {
         if (value == null || value.isEmpty()) {
             return;
         }
-        flowElement.setName(/* fixme StringEscapeUtils.escapeXml10 */(value.trim()));
+//        flowElement.setName(/* fixme StringEscapeUtils.escapeXml10 */(value.trim()));
+        flowElement.setName(StringEscapeUtils.escapeXml10(value.trim()));
         CustomElement.name.of(flowElement).set(value);
     }
 
